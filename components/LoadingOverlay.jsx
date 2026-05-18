@@ -1,8 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { shouldSkipIntro } from "@/lib/introSession";
+import {
+  shouldSkipIntro,
+  signalBootComplete,
+} from "@/lib/introSession";
 import {
   playStartupChime,
   playStartupWordAccent,
@@ -29,12 +32,6 @@ const EXIT_FADE_MS = 950;
 
 const TAGLINE_WORDS = ["Dream.", "Think.", "Build."];
 
-function markBootComplete() {
-  if (typeof window === "undefined") return;
-  window.__portfolioBootDone = true;
-  window.dispatchEvent(new CustomEvent("boot:done"));
-}
-
 function delay(ms, signal) {
   return new Promise((resolve, reject) => {
     if (signal.aborted) {
@@ -59,21 +56,20 @@ export default function LoadingOverlay() {
   const [bootDone, setBootDone] = useState(false);
   const [showTagline, setShowTagline] = useState(false);
   const [exiting, setExiting] = useState(false);
-  const [visible, setVisible] = useState(() => {
-    if (typeof window === "undefined") return true;
-    return !shouldSkipIntro();
-  });
-  const skipBootRef = useRef(
-    typeof window !== "undefined" && shouldSkipIntro()
-  );
+  /** Hidden until client decides: full boot vs skip (refresh with intro seen). */
+  const [visible, setVisible] = useState(false);
+  const skipBootRef = useRef(false);
+  const [bootReady, setBootReady] = useState(false);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (!shouldSkipIntro()) return;
-    skipBootRef.current = true;
-    setVisible(false);
-    window.__portfolioBootDone = true;
-    window.dispatchEvent(new CustomEvent("boot:done"));
+  useLayoutEffect(() => {
+    if (shouldSkipIntro()) {
+      skipBootRef.current = true;
+      setVisible(false);
+      signalBootComplete();
+    } else {
+      setVisible(true);
+    }
+    setBootReady(true);
   }, []);
 
   useEffect(() => {
@@ -90,7 +86,7 @@ export default function LoadingOverlay() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (skipBootRef.current) return;
+    if (!bootReady || skipBootRef.current) return;
 
     const ac = new AbortController();
     const { signal } = ac;
@@ -110,7 +106,7 @@ export default function LoadingOverlay() {
           setExiting(true);
           await delay(EXIT_FADE_MS, signal);
           setVisible(false);
-          markBootComplete();
+          signalBootComplete();
           return;
         }
 
@@ -139,14 +135,14 @@ export default function LoadingOverlay() {
         setExiting(true);
         await delay(EXIT_FADE_MS, signal);
         setVisible(false);
-        markBootComplete();
+        signalBootComplete();
       } catch {
         /* aborted — Strict Mode remount will start a fresh run */
       }
     })();
 
     return () => ac.abort();
-  }, []);
+  }, [bootReady]);
 
   useEffect(() => {
     if (!showTagline) return;

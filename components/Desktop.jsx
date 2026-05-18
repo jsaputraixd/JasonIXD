@@ -34,7 +34,11 @@ import {
   PROJECT_WINDOW_GAP,
 } from "@/lib/desktopWindowPlacement";
 import { getProjectDesktopCards } from "@/lib/projectDesktopCards";
-import { markIntroSeen, shouldSkipIntro } from "@/lib/introSession";
+import {
+  markIntroSeen,
+  shouldSkipIntro,
+  signalBootComplete,
+} from "@/lib/introSession";
 import { playTypingClick } from "@/lib/typingSound";
 import { pickTrashMessage } from "@/lib/trashMessage";
 
@@ -189,6 +193,7 @@ export default function Desktop() {
     if (shouldSkipIntro()) {
       introSkippedRef.current = true;
       setPhase("dashboard");
+      signalBootComplete();
     }
   }, []);
 
@@ -1395,14 +1400,18 @@ function MobileOpenForWorkStrip() {
 }
 
 function MobileDesktop() {
-  const introSkippedRef = useRef(
-    typeof window !== "undefined" && shouldSkipIntro()
-  );
-  const [phase, setPhase] = useState(
-    introSkippedRef.current ? "dashboard" : "waiting-boot"
-  );
+  const introSkippedRef = useRef(false);
+  const [phase, setPhase] = useState("waiting-boot");
   const [welcomeTyped, setWelcomeTyped] = useState("");
   const welcomeDoneTimerRef = useRef(null);
+
+  useLayoutEffect(() => {
+    if (shouldSkipIntro()) {
+      introSkippedRef.current = true;
+      setPhase("dashboard");
+      signalBootComplete();
+    }
+  }, []);
 
   useEffect(() => {
     if (phase === "dashboard") markIntroSeen();
