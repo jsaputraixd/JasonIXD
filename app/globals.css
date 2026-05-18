@@ -1,0 +1,240 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  background-color: #171717;
+  color: #ffffff;
+  font-family: "DM Sans", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Hide the system cursor — the custom Cursor component replaces it */
+@media (pointer: fine) {
+  *,
+  *::before,
+  *::after {
+    cursor: none !important;
+  }
+}
+
+/* Visible keyboard focus ring on interactive elements */
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid #ff7a29;
+  outline-offset: 3px;
+  border-radius: 2px;
+  box-shadow: 0 0 12px rgba(255, 122, 41, 0.45);
+}
+
+body {
+  background-color: transparent;
+  min-height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* CRT stage — subtle perspective tilt for the screen-curve illusion */
+.crt-stage {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  min-height: 100vh;
+  perspective: 2400px;
+  perspective-origin: 50% 50%;
+}
+
+.crt-stage:not(:has(> .crt-tilt)) {
+  perspective: none;
+}
+
+.crt-stage > * {
+  width: 100%;
+}
+
+/* Desktop home only — slight tilt; tall pages (e.g. work) must stay untilted or layout “sinks” */
+.crt-stage > .crt-tilt {
+  transform: rotateX(1.2deg);
+  transform-origin: center 80%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .crt-stage > .crt-tilt {
+    transform: none;
+  }
+}
+
+/* Mobile — kill the perspective tilt and let pages scroll naturally */
+@media (max-width: 899px) {
+  body {
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+  .crt-stage {
+    perspective: none;
+    min-height: 100vh;
+    height: auto;
+  }
+  .crt-stage > .crt-tilt {
+    transform: none;
+  }
+}
+
+/* Mobile project strip — let horizontal swipes hit the carousel, not the page */
+.project-carousel {
+  touch-action: pan-x;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+
+/* Custom scrollbars — scoped to html & body first (reliable vs. Tailwind preflight), then all scrollers */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: #ff7a29 #111111;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+html::-webkit-scrollbar-track,
+body::-webkit-scrollbar-track {
+  background: #111111;
+}
+
+html::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb {
+  background: #ff7a29;
+  border-radius: 999px;
+}
+
+html::-webkit-scrollbar-thumb:hover,
+body::-webkit-scrollbar-thumb:hover {
+  background: #ffb570;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #ff7a29 #111111;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #111111;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ff7a29;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #ffb570;
+}
+
+.project-pane-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #ff7a29 #111111;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+.label-uppercase {
+  font-family: "VT323", monospace;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  color: #ff7a29;
+  text-shadow: 0 0 8px rgba(255, 122, 41, 0.5);
+}
+
+::selection {
+  background: rgba(255, 122, 41, 0.4);
+  color: #fff;
+}
+
+/* Skills planet — orbit animations */
+@keyframes skills-orbit-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes skills-orbit-counter-spin {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(-360deg);
+  }
+}
+
+.skills-orbit-rotor {
+  animation: skills-orbit-spin 75s linear infinite;
+}
+
+.skills-orbit-label {
+  animation: skills-orbit-counter-spin 75s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skills-orbit-rotor,
+  .skills-orbit-label {
+    animation: none !important;
+  }
+}
+
+/* CRT tracking band animation — global to avoid hydration mismatches */
+@keyframes crt-roll {
+  0%   { top: -10%; opacity: 0; }
+  5%   { opacity: 1; }
+  95%  { opacity: 1; }
+  100% { top: 110%; opacity: 0; }
+}
+
+.crt-roll-band {
+  animation: crt-roll 14s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .crt-roll-band {
+    animation: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
