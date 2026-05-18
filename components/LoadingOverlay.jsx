@@ -35,6 +35,24 @@ function markBootComplete() {
   window.dispatchEvent(new CustomEvent("boot:done"));
 }
 
+function delay(ms, signal) {
+  return new Promise((resolve, reject) => {
+    if (signal.aborted) {
+      reject(signal.reason);
+      return;
+    }
+    const id = setTimeout(resolve, ms);
+    signal.addEventListener(
+      "abort",
+      () => {
+        clearTimeout(id);
+        reject(signal.reason);
+      },
+      { once: true }
+    );
+  });
+}
+
 export default function LoadingOverlay() {
   const [typed, setTyped] = useState(BOOT_LINES.map(() => ""));
   const [activeLine, setActiveLine] = useState(0);
@@ -74,94 +92,60 @@ export default function LoadingOverlay() {
     if (typeof window === "undefined") return;
     if (skipBootRef.current) return;
 
+    const ac = new AbortController();
+    const { signal } = ac;
+
     const reduced = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     ).matches;
 
-    let cancelled = false;
+    (async () => {
+      try {
+        if (reduced) {
+          setTyped(BOOT_LINES);
+          setActiveLine(BOOT_LINES.length);
+          setBootDone(true);
+          setShowTagline(true);
+          await delay(2000, signal);
+          setExiting(true);
+          await delay(EXIT_FADE_MS, signal);
+          setVisible(false);
+          markBootComplete();
+          return;
+        }
 
-    if (reduced) {
-      setTyped(BOOT_LINES);
-      setActiveLine(BOOT_LINES.length);
-      setBootDone(true);
-      setShowTagline(true);
-      const t1 = setTimeout(() => {
-        if (cancelled) return;
-        setExiting(true);
-      }, 2000);
-      const t2 = setTimeout(() => {
-        if (cancelled) return;
-        setVisible(false);
-        markBootComplete();
-      }, 2000 + EXIT_FADE_MS);
-      return () => {
-        cancelled = true;
-        clearTimeout(t1);
-        clearTimeout(t2);
-      };
-    }
+        await delay(220, signal);
 
-    const timers = [];
-    let ms = 220;
-
-    BOOT_LINES.forEach((line, lineIdx) => {
-      timers.push(
-        setTimeout(() => {
-          if (cancelled) return;
+        for (let lineIdx = 0; lineIdx < BOOT_LINES.length; lineIdx++) {
+          const line = BOOT_LINES[lineIdx];
           setActiveLine(lineIdx);
-        }, ms)
-      );
-      for (let i = 1; i <= line.length; i++) {
-        timers.push(
-          setTimeout(() => {
-            if (cancelled) return;
+          for (let i = 1; i <= line.length; i++) {
+            await delay(CHAR_MS, signal);
             setTyped((prev) => {
               const next = [...prev];
               next[lineIdx] = line.slice(0, i);
               return next;
             });
-            playTypingClick();
-          }, ms + i * CHAR_MS)
-        );
-      }
-      ms += line.length * CHAR_MS + LINE_GAP_MS;
-    });
+            if (i % 3 === 0) playTypingClick();
+          }
+          await delay(LINE_GAP_MS, signal);
+        }
 
-    timers.push(
-      setTimeout(() => {
-        if (cancelled) return;
         setBootDone(true);
         setActiveLine(BOOT_LINES.length);
-      }, ms)
-    );
-
-    const taglineStart = ms + POST_BOOT_PAUSE;
-    timers.push(
-      setTimeout(() => {
-        if (cancelled) return;
+        await delay(POST_BOOT_PAUSE, signal);
         setShowTagline(true);
-      }, taglineStart)
-    );
-
-    const exitAt = taglineStart + TAGLINE_HOLD_MS;
-    timers.push(
-      setTimeout(() => {
-        if (cancelled) return;
+        await delay(TAGLINE_HOLD_MS, signal);
         setExiting(true);
-      }, exitAt)
-    );
-    timers.push(
-      setTimeout(() => {
-        if (cancelled) return;
+        await delay(EXIT_FADE_MS, signal);
         setVisible(false);
         markBootComplete();
-      }, exitAt + EXIT_FADE_MS)
-    );
+      } catch {
+        /* aborted — Strict Mode remount will start a fresh run */
+      }
+    })();
 
-    return () => {
-      cancelled = true;
-      timers.forEach(clearTimeout);
-    };
+    return () => ac.abort();
   }, []);
 
   useEffect(() => {

@@ -2,7 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   AnimatePresence,
   motion,
@@ -11,7 +18,7 @@ import {
 } from "framer-motion";
 import Window from "./Window";
 import StatusBar from "./StatusBar";
-import IdleScreensaver, { IDLE_MS } from "./IdleScreensaver";
+import DesktopIdleLayer from "./DesktopIdleLayer";
 import RecycleBinIcon from "./RecycleBinIcon";
 import SkillsPlanet from "./SkillsPlanet";
 import { projects } from "@/data/projects";
@@ -29,7 +36,6 @@ import {
 import { getProjectDesktopCards } from "@/lib/projectDesktopCards";
 import { markIntroSeen, shouldSkipIntro } from "@/lib/introSession";
 import { playTypingClick } from "@/lib/typingSound";
-import { useIdleTimer } from "@/lib/useIdleTimer";
 import { pickTrashMessage } from "@/lib/trashMessage";
 
 const ACCENT = "#FF7A29";
@@ -170,18 +176,21 @@ export default function Desktop() {
   //   "expanding"     → card flies into welcome.exe slot (no other windows yet)
   //   "ready"         → welcome.exe body types in (Hello, name, role…)
   //   "dashboard"   → all other windows cascade in
-  const introSkippedRef = useRef(
-    typeof window !== "undefined" && shouldSkipIntro()
-  );
-  const [phase, setPhase] = useState(
-    introSkippedRef.current ? "dashboard" : "waiting-boot"
-  );
+  const introSkippedRef = useRef(false);
+  const [phase, setPhase] = useState("waiting-boot");
   const [welcomeTyped, setWelcomeTyped] = useState("");
   const [otherStuffOpen, setOtherStuffOpen] = useState(false);
   const [trashMessage, setTrashMessage] = useState(null);
   const trashMessageTimerRef = useRef(null);
   const welcomeDoneTimerRef = useRef(null);
   const [parallax, setParallax] = useState({ x: 0, y: 0 });
+
+  useLayoutEffect(() => {
+    if (shouldSkipIntro()) {
+      introSkippedRef.current = true;
+      setPhase("dashboard");
+    }
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -294,7 +303,7 @@ export default function Desktop() {
   const zOf = (id, base) => zMap[id] ?? base;
 
   useEffect(() => {
-    if (!viewport || viewport.w < 900) return;
+    if (!viewport || viewport.w < 900 || phase !== "dashboard") return;
     const el = stageRef.current;
     if (!el) return;
     const onMove = (e) => {
@@ -308,20 +317,14 @@ export default function Desktop() {
     };
     el.addEventListener("mousemove", onMove, { passive: true });
     return () => el.removeEventListener("mousemove", onMove);
-  }, [viewport]);
+  }, [viewport, phase]);
 
   const vwSafe = viewport?.w ?? 1280;
   const vhSafe = viewport?.h ?? 800;
-  const isDesktopViewport = Boolean(viewport && viewport.w >= 900);
 
   const { W, pos, projectCards, layoutScale } = useMemo(
     () => getDesktopLayout(vwSafe, vhSafe),
     [vwSafe, vhSafe]
-  );
-
-  const screensaverActive = useIdleTimer(
-    IDLE_MS,
-    phase === "dashboard" && isDesktopViewport
   );
 
   const showTrashBubble = useCallback(() => {
@@ -777,7 +780,7 @@ export default function Desktop() {
 
       <NomineeTab />
       <StatusBar />
-      <IdleScreensaver active={screensaverActive} />
+      {phase === "dashboard" && <DesktopIdleLayer />}
     </div>
   );
 }
