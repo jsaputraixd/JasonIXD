@@ -558,7 +558,6 @@ function ProjectFlipCard({
   frameWidth,
   onRequestFocus,
 }) {
-  const [showInfo, setShowInfo] = useState(false);
   const reduceMotion = useReducedMotion();
   const s = layoutScale;
   const innerW = frameWidth ?? 268;
@@ -566,8 +565,6 @@ function ProjectFlipCard({
     Math.round(210 * s),
     Math.round(innerW * 1.42)
   );
-  const padX = Math.max(12, Math.round(14 * s));
-  const padY = Math.max(12, Math.round(14 * s));
 
   const heroSrc = project.thumb ?? project.caseStudyHero ?? null;
   const heroSrcEnc = heroSrc ? encodeURI(heroSrc) : null;
@@ -575,19 +572,11 @@ function ProjectFlipCard({
   return (
     <Link
       href={`/work/${project.slug}`}
-      data-cursor="hover"
+      data-cursor="project"
+      data-project-slug={project.slug}
       aria-label={`Open ${project.title} case study`}
-      onMouseEnter={() => {
-        onRequestFocus?.();
-        setShowInfo(true);
-      }}
-      onMouseLeave={() => setShowInfo(false)}
-      onFocus={() => {
-        onRequestFocus?.();
-        setShowInfo(true);
-      }}
-      onBlur={() => setShowInfo(false)}
-      onTouchStart={() => setShowInfo((v) => !v)}
+      onMouseEnter={() => onRequestFocus?.()}
+      onFocus={() => onRequestFocus?.()}
       style={{
         display: "block",
         position: "relative",
@@ -661,80 +650,6 @@ function ProjectFlipCard({
           />
         </div>
 
-        <motion.div
-          initial={false}
-          animate={{ opacity: showInfo ? 1 : 0 }}
-          transition={{ duration: 0.32, ease: EASE }}
-          aria-hidden={!showInfo}
-          style={{
-            position: "absolute",
-            inset: 0,
-            zIndex: 2,
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "flex-end",
-            pointerEvents: "none",
-            overflow: "hidden",
-          }}
-        >
-          <div
-            className="project-card-overlay"
-            style={{
-              padding: `${padY}px ${padX}px`,
-              display: "flex",
-              flexDirection: "column",
-              gap: Math.max(6, Math.round(8 * s)),
-              minHeight: 0,
-              maxHeight: "82%",
-            }}
-          >
-            <p
-              style={{
-                margin: 0,
-                fontFamily: "'Bonbon', cursive",
-                fontSize: Math.max(18, Math.round(22 * s)),
-                lineHeight: 1,
-                color: "#fff",
-                textShadow: "0 0 14px rgba(255, 122, 41, 0.35)",
-                flexShrink: 0,
-              }}
-            >
-              {project.title}
-            </p>
-            <p
-              style={{
-                margin: 0,
-                fontFamily: "'VT323', monospace",
-                fontSize: Math.max(10, Math.round(11 * s)),
-                letterSpacing: "0.14em",
-                color: ACCENT_DIM,
-                textTransform: "uppercase",
-                lineHeight: 1.3,
-                flexShrink: 0,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {project.tagline}
-            </p>
-            <p className="project-card-desc">{project.description}</p>
-            <span
-              style={{
-                fontFamily: "'VT323', monospace",
-                fontSize: Math.max(11, Math.round(12 * s)),
-                letterSpacing: "0.26em",
-                textTransform: "uppercase",
-                color: ACCENT,
-                textShadow: "0 0 8px rgba(255, 122, 41, 0.5)",
-                alignSelf: "flex-end",
-                flexShrink: 0,
-              }}
-            >
-              Case study →
-            </span>
-          </div>
-        </motion.div>
       </motion.div>
     </Link>
   );
