@@ -15,7 +15,12 @@ import SkillsPlanet from "./SkillsPlanet";
 import { projects } from "@/data/projects";
 import { about } from "@/data/about";
 import WelcomeReadAloud from "@/components/WelcomeReadAloud";
-import { getDeterministicDesktopPositions } from "@/lib/desktopWindowPlacement";
+import JunkFolder from "@/components/JunkFolder";
+import {
+  getDeterministicDesktopPositions,
+  PROJECT_WINDOW_GAP,
+} from "@/lib/desktopWindowPlacement";
+import { getProjectDesktopCards } from "@/lib/projectDesktopCards";
 
 const ACCENT = "#FF7A29";
 const ACCENT_DIM = "rgba(255, 180, 112, 0.7)";
@@ -50,6 +55,7 @@ function getDesktopLayout(vw, vh) {
     welcome: Math.round(clamp(380, 540, 400 + 130 * u)),
     me: Math.round(clamp(208, 288, 218 + 70 * u)),
     skills: Math.round(clamp(300, 440, 330 + 100 * u)),
+    junk: Math.round(clamp(248, 300, 268 + 24 * u)),
     contact: Math.round(clamp(248, 298, 260 + 28 * u)),
   };
 
@@ -60,6 +66,7 @@ function getDesktopLayout(vw, vh) {
       200,
       Math.round(W0.skills * layoutScale * SKILLS_WINDOW_BODY_SCALE)
     ),
+    junk: Math.round(W0.junk * layoutScale),
     contact: Math.round(W0.contact * layoutScale),
   };
 
@@ -82,25 +89,27 @@ function getDesktopLayout(vw, vh) {
     }
   }
 
-  const bandInner = Math.max(0, skillsLeft - edge - g);
-  /** Project cards — capped smaller than before so the row isn’t visually dominant (desktop → tablet). */
-  const projW0 = Math.round(clamp(175, 235, 205 + 28 * u));
-  let projWidth = Math.round(projW0 * layoutScale);
-  const gapTotal = Math.max(0, nProj - 1) * g;
-  const maxRow = Math.max(
-    128,
-    Math.floor((bandInner - gapTotal) / Math.max(1, nProj))
-  );
-  projWidth = clamp(130, maxRow, projWidth);
-  if (edge + nProj * projWidth + gapTotal > skillsLeft - 4) {
-    projWidth = Math.max(
-      128,
-      Math.floor((skillsLeft - edge - gapTotal - 8) / Math.max(1, nProj))
-    );
-  }
+  const projectGap = Math.max(14, Math.round(PROJECT_WINDOW_GAP * layoutScale));
+  let projectCards = getProjectDesktopCards(projects, layoutScale);
 
-  /** Slightly compact vs layout band — room for hover overlay copy */
-  projWidth = Math.max(108, Math.round(projWidth * 0.65));
+  const bandInner = Math.max(0, skillsLeft - edge - g);
+  const rowW0 =
+    projectCards.reduce((sum, c) => sum + c.width, 0) +
+    Math.max(0, nProj - 1) * projectGap;
+  if (rowW0 > bandInner && bandInner > 0 && rowW0 > 0) {
+    const shrink = bandInner / rowW0;
+    projectCards = projectCards.map((card) => {
+      const width = Math.max(100, Math.round(card.width * shrink));
+      const bodyHeight = Math.round(width / card.aspect);
+      const tb = Math.max(26, Math.round(28 * layoutScale));
+      return {
+        ...card,
+        width,
+        bodyHeight,
+        windowHeight: tb + bodyHeight,
+      };
+    });
+  }
 
   // Same width as rendered `contact.msg`; required for accurate non-overlap packing.
   W.contact = W.me;
@@ -109,7 +118,8 @@ function getDesktopLayout(vw, vh) {
     vw,
     vh,
     W,
-    projWidth,
+    projectCards,
+    projectGap,
     nProj,
     layoutScale,
     edge,
@@ -117,7 +127,7 @@ function getDesktopLayout(vw, vh) {
     topBand,
   });
 
-  return { W, pos, projWidth, layoutScale };
+  return { W, pos, projectCards, layoutScale };
 }
 
 const DESKTOP_PROJECT_SLOTS = projects.map((_, projectIndex) => ({
@@ -249,7 +259,7 @@ export default function Desktop() {
 
   const vwSafe = viewport?.w ?? 1280;
   const vhSafe = viewport?.h ?? 800;
-  const { W, pos, projWidth, layoutScale } = useMemo(
+  const { W, pos, projectCards, layoutScale } = useMemo(
     () => getDesktopLayout(vwSafe, vhSafe),
     [vwSafe, vhSafe]
   );
@@ -270,12 +280,13 @@ export default function Desktop() {
   // One convention for every window: pointer right/down → pane shifts left/up
   // (recessed plane / “looking past the glass”). Only depth (amount) differs.
   const yz = 0.78;
-  const depth = { welcome: 8, me: 8, proj: 12, skills: 10, contact: 9 };
+  const depth = { welcome: 8, me: 8, proj: 12, skills: 10, junk: 9, contact: 9 };
   const pShift = {
     welcome: { x: -px * depth.welcome, y: -py * depth.welcome * yz },
     me: { x: -px * depth.me, y: -py * depth.me * yz },
     proj: { x: -px * depth.proj, y: -py * depth.proj * yz },
     skills: { x: -px * depth.skills, y: -py * depth.skills * yz },
+    junk: { x: -px * depth.junk, y: -py * depth.junk * yz },
     contact: { x: -px * depth.contact, y: -py * depth.contact * yz },
   };
 
@@ -379,6 +390,7 @@ export default function Desktop() {
       {showOtherWindows &&
         DESKTOP_PROJECT_SLOTS.map(({ slot, projectIndex, delay, zBase }) => {
           const p = projects[projectIndex];
+          const card = projectCards[projectIndex];
           const id = `proj-${projectIndex + 1}`;
           return (
             <Window
@@ -387,7 +399,8 @@ export default function Desktop() {
               title={p.title}
               left={pos[slot].left}
               top={pos[slot].top}
-              width={projWidth}
+              width={card.width}
+              height={card.windowHeight}
               delay={delay}
               zIndex={zOf(id, zBase)}
               onFocus={bringToFront}
@@ -402,12 +415,33 @@ export default function Desktop() {
                   PROJECT_GRADIENTS[projectIndex % PROJECT_GRADIENTS.length]
                 }
                 layoutScale={layoutScale}
-                frameWidth={projWidth}
+                frameWidth={card.width}
+                frameHeight={card.bodyHeight}
+                aspectRatio={card.aspect}
                 onRequestFocus={() => bringToFront(id)}
               />
             </Window>
           );
         })}
+
+      {showOtherWindows && (
+        <Window
+          id="junk"
+          title="junk/"
+          titleUppercase={false}
+          left={pos.junk.left}
+          top={pos.junk.top}
+          width={W.junk}
+          delay={1.35}
+          zIndex={zOf("junk", 15)}
+          onFocus={bringToFront}
+          dragConstraints={stageRef}
+          parallaxShift={pShift.junk}
+          uiScale={layoutScale}
+        >
+          <JunkFolder variant="desktop" layoutScale={layoutScale} />
+        </Window>
+      )}
 
       {showOtherWindows && (
         <Window
@@ -556,15 +590,15 @@ function ProjectFlipCard({
   gradient,
   layoutScale = 1,
   frameWidth,
+  frameHeight,
+  aspectRatio,
   onRequestFocus,
 }) {
   const reduceMotion = useReducedMotion();
-  const s = layoutScale;
   const innerW = frameWidth ?? 268;
-  const cardH = Math.max(
-    Math.round(210 * s),
-    Math.round(innerW * 1.42)
-  );
+  const cardH =
+    frameHeight ??
+    Math.round(innerW / (aspectRatio ?? 4 / 5));
 
   const heroSrc = project.thumb ?? project.caseStudyHero ?? null;
   const heroSrcEnc = heroSrc ? encodeURI(heroSrc) : null;
@@ -580,8 +614,9 @@ function ProjectFlipCard({
       style={{
         display: "block",
         position: "relative",
+        width: "100%",
         height: cardH,
-        overflow: "visible",
+        overflow: "hidden",
         cursor: "pointer",
         textDecoration: "none",
         color: "inherit",
@@ -622,7 +657,8 @@ function ProjectFlipCard({
                   inset: 0,
                   width: "100%",
                   height: "100%",
-                  objectFit: "cover",
+                  objectFit: "contain",
+                  objectPosition: "center",
                 }}
               />
               <div
@@ -1200,6 +1236,17 @@ function MobileDesktop() {
         <MobileScrollReveal scrollRoot={scrollRef} variant="left" delay={0.06}>
           <MobileCard title="me.txt" titleUppercase={false}>
             <MeTxtBody />
+          </MobileCard>
+        </MobileScrollReveal>
+
+        <MobileSectionRule />
+
+        <MobileScrollReveal scrollRoot={scrollRef} variant="right" delay={0.05}>
+          <SectionLabel>▢ Junk drawer · photos & sketches</SectionLabel>
+        </MobileScrollReveal>
+        <MobileScrollReveal scrollRoot={scrollRef} variant="up" delay={0.1}>
+          <MobileCard title="junk/" titleUppercase={false}>
+            <JunkFolder variant="mobile" />
           </MobileCard>
         </MobileScrollReveal>
 
