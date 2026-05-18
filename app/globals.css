@@ -95,6 +95,59 @@ body {
   overscroll-behavior-x: contain;
 }
 
+.mobile-os-scroll {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.mobile-window-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.mobile-window-scanlines {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.35;
+  background-image: repeating-linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0.04) 0px,
+    rgba(255, 255, 255, 0.04) 1px,
+    transparent 2px,
+    transparent 4px
+  );
+}
+
+.mobile-window-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  margin-right: 2px;
+}
+
+.mobile-window-dots span {
+  width: 7px;
+  height: 7px;
+  border-radius: 1px;
+  border: 1px solid rgba(255, 122, 41, 0.55);
+  background: rgba(255, 122, 41, 0.12);
+  box-shadow: 0 0 6px rgba(255, 122, 41, 0.25);
+}
+
+.mobile-open-strip {
+  margin-bottom: 8px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.mobile-open-strip:active {
+  border-color: rgba(255, 122, 41, 0.75);
+  box-shadow: 0 0 18px rgba(255, 122, 41, 0.22);
+}
+
 /* Custom scrollbars — scoped to html & body first (reliable vs. Tailwind preflight), then all scrollers */
 html {
   scrollbar-width: thin;

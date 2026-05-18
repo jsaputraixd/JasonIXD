@@ -3,7 +3,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import {
+  AnimatePresence,
+  motion,
+  useInView,
+  useReducedMotion,
+} from "framer-motion";
 import Window from "./Window";
 import StatusBar from "./StatusBar";
 import SkillsPlanet from "./SkillsPlanet";
@@ -1063,6 +1068,129 @@ function BlinkCursor() {
 /*                              MOBILE EXPERIENCE                             */
 /* -------------------------------------------------------------------------- */
 
+const MOBILE_BLOCK_GAP = 44;
+const MOBILE_CARD_INSET = 18;
+
+/** Scroll-triggered entrance — uses the mobile column as intersection root. */
+function MobileScrollReveal({
+  children,
+  scrollRoot,
+  variant = "up",
+  delay = 0,
+  className,
+  style,
+}) {
+  const reduceMotion = useReducedMotion();
+  const ref = useRef(null);
+  const inView = useInView(ref, {
+    root: scrollRoot ?? undefined,
+    once: true,
+    amount: 0.18,
+    margin: "0px 0px -10% 0px",
+  });
+
+  const variants = {
+    up: {
+      hidden: { opacity: 0, y: 36, scale: 0.94, filter: "blur(8px)" },
+      visible: { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" },
+    },
+    left: {
+      hidden: { opacity: 0, x: -28, y: 16, scale: 0.97 },
+      visible: { opacity: 1, x: 0, y: 0, scale: 1 },
+    },
+    right: {
+      hidden: { opacity: 0, x: 28, y: 16, scale: 0.97 },
+      visible: { opacity: 1, x: 0, y: 0, scale: 1 },
+    },
+    fade: {
+      hidden: { opacity: 0, y: 10 },
+      visible: { opacity: 1, y: 0 },
+    },
+  };
+
+  const v = variants[variant] ?? variants.up;
+  const show = reduceMotion || inView;
+
+  return (
+    <motion.div
+      ref={ref}
+      className={className}
+      style={style}
+      initial={reduceMotion ? false : "hidden"}
+      animate={show ? "visible" : "hidden"}
+      variants={v}
+      transition={{ duration: 0.72, ease: EASE, delay }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+function MobileSectionRule() {
+  return (
+    <motion.div
+      aria-hidden
+      className="mobile-section-rule"
+      initial={{ scaleX: 0, opacity: 0 }}
+      whileInView={{ scaleX: 1, opacity: 1 }}
+      viewport={{ once: true, amount: 0.5 }}
+      transition={{ duration: 0.85, ease: EASE }}
+      style={{
+        margin: `${MOBILE_BLOCK_GAP - 12}px ${MOBILE_CARD_INSET + 4}px 0`,
+        height: 1,
+        transformOrigin: "left center",
+        background:
+          "linear-gradient(90deg, rgba(255,122,41,0.55), rgba(255,122,41,0.12) 55%, transparent)",
+        boxShadow: "0 0 12px rgba(255, 122, 41, 0.25)",
+      }}
+    />
+  );
+}
+
+function MobileOpenForWorkStrip() {
+  return (
+    <a
+      href={about.socials.linkedin}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="mobile-open-strip"
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 10,
+        margin: `0 ${MOBILE_CARD_INSET}px`,
+        padding: "10px 14px",
+        border: "1px solid rgba(255, 122, 41, 0.4)",
+        borderRadius: 2,
+        background:
+          "linear-gradient(90deg, rgba(255,122,41,0.12), rgba(255,122,41,0.04), rgba(255,122,41,0.12))",
+        fontFamily: "'VT323', monospace",
+        fontSize: 13,
+        letterSpacing: "0.28em",
+        textTransform: "uppercase",
+        color: ACCENT,
+        textShadow: "0 0 8px rgba(255, 122, 41, 0.45)",
+        textDecoration: "none",
+      }}
+    >
+      <motion.span
+        aria-hidden
+        animate={{ opacity: [0.35, 1, 0.35] }}
+        transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+        style={{
+          width: 6,
+          height: 6,
+          borderRadius: "50%",
+          background: ACCENT,
+          boxShadow: "0 0 10px rgba(255, 122, 41, 0.8)",
+        }}
+      />
+      J.S. · Open for work
+    </a>
+  );
+}
+
 function MobileDesktop() {
   // Mobile uses its own lightweight phase machine that mirrors the desktop's
   // boot → intro → ready flow, but the morph happens in place at the top of
@@ -1095,13 +1223,17 @@ function MobileDesktop() {
     return () => timers.forEach(clearTimeout);
   }, [phase]);
 
+  const scrollRef = useRef(null);
+
   return (
-    <div
+    <motion.div
       className="mobile-os"
       style={{ position: "relative", height: "100vh" }}
     >
-      <div
+      <motion.div
+        ref={scrollRef}
         data-mobile-scroll
+        className="mobile-os-scroll"
         style={{
           position: "absolute",
           inset: 0,
@@ -1109,49 +1241,84 @@ function MobileDesktop() {
           overflowX: "hidden",
           WebkitOverflowScrolling: "touch",
           touchAction: "pan-y",
-          paddingTop: 12,
-          paddingBottom: 120,
+          paddingTop: 20,
+          paddingBottom: 140,
         }}
       >
-        <MobileCard title="welcome.exe" titleExtra={<WelcomeReadAloud compact />}>
-          <MobileWelcomeMorph phase={phase} typed={welcomeTyped} />
-        </MobileCard>
+        <MobileScrollReveal scrollRoot={scrollRef} variant="fade" delay={0.05}>
+          <MobileCard title="welcome.exe" titleExtra={<WelcomeReadAloud compact />}>
+            <MobileWelcomeMorph phase={phase} typed={welcomeTyped} />
+          </MobileCard>
+        </MobileScrollReveal>
 
-        <SectionLabel>▢ Selected work · swipe →</SectionLabel>
-        <MobileProjectsCarousel />
+        <MobileSectionRule />
 
-        <SectionLabel>▢ Skills · orbiting</SectionLabel>
-        <div style={{ padding: "4px 14px 20px", display: "flex", justifyContent: "center" }}>
-          <SkillsPlanet variant="mobile" scrollRootSelector="[data-mobile-scroll]" />
-        </div>
+        <MobileScrollReveal scrollRoot={scrollRef} variant="left" delay={0.04}>
+          <SectionLabel>▢ Selected work · swipe →</SectionLabel>
+        </MobileScrollReveal>
+        <MobileScrollReveal scrollRoot={scrollRef} variant="up" delay={0.1}>
+          <MobileProjectsCarousel scrollRoot={scrollRef} />
+        </MobileScrollReveal>
 
-        <MobileCard title="me.txt" titleUppercase={false}>
-          <MeTxtBody />
-        </MobileCard>
+        <MobileSectionRule />
 
-        <MobileCard title="contact.msg">
-          <MobileContact />
-        </MobileCard>
-      </div>
+        <MobileScrollReveal scrollRoot={scrollRef} variant="right" delay={0.04}>
+          <SectionLabel>▢ Skills · orbiting</SectionLabel>
+        </MobileScrollReveal>
+        <MobileScrollReveal scrollRoot={scrollRef} variant="up" delay={0.12}>
+          <motion.div
+            style={{
+              padding: "8px 14px 28px",
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
+            <SkillsPlanet variant="mobile" scrollRootSelector="[data-mobile-scroll]" />
+          </motion.div>
+        </MobileScrollReveal>
+
+        <MobileSectionRule />
+
+        <MobileScrollReveal scrollRoot={scrollRef} variant="left" delay={0.06}>
+          <MobileCard title="me.txt" titleUppercase={false}>
+            <MeTxtBody />
+          </MobileCard>
+        </MobileScrollReveal>
+
+        <MobileScrollReveal scrollRoot={scrollRef} variant="fade" delay={0.08}>
+          <MobileOpenForWorkStrip />
+        </MobileScrollReveal>
+
+        <MobileScrollReveal scrollRoot={scrollRef} variant="right" delay={0.1}>
+          <MobileCard title="contact.msg">
+            <MobileContact />
+          </MobileCard>
+        </MobileScrollReveal>
+      </motion.div>
 
       <StatusBar />
-    </div>
+    </motion.div>
   );
 }
 
 function MobileCard({ title, children, titleUppercase = true, titleExtra }) {
   return (
     <section
+      className="mobile-window-card"
       style={{
-        margin: "12px 14px",
-        background: "rgba(18, 12, 8, 0.78)",
-        border: "1px solid rgba(255, 122, 41, 0.45)",
+        margin: `0 ${MOBILE_CARD_INSET}px`,
+        background: "rgba(18, 12, 8, 0.82)",
+        border: "1px solid rgba(255, 122, 41, 0.48)",
         borderRadius: 3,
-        boxShadow: "0 0 24px rgba(255, 122, 41, 0.08)",
+        boxShadow:
+          "0 0 32px rgba(255, 122, 41, 0.12), 0 12px 40px rgba(0, 0, 0, 0.45)",
       }}
     >
+      <div aria-hidden className="mobile-window-scanlines" />
       <div
         style={{
+          position: "relative",
+          zIndex: 1,
           display: "flex",
           alignItems: "center",
           gap: 10,
@@ -1167,6 +1334,11 @@ function MobileCard({ title, children, titleUppercase = true, titleExtra }) {
           textShadow: "0 0 6px rgba(255, 122, 41, 0.55)",
         }}
       >
+        <span className="mobile-window-dots" aria-hidden>
+          <span />
+          <span />
+          <span />
+        </span>
         <span
           style={{
             flex: "1 1 0%",
@@ -1182,7 +1354,9 @@ function MobileCard({ title, children, titleUppercase = true, titleExtra }) {
           <span style={{ flexShrink: 0, display: "inline-flex" }}>{titleExtra}</span>
         ) : null}
       </div>
-      <div style={{ padding: "16px 16px 18px" }}>{children}</div>
+      <div style={{ padding: "16px 16px 18px", position: "relative", zIndex: 1 }}>
+        {children}
+      </div>
     </section>
   );
 }
@@ -1191,7 +1365,7 @@ function SectionLabel({ children }) {
   return (
     <p
       style={{
-        margin: "22px 22px 6px",
+        margin: `${MOBILE_BLOCK_GAP}px ${MOBILE_CARD_INSET + 4}px 14px`,
         fontFamily: "'VT323', monospace",
         fontSize: 13,
         letterSpacing: "0.32em",
@@ -1352,11 +1526,18 @@ function MobileWelcomeBody() {
   );
 }
 
-function MobileProjectsCarousel() {
+function MobileProjectsCarousel({ scrollRoot }) {
   const carouselRef = useRef(null);
   const cardsRef = useRef([]);
   const dragRef = useRef(null);
   const [activeIdx, setActiveIdx] = useState(0);
+  const reduceMotion = useReducedMotion();
+  const sectionRef = useRef(null);
+  const sectionInView = useInView(sectionRef, {
+    root: scrollRoot ?? undefined,
+    once: true,
+    amount: 0.15,
+  });
 
   const syncActiveFromScroll = useCallback(() => {
     const carousel = carouselRef.current;
@@ -1431,10 +1612,13 @@ function MobileProjectsCarousel() {
     }
   };
 
+  const showCards = reduceMotion || sectionInView;
+
   return (
-    <div
-      ref={carouselRef}
-      className="project-carousel"
+    <motion.div ref={sectionRef} style={{ marginBottom: 4 }}>
+      <motion.div
+        ref={carouselRef}
+        className="project-carousel"
       role="region"
       aria-roledescription="carousel"
       aria-label="Selected projects — swipe horizontally"
@@ -1446,10 +1630,10 @@ function MobileProjectsCarousel() {
         overflowX: "auto",
         overflowY: "hidden",
         scrollSnapType: "x mandatory",
-        scrollPaddingInline: "17.5vw",
+        scrollPaddingInline: "14vw",
         display: "flex",
-        gap: "5vw",
-        padding: "10px 17.5vw 18px",
+        gap: "7vw",
+        padding: "18px 14vw 32px",
         WebkitOverflowScrolling: "touch",
         touchAction: "pan-x",
         overscrollBehaviorX: "contain",
@@ -1461,32 +1645,45 @@ function MobileProjectsCarousel() {
       {projects.map((p, i) => {
         const isActive = i === activeIdx;
         return (
-          <div
+          <motion.div
             key={p.id}
             ref={(el) => (cardsRef.current[i] = el)}
             data-idx={i}
             style={{
-              flex: "0 0 65vw",
+              flex: "0 0 68vw",
               maxWidth: 360,
               aspectRatio: "1 / 1",
               scrollSnapAlign: "center",
-              transform: isActive
-                ? "scale(1) translateY(0)"
-                : "scale(0.86) translateY(6px)",
-              opacity: isActive ? 1 : 0.55,
-              transition:
-                "transform 320ms cubic-bezier(0.16, 1, 0.3, 1), opacity 320ms ease",
               willChange: "transform, opacity",
+            }}
+            initial={reduceMotion ? false : { opacity: 0, y: 36, scale: 0.88 }}
+            animate={{
+              opacity: showCards ? (isActive ? 1 : 0.52) : 0,
+              y: showCards ? (isActive ? 0 : 8) : 36,
+              scale: showCards ? (isActive ? 1 : 0.86) : 0.88,
+            }}
+            transition={{
+              opacity: {
+                duration: 0.45,
+                delay: showCards ? i * 0.09 : 0,
+              },
+              y: { duration: 0.62, ease: EASE, delay: showCards ? i * 0.09 : 0 },
+              scale: {
+                duration: isActive ? 0.34 : 0.62,
+                ease: EASE,
+                delay: showCards ? i * 0.09 : 0,
+              },
             }}
           >
             <MobileProjectCard
               project={p}
               gradient={PROJECT_GRADIENTS[i % PROJECT_GRADIENTS.length]}
             />
-          </div>
+          </motion.div>
         );
       })}
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 
