@@ -99,8 +99,8 @@ function getDesktopLayout(vw, vh) {
     );
   }
 
-  /** ~40% smaller than the layout-derived width — keeps the project row compact on desktop/tablet */
-  projWidth = Math.max(100, Math.round(projWidth * 0.6));
+  /** Slightly compact vs layout band — room for hover overlay copy */
+  projWidth = Math.max(108, Math.round(projWidth * 0.65));
 
   // Same width as rendered `contact.msg`; required for accurate non-overlap packing.
   W.contact = W.me;
@@ -562,30 +562,31 @@ function ProjectFlipCard({
   const reduceMotion = useReducedMotion();
   const s = layoutScale;
   const innerW = frameWidth ?? 268;
-  /** Taller body when windows are narrow (e.g. 4-up row) so hover copy isn't clipped. */
   const cardH = Math.max(
-    Math.round(200 * s),
-    Math.round(innerW * 1.36)
+    Math.round(210 * s),
+    Math.round(innerW * 1.42)
   );
-  const padBackX = Math.round(18 * s);
-  const padBackY = Math.round(20 * s);
+  const padX = Math.max(12, Math.round(14 * s));
+  const padY = Math.max(12, Math.round(14 * s));
 
   const heroSrc = project.thumb ?? project.caseStudyHero ?? null;
   const heroSrcEnc = heroSrc ? encodeURI(heroSrc) : null;
 
-  const flipToInfo = () => setShowInfo(true);
-  const flipToImage = () => setShowInfo(false);
-
   return (
     <Link
       href={`/work/${project.slug}`}
-      data-cursor="project"
+      data-cursor="hover"
       aria-label={`Open ${project.title} case study`}
       onMouseEnter={() => {
         onRequestFocus?.();
-        flipToInfo();
+        setShowInfo(true);
       }}
-      onMouseLeave={flipToImage}
+      onMouseLeave={() => setShowInfo(false)}
+      onFocus={() => {
+        onRequestFocus?.();
+        setShowInfo(true);
+      }}
+      onBlur={() => setShowInfo(false)}
       onTouchStart={() => setShowInfo((v) => !v)}
       style={{
         display: "block",
@@ -599,139 +600,141 @@ function ProjectFlipCard({
       }}
     >
       <motion.div
+        className="project-card-shell"
         style={{
           position: "relative",
           height: "100%",
           transformOrigin: "center center",
+          borderRadius: 3,
+          border: "1px solid rgba(255, 122, 41, 0.4)",
+          overflow: "hidden",
+          boxShadow: "0 6px 20px rgba(0, 0, 0, 0.45)",
         }}
         initial={false}
-        whileHover={reduceMotion ? undefined : { scale: 1.5 }}
-        transition={{ duration: 0.38, ease: EASE }}
+        whileHover={reduceMotion ? undefined : { scale: 1.1, zIndex: 4 }}
+        transition={{ duration: 0.34, ease: EASE }}
       >
-      {/* Hero face — project image only (tint + scanlines) */}
-      <motion.div
-        animate={{
-          opacity: showInfo ? 0 : 1,
-          scale: showInfo ? 0.97 : 1,
-        }}
-        transition={{ duration: 0.45, ease: EASE }}
-        style={{
-          position: "absolute",
-          inset: 0,
-          background: gradient,
-          display: "block",
-          padding: 0,
-          pointerEvents: showInfo ? "none" : "auto",
-        }}
-      >
-        {heroSrcEnc ? (
-          <>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={heroSrcEnc}
-              alt=""
-              aria-hidden
-              style={{
-                position: "absolute",
-                inset: 0,
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-              }}
-            />
-            <div
-              aria-hidden="true"
-              style={{
-                position: "absolute",
-                inset: 0,
-                background:
-                  "linear-gradient(180deg, rgba(12, 8, 6, 0.12) 0%, rgba(8, 5, 4, 0.45) 100%)",
-                pointerEvents: "none",
-              }}
-            />
-          </>
-        ) : null}
-        {/* CRT-style scanlines on the project hero */}
         <div
-          aria-hidden="true"
           style={{
             position: "absolute",
             inset: 0,
-            backgroundImage:
-              "repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.04) 0px, rgba(255, 255, 255, 0.04) 1px, transparent 2px, transparent 4px)",
-            pointerEvents: "none",
-            zIndex: 1,
+            background: gradient,
           }}
-        />
-      </motion.div>
+        >
+          {heroSrcEnc ? (
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={heroSrcEnc}
+                alt=""
+                aria-hidden
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+              />
+              <div
+                aria-hidden="true"
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  background:
+                    "linear-gradient(180deg, rgba(12, 8, 6, 0.08) 0%, rgba(8, 5, 4, 0.35) 100%)",
+                  pointerEvents: "none",
+                }}
+              />
+            </>
+          ) : null}
+          <div
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              inset: 0,
+              backgroundImage:
+                "repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.04) 0px, rgba(255, 255, 255, 0.04) 1px, transparent 2px, transparent 4px)",
+              pointerEvents: "none",
+              zIndex: 1,
+            }}
+          />
+        </div>
 
-      {/* Description face */}
-      <motion.div
-        initial={false}
-        animate={{
-          opacity: showInfo ? 1 : 0,
-          scale: showInfo ? 1 : 1.04,
-        }}
-        transition={{ duration: 0.45, ease: EASE }}
-        style={{
-          position: "absolute",
-          inset: 0,
-          background: "rgba(15, 10, 6, 0.95)",
-          padding: `${padBackY}px ${padBackX}px ${padBackX}px`,
-          display: "flex",
-          flexDirection: "column",
-          minHeight: 0,
-          pointerEvents: showInfo ? "auto" : "none",
-        }}
-      >
-        <p
+        <motion.div
+          initial={false}
+          animate={{ opacity: showInfo ? 1 : 0 }}
+          transition={{ duration: 0.32, ease: EASE }}
+          aria-hidden={!showInfo}
           style={{
-            fontFamily: "'VT323', monospace",
-            fontSize: Math.max(10, Math.round(13 * s)),
-            letterSpacing: "0.28em",
-            color: ACCENT,
-            textTransform: "uppercase",
-            textShadow: "0 0 6px rgba(255, 122, 41, 0.45)",
-            marginBottom: Math.max(8, Math.round(10 * s)),
-            lineHeight: 1.35,
-            flexShrink: 0,
+            position: "absolute",
+            inset: 0,
+            zIndex: 2,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "flex-end",
+            pointerEvents: "none",
+            overflow: "hidden",
           }}
         >
-          {project.tagline}
-        </p>
-        <p
-          className="project-pane-scroll"
-          style={{
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: Math.max(10, Math.round(12.5 * s)),
-            color: "rgba(255,255,255,0.78)",
-            lineHeight: 1.6,
-            flex: 1,
-            minHeight: 0,
-            overflowY: "auto",
-            WebkitOverflowScrolling: "touch",
-            overscrollBehavior: "contain",
-          }}
-        >
-          {project.description}
-        </p>
-        <span
-          aria-hidden
-          style={{
-            marginTop: Math.max(10, Math.round(14 * s)),
-            fontFamily: "'VT323', monospace",
-            fontSize: Math.max(11, Math.round(14 * s)),
-            letterSpacing: "0.3em",
-            textTransform: "uppercase",
-            color: ACCENT,
-            textShadow: "0 0 8px rgba(255, 122, 41, 0.5)",
-            alignSelf: "flex-end",
-            flexShrink: 0,
-          }}
-        >
-          Case study →
-        </span>
-      </motion.div>
+          <div
+            className="project-card-overlay"
+            style={{
+              padding: `${padY}px ${padX}px`,
+              display: "flex",
+              flexDirection: "column",
+              gap: Math.max(6, Math.round(8 * s)),
+              minHeight: 0,
+              maxHeight: "82%",
+            }}
+          >
+            <p
+              style={{
+                margin: 0,
+                fontFamily: "'Bonbon', cursive",
+                fontSize: Math.max(18, Math.round(22 * s)),
+                lineHeight: 1,
+                color: "#fff",
+                textShadow: "0 0 14px rgba(255, 122, 41, 0.35)",
+                flexShrink: 0,
+              }}
+            >
+              {project.title}
+            </p>
+            <p
+              style={{
+                margin: 0,
+                fontFamily: "'VT323', monospace",
+                fontSize: Math.max(10, Math.round(11 * s)),
+                letterSpacing: "0.14em",
+                color: ACCENT_DIM,
+                textTransform: "uppercase",
+                lineHeight: 1.3,
+                flexShrink: 0,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {project.tagline}
+            </p>
+            <p className="project-card-desc">{project.description}</p>
+            <span
+              style={{
+                fontFamily: "'VT323', monospace",
+                fontSize: Math.max(11, Math.round(12 * s)),
+                letterSpacing: "0.26em",
+                textTransform: "uppercase",
+                color: ACCENT,
+                textShadow: "0 0 8px rgba(255, 122, 41, 0.5)",
+                alignSelf: "flex-end",
+                flexShrink: 0,
+              }}
+            >
+              Case study →
+            </span>
+          </div>
+        </motion.div>
       </motion.div>
     </Link>
   );
