@@ -1,7 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { shouldSkipIntro } from "@/lib/introSession";
+import {
+  playStartupChime,
+  playStartupWordAccent,
+  playTypingClick,
+} from "@/lib/typingSound";
 
 const ACCENT = "#FF7A29";
 const EASE = [0.16, 1, 0.3, 1];
@@ -35,7 +41,22 @@ export default function LoadingOverlay() {
   const [bootDone, setBootDone] = useState(false);
   const [showTagline, setShowTagline] = useState(false);
   const [exiting, setExiting] = useState(false);
-  const [visible, setVisible] = useState(true);
+  const [visible, setVisible] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return !shouldSkipIntro();
+  });
+  const skipBootRef = useRef(
+    typeof window !== "undefined" && shouldSkipIntro()
+  );
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!shouldSkipIntro()) return;
+    skipBootRef.current = true;
+    setVisible(false);
+    window.__portfolioBootDone = true;
+    window.dispatchEvent(new CustomEvent("boot:done"));
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -51,6 +72,8 @@ export default function LoadingOverlay() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (skipBootRef.current) return;
+
     const reduced = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     ).matches;
@@ -84,6 +107,7 @@ export default function LoadingOverlay() {
               next[lineIdx] = line.slice(0, i);
               return next;
             });
+            playTypingClick();
           }, ms + i * CHAR_MS)
         );
       }
@@ -111,6 +135,24 @@ export default function LoadingOverlay() {
 
     return () => timers.forEach(clearTimeout);
   }, []);
+
+  useEffect(() => {
+    if (!showTagline) return;
+    if (skipBootRef.current) return;
+    const reduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+    if (reduced) return;
+
+    playStartupChime();
+    const pings = TAGLINE_WORDS.map((_, i) =>
+      window.setTimeout(
+        () => playStartupWordAccent(i),
+        (i * WORD_STAGGER_S + 0.2) * 1000
+      )
+    );
+    return () => pings.forEach((id) => clearTimeout(id));
+  }, [showTagline]);
 
   return (
     <AnimatePresence>

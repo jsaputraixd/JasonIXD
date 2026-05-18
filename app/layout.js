@@ -3,6 +3,7 @@ import Cursor from "@/components/Cursor";
 import GlobalBackground from "@/components/GlobalBackground";
 import CRTOverlay from "@/components/CRTOverlay";
 import LoadingOverlay from "@/components/LoadingOverlay";
+import TypingSoundInit from "@/components/TypingSoundInit";
 
 const siteUrl =
   (process.env.NEXT_PUBLIC_SITE_URL &&
@@ -55,6 +56,7 @@ export default function RootLayout({ children }) {
         <div className="crt-stage">{children}</div>
         <CRTOverlay />
         <Cursor />
+        <TypingSoundInit />
         <LoadingOverlay />
       </body>
     </html>

@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, useDragControls } from "framer-motion";
+import { playWindowWhoosh } from "@/lib/typingSound";
 
 const ACCENT = "#FF7A29";
 const EASE = [0.16, 1, 0.3, 1];
@@ -16,6 +17,7 @@ export default function Window({
   minWidth,
   zIndex = 1,
   onFocus,
+  onClose,
   closable = true,
   delay = 0,
   dragConstraints,
@@ -26,12 +28,23 @@ export default function Window({
   titleBarExtra,
   /** When false, content may extend outside window bounds (e.g. hover scale on project cards). */
   clipContent = true,
+  /** Play a short whoosh when the window first appears (cascade delay respected). */
+  playOpenSound = true,
 }) {
   const [open, setOpen] = useState(true);
   const [closing, setClosing] = useState(false);
   const [isHeld, setIsHeld] = useState(false);
   const [hasBeenHeld, setHasBeenHeld] = useState(false);
   const dragControls = useDragControls();
+  const openSoundPlayed = useRef(false);
+
+  useEffect(() => {
+    if (!playOpenSound || openSoundPlayed.current) return;
+    openSoundPlayed.current = true;
+    const ms = Math.max(0, delay * 1000);
+    const t = setTimeout(() => playWindowWhoosh(), ms);
+    return () => clearTimeout(t);
+  }, [delay, playOpenSound]);
 
   useEffect(() => {
     if (!isHeld) return;
@@ -49,7 +62,10 @@ export default function Window({
   const handleClose = (e) => {
     e.stopPropagation();
     setClosing(true);
-    setTimeout(() => setOpen(false), 220);
+    setTimeout(() => {
+      setOpen(false);
+      onClose?.();
+    }, 220);
   };
 
   const startDrag = (event) => {

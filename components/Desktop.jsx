@@ -15,12 +15,18 @@ import SkillsPlanet from "./SkillsPlanet";
 import { projects } from "@/data/projects";
 import { about } from "@/data/about";
 import WelcomeReadAloud from "@/components/WelcomeReadAloud";
-import JunkFolder from "@/components/JunkFolder";
+import DesktopFolderIcon from "@/components/DesktopFolderIcon";
+import OtherStuffFolder from "@/components/OtherStuffFolder";
+import { otherStuff } from "@/data/otherStuff";
 import {
+  DESKTOP_FOLDER_ICON_W,
   getDeterministicDesktopPositions,
+  LEFT_COLUMN_INSET,
   PROJECT_WINDOW_GAP,
 } from "@/lib/desktopWindowPlacement";
 import { getProjectDesktopCards } from "@/lib/projectDesktopCards";
+import { markIntroSeen, shouldSkipIntro } from "@/lib/introSession";
+import { playTypingClick } from "@/lib/typingSound";
 
 const ACCENT = "#FF7A29";
 const ACCENT_DIM = "rgba(255, 180, 112, 0.7)";
@@ -55,7 +61,7 @@ function getDesktopLayout(vw, vh) {
     welcome: Math.round(clamp(380, 540, 400 + 130 * u)),
     me: Math.round(clamp(208, 288, 218 + 70 * u)),
     skills: Math.round(clamp(300, 440, 330 + 100 * u)),
-    junk: Math.round(clamp(248, 300, 268 + 24 * u)),
+    otherStuff: Math.round(clamp(300, 380, 340 + 28 * u)),
     contact: Math.round(clamp(248, 298, 260 + 28 * u)),
   };
 
@@ -66,7 +72,7 @@ function getDesktopLayout(vw, vh) {
       200,
       Math.round(W0.skills * layoutScale * SKILLS_WINDOW_BODY_SCALE)
     ),
-    junk: Math.round(W0.junk * layoutScale),
+    otherStuff: Math.round(W0.otherStuff * layoutScale),
     contact: Math.round(W0.contact * layoutScale),
   };
 
@@ -114,6 +120,8 @@ function getDesktopLayout(vw, vh) {
   // Same width as rendered `contact.msg`; required for accurate non-overlap packing.
   W.contact = W.me;
 
+  const leftColumnInset = Math.round(LEFT_COLUMN_INSET * layoutScale);
+
   const pos = getDeterministicDesktopPositions({
     vw,
     vh,
@@ -125,6 +133,7 @@ function getDesktopLayout(vw, vh) {
     edge,
     g,
     topBand,
+    leftColumnInset,
   });
 
   return { W, pos, projectCards, layoutScale };
@@ -154,10 +163,18 @@ export default function Desktop() {
   //   "waiting-boot"  → LoadingOverlay is still showing
   //   "intro-typing"  → big centered card, typing "WELCOME!"
   //   "intro-hold"    → fully typed, brief pause
-  //   "expanding"     → card flies into welcome window position; other windows cascade in
-  //   "ready"         → real welcome window with body content typing in, fully interactive
-  const [phase, setPhase] = useState("waiting-boot");
+  //   "expanding"     → card flies into welcome.exe slot (no other windows yet)
+  //   "ready"         → welcome.exe body types in (Hello, name, role…)
+  //   "dashboard"   → all other windows cascade in
+  const introSkippedRef = useRef(
+    typeof window !== "undefined" && shouldSkipIntro()
+  );
+  const [phase, setPhase] = useState(
+    introSkippedRef.current ? "dashboard" : "waiting-boot"
+  );
   const [welcomeTyped, setWelcomeTyped] = useState("");
+  const [otherStuffOpen, setOtherStuffOpen] = useState(false);
+  const welcomeDoneTimerRef = useRef(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -186,8 +203,13 @@ export default function Desktop() {
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
+  useEffect(() => {
+    if (phase === "dashboard") markIntroSeen();
+  }, [phase]);
+
   // Listen for the boot overlay completing its exit
   useEffect(() => {
+    if (introSkippedRef.current) return;
     const handler = () => setPhase("intro-typing");
     window.addEventListener("boot:done", handler);
     if (typeof window !== "undefined" && window.__portfolioBootDone) {
@@ -204,13 +226,16 @@ export default function Desktop() {
     const timers = [];
     for (let i = 1; i <= target.length; i++) {
       timers.push(
-        setTimeout(() => setWelcomeTyped(target.slice(0, i)), i * charMs)
+        setTimeout(() => {
+          setWelcomeTyped(target.slice(0, i));
+          playTypingClick();
+        }, i * charMs)
       );
     }
     timers.push(
       setTimeout(
         () => setPhase("intro-hold"),
-        target.length * charMs + 220
+        target.length * charMs + 280
       )
     );
     return () => timers.forEach(clearTimeout);
@@ -219,16 +244,34 @@ export default function Desktop() {
   // intro-hold → expanding (brief beat)
   useEffect(() => {
     if (phase !== "intro-hold") return;
-    const t = setTimeout(() => setPhase("expanding"), 700);
+    const t = setTimeout(() => setPhase("expanding"), 820);
     return () => clearTimeout(t);
   }, [phase]);
 
-  // expanding → ready (after flight)
+  // expanding → ready (after flight; welcome body types next)
   useEffect(() => {
     if (phase !== "expanding") return;
-    const t = setTimeout(() => setPhase("ready"), 720);
+    const t = setTimeout(() => setPhase("ready"), 780);
     return () => clearTimeout(t);
   }, [phase]);
+
+  const handleWelcomeTypingComplete = useCallback(() => {
+    if (welcomeDoneTimerRef.current) {
+      clearTimeout(welcomeDoneTimerRef.current);
+    }
+    welcomeDoneTimerRef.current = setTimeout(() => {
+      setPhase("dashboard");
+    }, 640);
+  }, []);
+
+  useEffect(
+    () => () => {
+      if (welcomeDoneTimerRef.current) {
+        clearTimeout(welcomeDoneTimerRef.current);
+      }
+    },
+    []
+  );
 
   const bringToFront = (id) => {
     setTopZ((z) => z + 1);
@@ -280,13 +323,25 @@ export default function Desktop() {
   // One convention for every window: pointer right/down → pane shifts left/up
   // (recessed plane / “looking past the glass”). Only depth (amount) differs.
   const yz = 0.78;
-  const depth = { welcome: 8, me: 8, proj: 12, skills: 10, junk: 9, contact: 9 };
+  const depth = {
+    welcome: 8,
+    me: 8,
+    proj: 12,
+    skills: 10,
+    otherStuff: 9,
+    otherStuffIcon: 7,
+    contact: 9,
+  };
   const pShift = {
     welcome: { x: -px * depth.welcome, y: -py * depth.welcome * yz },
     me: { x: -px * depth.me, y: -py * depth.me * yz },
     proj: { x: -px * depth.proj, y: -py * depth.proj * yz },
     skills: { x: -px * depth.skills, y: -py * depth.skills * yz },
-    junk: { x: -px * depth.junk, y: -py * depth.junk * yz },
+    otherStuff: { x: -px * depth.otherStuff, y: -py * depth.otherStuff * yz },
+    otherStuffIcon: {
+      x: -px * depth.otherStuffIcon,
+      y: -py * depth.otherStuffIcon * yz,
+    },
     contact: { x: -px * depth.contact, y: -py * depth.contact * yz },
   };
 
@@ -294,8 +349,12 @@ export default function Desktop() {
     phase === "intro-typing" ||
     phase === "intro-hold" ||
     phase === "expanding";
-  const showOtherWindows = phase === "expanding" || phase === "ready";
-  const showRealWelcome = phase === "expanding" || phase === "ready";
+  const showOtherWindows = phase === "dashboard";
+  const showRealWelcome =
+    phase === "expanding" || phase === "ready" || phase === "dashboard";
+  const cascadeDelay = (seconds) =>
+    introSkippedRef.current ? 0 : seconds;
+  const skipWelcomeTyping = phase === "dashboard";
 
   return (
     <div
@@ -358,13 +417,18 @@ export default function Desktop() {
           top={pos.welcome.top}
           width={W.welcome}
           delay={0}
+          playOpenSound={false}
           zIndex={zOf("welcome", 12)}
           onFocus={bringToFront}
           dragConstraints={stageRef}
           parallaxShift={pShift.welcome}
           uiScale={layoutScale}
         >
-          <WelcomeBody layoutScale={layoutScale} />
+          <WelcomeBody
+            layoutScale={layoutScale}
+            skipTyping={skipWelcomeTyping}
+            onTypingComplete={handleWelcomeTypingComplete}
+          />
         </Window>
       )}
 
@@ -376,7 +440,7 @@ export default function Desktop() {
           left={pos.me.left}
           top={pos.me.top}
           width={W.me}
-          delay={0.22}
+          delay={cascadeDelay(0.45)}
           zIndex={zOf("me", 13)}
           onFocus={bringToFront}
           dragConstraints={stageRef}
@@ -388,7 +452,7 @@ export default function Desktop() {
       )}
 
       {showOtherWindows &&
-        DESKTOP_PROJECT_SLOTS.map(({ slot, projectIndex, delay, zBase }) => {
+        DESKTOP_PROJECT_SLOTS.map(({ slot, projectIndex, zBase }) => {
           const p = projects[projectIndex];
           const card = projectCards[projectIndex];
           const id = `proj-${projectIndex + 1}`;
@@ -401,7 +465,7 @@ export default function Desktop() {
               top={pos[slot].top}
               width={card.width}
               height={card.windowHeight}
-              delay={delay}
+              delay={cascadeDelay(0.62 + projectIndex * 0.28)}
               zIndex={zOf(id, zBase)}
               onFocus={bringToFront}
               dragConstraints={stageRef}
@@ -425,21 +489,43 @@ export default function Desktop() {
         })}
 
       {showOtherWindows && (
+        <DesktopFolderIcon
+          label={otherStuff.label}
+          iconSrc={otherStuff.icon}
+          left={pos.otherStuffIcon.left}
+          top={pos.otherStuffIcon.top}
+          delay={cascadeDelay(2.05)}
+          zIndex={zOf("otherStuffIcon", 15)}
+          onFocus={() => bringToFront("otherStuffIcon")}
+          onOpen={() => {
+            bringToFront("otherStuff");
+            setOtherStuffOpen(true);
+          }}
+          parallaxShift={pShift.otherStuffIcon}
+          selected={otherStuffOpen}
+        />
+      )}
+
+      {showOtherWindows && otherStuffOpen && (
         <Window
-          id="junk"
-          title="junk/"
+          id="otherStuff"
+          title={otherStuff.windowTitle}
           titleUppercase={false}
-          left={pos.junk.left}
-          top={pos.junk.top}
-          width={W.junk}
-          delay={1.35}
-          zIndex={zOf("junk", 15)}
+          left={Math.max(12, pos.otherStuffIcon.left)}
+          top={Math.max(
+            12,
+            pos.otherStuffIcon.top - Math.round(320 * layoutScale)
+          )}
+          width={W.otherStuff}
+          delay={0}
+          zIndex={zOf("otherStuff", 22)}
           onFocus={bringToFront}
+          onClose={() => setOtherStuffOpen(false)}
           dragConstraints={stageRef}
-          parallaxShift={pShift.junk}
+          parallaxShift={pShift.otherStuff}
           uiScale={layoutScale}
         >
-          <JunkFolder variant="desktop" layoutScale={layoutScale} />
+          <OtherStuffFolder variant="desktop" layoutScale={layoutScale} />
         </Window>
       )}
 
@@ -450,7 +536,7 @@ export default function Desktop() {
           left={pos.skills.left}
           top={pos.skills.top}
           width={W.skills}
-          delay={1.0}
+          delay={cascadeDelay(2.45)}
           zIndex={zOf("skills", 16)}
           onFocus={bringToFront}
           dragConstraints={stageRef}
@@ -478,7 +564,7 @@ export default function Desktop() {
         left={pos.contact.left}
         top={pos.contact.top}
         width={W.contact}
-        delay={1.6}
+        delay={cascadeDelay(2.85)}
         zIndex={zOf("contact", 17)}
         onFocus={bringToFront}
         dragConstraints={stageRef}
@@ -828,11 +914,26 @@ function MeTxtBody({ frameWidth, layoutScale = 1 }) {
   );
 }
 
-function WelcomeBody({ layoutScale = 1 }) {
+function WelcomeBody({
+  layoutScale = 1,
+  skipTyping = false,
+  onTypingComplete,
+}) {
   const s = layoutScale;
   const px = Math.round;
   const mono = px(14 * s);
   const bio = Math.max(11, Math.round(13 * s));
+  const [typingDone, setTypingDone] = useState(skipTyping);
+
+  useEffect(() => {
+    if (skipTyping) setTypingDone(true);
+  }, [skipTyping]);
+
+  const handleLinesComplete = useCallback(() => {
+    setTypingDone(true);
+    onTypingComplete?.();
+  }, [onTypingComplete]);
+
   return (
     <div
       style={{
@@ -841,8 +942,9 @@ function WelcomeBody({ layoutScale = 1 }) {
     >
       <TypedLine
         text="▢ Hello."
-        charMs={45}
-        delay={120}
+        charMs={48}
+        delay={160}
+        skipTyping={skipTyping}
         style={{
           fontFamily: "'VT323', monospace",
           fontSize: mono,
@@ -857,8 +959,9 @@ function WelcomeBody({ layoutScale = 1 }) {
       <TypedLine
         as="h1"
         text="Jason Saputra"
-        charMs={70}
-        delay={520}
+        charMs={72}
+        delay={580}
+        skipTyping={skipTyping}
         style={{
           fontFamily: "'Bonbon', cursive",
           fontSize: `clamp(${px(44 * s)}px, 4.8vw, ${px(68 * s)}px)`,
@@ -871,8 +974,10 @@ function WelcomeBody({ layoutScale = 1 }) {
       />
       <TypedLine
         text="Interaction · Visual · Designer"
-        charMs={28}
-        delay={1450}
+        charMs={30}
+        delay={1580}
+        skipTyping={skipTyping}
+        onComplete={skipTyping ? undefined : handleLinesComplete}
         style={{
           fontFamily: "'VT323', monospace",
           fontSize: mono,
@@ -884,56 +989,86 @@ function WelcomeBody({ layoutScale = 1 }) {
           display: "block",
         }}
       />
-      <FadeInLine delay={2400}>
-        <p
-          className="mt-4"
-          style={{
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: bio,
-            color: "rgba(255,255,255,0.78)",
-            lineHeight: 1.7,
-            maxWidth: px(420 * s),
-            margin: `${px(16 * s)}px 0 0`,
-          }}
-        >
-          {about.bio}
-        </p>
-      </FadeInLine>
-      <FadeInLine delay={2800}>
-        <p
-          className="mt-4"
-          style={{
-            fontFamily: "'VT323', monospace",
-            fontSize: Math.max(10, px(13 * s)),
-            letterSpacing: "0.35em",
-            textTransform: "uppercase",
-            color: ACCENT_DIM,
-            margin: `${px(16 * s)}px 0 0`,
-          }}
-        >
-          ─ Dream · Think · Build ─
-        </p>
-      </FadeInLine>
+      {typingDone ? (
+        <>
+          <FadeInLine delay={skipTyping ? 0 : 120}>
+            <p
+              className="mt-4"
+              style={{
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: bio,
+                color: "rgba(255,255,255,0.78)",
+                lineHeight: 1.7,
+                maxWidth: px(420 * s),
+                margin: `${px(16 * s)}px 0 0`,
+              }}
+            >
+              {about.bio}
+            </p>
+          </FadeInLine>
+          <FadeInLine delay={skipTyping ? 80 : 420}>
+            <p
+              className="mt-4"
+              style={{
+                fontFamily: "'VT323', monospace",
+                fontSize: Math.max(10, px(13 * s)),
+                letterSpacing: "0.35em",
+                textTransform: "uppercase",
+                color: ACCENT_DIM,
+                margin: `${px(16 * s)}px 0 0`,
+              }}
+            >
+              ─ Dream · Think · Build ─
+            </p>
+          </FadeInLine>
+        </>
+      ) : null}
     </div>
   );
 }
 
-function TypedLine({ text, charMs = 40, delay = 0, as: Tag = "span", style }) {
-  const [typed, setTyped] = useState("");
-  const [done, setDone] = useState(false);
+function TypedLine({
+  text,
+  charMs = 40,
+  delay = 0,
+  skipTyping = false,
+  onComplete,
+  as: Tag = "span",
+  style,
+}) {
+  const [typed, setTyped] = useState(skipTyping ? text : "");
+  const [done, setDone] = useState(skipTyping);
 
   useEffect(() => {
+    if (skipTyping) {
+      setTyped(text);
+      setDone(true);
+      return;
+    }
+
+    setTyped("");
+    setDone(false);
     const timers = [];
     timers.push(
       setTimeout(() => {
         for (let i = 1; i <= text.length; i++) {
-          timers.push(setTimeout(() => setTyped(text.slice(0, i)), i * charMs));
+          timers.push(
+            setTimeout(() => {
+              setTyped(text.slice(0, i));
+              playTypingClick();
+            }, i * charMs)
+          );
         }
-        timers.push(setTimeout(() => setDone(true), text.length * charMs + 60));
+        timers.push(
+          setTimeout(() => {
+            setDone(true);
+            onComplete?.();
+          }, text.length * charMs + 80)
+        );
       }, delay)
     );
     return () => timers.forEach(clearTimeout);
-  }, [text, charMs, delay]);
+  }, [text, charMs, delay, skipTyping, onComplete]);
 
   return (
     <Tag style={style}>
@@ -1146,13 +1281,21 @@ function MobileOpenForWorkStrip() {
 }
 
 function MobileDesktop() {
-  // Mobile uses its own lightweight phase machine that mirrors the desktop's
-  // boot → intro → ready flow, but the morph happens in place at the top of
-  // the welcome card (WELCOME! typewriter crossfades into the bio).
-  const [phase, setPhase] = useState("waiting-boot");
+  const introSkippedRef = useRef(
+    typeof window !== "undefined" && shouldSkipIntro()
+  );
+  const [phase, setPhase] = useState(
+    introSkippedRef.current ? "dashboard" : "waiting-boot"
+  );
   const [welcomeTyped, setWelcomeTyped] = useState("");
+  const welcomeDoneTimerRef = useRef(null);
 
   useEffect(() => {
+    if (phase === "dashboard") markIntroSeen();
+  }, [phase]);
+
+  useEffect(() => {
+    if (introSkippedRef.current) return;
     const handler = () => setPhase("intro");
     window.addEventListener("boot:done", handler);
     if (typeof window !== "undefined" && window.__portfolioBootDone) {
@@ -1168,15 +1311,38 @@ function MobileDesktop() {
     const timers = [];
     for (let i = 1; i <= target.length; i++) {
       timers.push(
-        setTimeout(() => setWelcomeTyped(target.slice(0, i)), i * charMs)
+        setTimeout(() => {
+          setWelcomeTyped(target.slice(0, i));
+          playTypingClick();
+        }, i * charMs)
       );
     }
     timers.push(
-      setTimeout(() => setPhase("ready"), target.length * charMs + 700)
+      setTimeout(() => setPhase("ready"), target.length * charMs + 780)
     );
     return () => timers.forEach(clearTimeout);
   }, [phase]);
 
+  const handleWelcomeTypingComplete = useCallback(() => {
+    if (welcomeDoneTimerRef.current) {
+      clearTimeout(welcomeDoneTimerRef.current);
+    }
+    welcomeDoneTimerRef.current = setTimeout(() => {
+      setPhase("dashboard");
+    }, 640);
+  }, []);
+
+  useEffect(
+    () => () => {
+      if (welcomeDoneTimerRef.current) {
+        clearTimeout(welcomeDoneTimerRef.current);
+      }
+    },
+    []
+  );
+
+  const showMobileRest = phase === "dashboard";
+  const skipWelcomeTyping = phase === "dashboard";
   const scrollRef = useRef(null);
 
   return (
@@ -1201,10 +1367,17 @@ function MobileDesktop() {
       >
         <MobileScrollReveal scrollRoot={scrollRef} variant="fade" delay={0.05}>
           <MobileCard title="welcome.exe" titleExtra={<WelcomeReadAloud compact />}>
-            <MobileWelcomeMorph phase={phase} typed={welcomeTyped} />
+            <MobileWelcomeMorph
+              phase={phase}
+              typed={welcomeTyped}
+              skipTyping={skipWelcomeTyping}
+              onTypingComplete={handleWelcomeTypingComplete}
+            />
           </MobileCard>
         </MobileScrollReveal>
 
+        {showMobileRest ? (
+          <>
         <MobileSectionRule />
 
         <MobileScrollReveal scrollRoot={scrollRef} variant="left" delay={0.04}>
@@ -1242,11 +1415,11 @@ function MobileDesktop() {
         <MobileSectionRule />
 
         <MobileScrollReveal scrollRoot={scrollRef} variant="right" delay={0.05}>
-          <SectionLabel>▢ Junk drawer · photos & sketches</SectionLabel>
+          <SectionLabel>▢ Other stuff · photos & sketches</SectionLabel>
         </MobileScrollReveal>
         <MobileScrollReveal scrollRoot={scrollRef} variant="up" delay={0.1}>
-          <MobileCard title="junk/" titleUppercase={false}>
-            <JunkFolder variant="mobile" />
+          <MobileCard title="Other stuff" titleUppercase={false}>
+            <OtherStuffFolder variant="mobile" />
           </MobileCard>
         </MobileScrollReveal>
 
@@ -1259,6 +1432,8 @@ function MobileDesktop() {
             <MobileContact />
           </MobileCard>
         </MobileScrollReveal>
+          </>
+        ) : null}
       </motion.div>
 
       <StatusBar />
@@ -1344,10 +1519,16 @@ function SectionLabel({ children }) {
   );
 }
 
-function MobileWelcomeMorph({ phase, typed }) {
+function MobileWelcomeMorph({
+  phase,
+  typed,
+  skipTyping = false,
+  onTypingComplete,
+}) {
   const showWaiting = phase === "waiting-boot";
   const showIntro = phase === "intro";
-  const showReady = phase === "ready";
+  const showReady =
+    phase === "ready" || phase === "dashboard";
 
   return (
     <div style={{ position: "relative", minHeight: 260 }}>
@@ -1405,7 +1586,10 @@ function MobileWelcomeMorph({ phase, typed }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55, ease: EASE }}
           >
-            <MobileWelcomeBody />
+            <MobileWelcomeBody
+              skipTyping={skipTyping}
+              onTypingComplete={onTypingComplete}
+            />
           </motion.div>
         )}
       </AnimatePresence>
@@ -1413,13 +1597,25 @@ function MobileWelcomeMorph({ phase, typed }) {
   );
 }
 
-function MobileWelcomeBody() {
+function MobileWelcomeBody({ skipTyping = false, onTypingComplete }) {
+  const [typingDone, setTypingDone] = useState(skipTyping);
+
+  useEffect(() => {
+    if (skipTyping) setTypingDone(true);
+  }, [skipTyping]);
+
+  const handleLinesComplete = useCallback(() => {
+    setTypingDone(true);
+    onTypingComplete?.();
+  }, [onTypingComplete]);
+
   return (
     <div>
       <TypedLine
         text="▢ Hello."
-        charMs={45}
-        delay={120}
+        charMs={48}
+        delay={160}
+        skipTyping={skipTyping}
         style={{
           fontFamily: "'VT323', monospace",
           fontSize: 14,
@@ -1433,8 +1629,9 @@ function MobileWelcomeBody() {
       <TypedLine
         as="h1"
         text={about.name}
-        charMs={70}
-        delay={520}
+        charMs={72}
+        delay={580}
+        skipTyping={skipTyping}
         style={{
           fontFamily: "'Bonbon', cursive",
           fontSize: "clamp(48px, 13vw, 72px)",
@@ -1447,8 +1644,10 @@ function MobileWelcomeBody() {
       />
       <TypedLine
         text="Interaction · Visual · Designer"
-        charMs={28}
-        delay={1450}
+        charMs={30}
+        delay={1580}
+        skipTyping={skipTyping}
+        onComplete={skipTyping ? undefined : handleLinesComplete}
         style={{
           fontFamily: "'VT323', monospace",
           fontSize: 14,
@@ -1460,7 +1659,9 @@ function MobileWelcomeBody() {
           display: "block",
         }}
       />
-      <FadeInLine delay={2200}>
+      {typingDone ? (
+        <>
+      <FadeInLine delay={skipTyping ? 0 : 120}>
         <p
           style={{
             fontFamily: "'DM Sans', sans-serif",
@@ -1473,7 +1674,7 @@ function MobileWelcomeBody() {
           {about.bio}
         </p>
       </FadeInLine>
-      <FadeInLine delay={2600}>
+      <FadeInLine delay={skipTyping ? 80 : 420}>
         <p
           style={{
             fontFamily: "'VT323', monospace",
@@ -1487,6 +1688,8 @@ function MobileWelcomeBody() {
           ─ Dream · Think · Build ─
         </p>
       </FadeInLine>
+        </>
+      ) : null}
     </div>
   );
 }

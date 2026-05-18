@@ -243,25 +243,26 @@ body::-webkit-scrollbar-thumb:hover {
   white-space: normal;
 }
 
-.junk-folder-body {
+.other-stuff-body {
   min-height: 0;
 }
 
-.junk-folder-grid {
+.other-stuff-grid,
+.other-stuff-category-grid {
   scrollbar-width: thin;
   scrollbar-color: #ff7a29 #111111;
 }
 
-.junk-folder-track {
+.other-stuff-track {
   scrollbar-width: thin;
   scrollbar-color: #ff7a29 #111111;
 }
 
-.junk-folder-track::-webkit-scrollbar {
+.other-stuff-track::-webkit-scrollbar {
   height: 6px;
 }
 
-.junk-folder-track::-webkit-scrollbar-thumb {
+.other-stuff-track::-webkit-scrollbar-thumb {
   background: #ff7a29;
   border-radius: 999px;
 }
