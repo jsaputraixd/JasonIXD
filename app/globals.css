@@ -148,6 +148,16 @@ body {
   box-shadow: 0 0 18px rgba(255, 122, 41, 0.22);
 }
 
+@media (max-width: 899px) {
+  .status-bar--mobile {
+    max-width: none;
+  }
+
+  .mobile-os [data-mobile-scroll] {
+    padding-bottom: calc(118px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
 /* Custom scrollbars — scoped to html & body first (reliable vs. Tailwind preflight), then all scrollers */
 html {
   scrollbar-width: thin;
