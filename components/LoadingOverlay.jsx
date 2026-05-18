@@ -78,17 +78,24 @@ export default function LoadingOverlay() {
       "(prefers-reduced-motion: reduce)"
     ).matches;
 
+    let cancelled = false;
+
     if (reduced) {
       setTyped(BOOT_LINES);
       setActiveLine(BOOT_LINES.length);
       setBootDone(true);
       setShowTagline(true);
-      const t1 = setTimeout(() => setExiting(true), 2000);
+      const t1 = setTimeout(() => {
+        if (cancelled) return;
+        setExiting(true);
+      }, 2000);
       const t2 = setTimeout(() => {
+        if (cancelled) return;
         setVisible(false);
         markBootComplete();
       }, 2000 + EXIT_FADE_MS);
       return () => {
+        cancelled = true;
         clearTimeout(t1);
         clearTimeout(t2);
       };
@@ -98,10 +105,16 @@ export default function LoadingOverlay() {
     let ms = 220;
 
     BOOT_LINES.forEach((line, lineIdx) => {
-      timers.push(setTimeout(() => setActiveLine(lineIdx), ms));
+      timers.push(
+        setTimeout(() => {
+          if (cancelled) return;
+          setActiveLine(lineIdx);
+        }, ms)
+      );
       for (let i = 1; i <= line.length; i++) {
         timers.push(
           setTimeout(() => {
+            if (cancelled) return;
             setTyped((prev) => {
               const next = [...prev];
               next[lineIdx] = line.slice(0, i);
@@ -116,24 +129,39 @@ export default function LoadingOverlay() {
 
     timers.push(
       setTimeout(() => {
+        if (cancelled) return;
         setBootDone(true);
         setActiveLine(BOOT_LINES.length);
       }, ms)
     );
 
     const taglineStart = ms + POST_BOOT_PAUSE;
-    timers.push(setTimeout(() => setShowTagline(true), taglineStart));
-
-    const exitAt = taglineStart + TAGLINE_HOLD_MS;
-    timers.push(setTimeout(() => setExiting(true), exitAt));
     timers.push(
       setTimeout(() => {
+        if (cancelled) return;
+        setShowTagline(true);
+      }, taglineStart)
+    );
+
+    const exitAt = taglineStart + TAGLINE_HOLD_MS;
+    timers.push(
+      setTimeout(() => {
+        if (cancelled) return;
+        setExiting(true);
+      }, exitAt)
+    );
+    timers.push(
+      setTimeout(() => {
+        if (cancelled) return;
         setVisible(false);
         markBootComplete();
       }, exitAt + EXIT_FADE_MS)
     );
 
-    return () => timers.forEach(clearTimeout);
+    return () => {
+      cancelled = true;
+      timers.forEach(clearTimeout);
+    };
   }, []);
 
   useEffect(() => {

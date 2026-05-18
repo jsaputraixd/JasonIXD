@@ -181,6 +181,7 @@ export default function Desktop() {
   const [trashMessage, setTrashMessage] = useState(null);
   const trashMessageTimerRef = useRef(null);
   const welcomeDoneTimerRef = useRef(null);
+  const [parallax, setParallax] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -221,7 +222,13 @@ export default function Desktop() {
     if (typeof window !== "undefined" && window.__portfolioBootDone) {
       handler();
     }
-    return () => window.removeEventListener("boot:done", handler);
+    const fallback = setTimeout(() => {
+      setPhase((p) => (p === "waiting-boot" ? "intro-typing" : p));
+    }, 14000);
+    return () => {
+      clearTimeout(fallback);
+      window.removeEventListener("boot:done", handler);
+    };
   }, []);
 
   // Typewriter for "WELCOME!" during intro-typing
@@ -285,9 +292,6 @@ export default function Desktop() {
   };
 
   const zOf = (id, base) => zMap[id] ?? base;
-
-  /** Subtle cursor parallax — normalized pointer offset from stage center. */
-  const [parallax, setParallax] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     if (!viewport || viewport.w < 900) return;
