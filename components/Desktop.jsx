@@ -29,6 +29,8 @@ import {
 import { getProjectDesktopCards } from "@/lib/projectDesktopCards";
 import { markIntroSeen, shouldSkipIntro } from "@/lib/introSession";
 import { playTypingClick } from "@/lib/typingSound";
+import { useIdleTimer } from "@/lib/useIdleTimer";
+import { pickTrashMessage } from "@/lib/trashMessage";
 
 const ACCENT = "#FF7A29";
 const ACCENT_DIM = "rgba(255, 180, 112, 0.7)";
@@ -306,9 +308,35 @@ export default function Desktop() {
 
   const vwSafe = viewport?.w ?? 1280;
   const vhSafe = viewport?.h ?? 800;
+  const isDesktopViewport = Boolean(viewport && viewport.w >= 900);
+
   const { W, pos, projectCards, layoutScale } = useMemo(
     () => getDesktopLayout(vwSafe, vhSafe),
     [vwSafe, vhSafe]
+  );
+
+  const screensaverActive = useIdleTimer(
+    IDLE_MS,
+    phase === "dashboard" && isDesktopViewport
+  );
+
+  const showTrashBubble = useCallback(() => {
+    if (trashMessageTimerRef.current) {
+      clearTimeout(trashMessageTimerRef.current);
+    }
+    setTrashMessage(pickTrashMessage());
+    trashMessageTimerRef.current = setTimeout(() => {
+      setTrashMessage(null);
+    }, 5000);
+  }, []);
+
+  useEffect(
+    () => () => {
+      if (trashMessageTimerRef.current) {
+        clearTimeout(trashMessageTimerRef.current);
+      }
+    },
+    []
   );
 
   if (!viewport) {
@@ -353,30 +381,6 @@ export default function Desktop() {
     },
     contact: { x: -px * depth.contact, y: -py * depth.contact * yz },
   };
-
-  const screensaverActive = useIdleTimer(
-    IDLE_MS,
-    phase === "dashboard"
-  );
-
-  const showTrashBubble = useCallback(() => {
-    if (trashMessageTimerRef.current) {
-      clearTimeout(trashMessageTimerRef.current);
-    }
-    setTrashMessage(pickTrashMessage());
-    trashMessageTimerRef.current = setTimeout(() => {
-      setTrashMessage(null);
-    }, 5000);
-  }, []);
-
-  useEffect(
-    () => () => {
-      if (trashMessageTimerRef.current) {
-        clearTimeout(trashMessageTimerRef.current);
-      }
-    },
-    []
-  );
 
   const showIntroCard =
     phase === "intro-typing" ||
