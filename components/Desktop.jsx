@@ -181,6 +181,7 @@ export default function Desktop() {
   //   "ready"         → welcome.exe body types in (Hello, name, role…)
   //   "dashboard"   → all other windows cascade in
   const introSkippedRef = useRef(false);
+  const bootHandledRef = useRef(false);
   const [phase, setPhase] = useState("waiting-boot");
   const [welcomeTyped, setWelcomeTyped] = useState("");
   const [otherStuffOpen, setOtherStuffOpen] = useState(false);
@@ -228,20 +229,26 @@ export default function Desktop() {
     if (phase === "dashboard") markIntroSeen();
   }, [phase]);
 
-  // Listen for the boot overlay completing its exit
+  // Listen for the boot overlay completing its exit (once per visit).
   useEffect(() => {
     if (introSkippedRef.current) return;
-    const handler = () => setPhase("intro-typing");
-    window.addEventListener("boot:done", handler);
+
+    const startIntro = () => {
+      if (bootHandledRef.current) return;
+      bootHandledRef.current = true;
+      setPhase((p) => (p === "waiting-boot" ? "intro-typing" : p));
+    };
+
+    window.addEventListener("boot:done", startIntro);
     if (typeof window !== "undefined" && window.__portfolioBootDone) {
-      handler();
+      startIntro();
     }
     const fallback = setTimeout(() => {
       setPhase((p) => (p === "waiting-boot" ? "intro-typing" : p));
     }, 14000);
     return () => {
       clearTimeout(fallback);
-      window.removeEventListener("boot:done", handler);
+      window.removeEventListener("boot:done", startIntro);
     };
   }, []);
 
@@ -1401,6 +1408,7 @@ function MobileOpenForWorkStrip() {
 
 function MobileDesktop() {
   const introSkippedRef = useRef(false);
+  const bootHandledRef = useRef(false);
   const [phase, setPhase] = useState("waiting-boot");
   const [welcomeTyped, setWelcomeTyped] = useState("");
   const welcomeDoneTimerRef = useRef(null);
@@ -1419,12 +1427,18 @@ function MobileDesktop() {
 
   useEffect(() => {
     if (introSkippedRef.current) return;
-    const handler = () => setPhase("intro");
-    window.addEventListener("boot:done", handler);
+
+    const startIntro = () => {
+      if (bootHandledRef.current) return;
+      bootHandledRef.current = true;
+      setPhase((p) => (p === "waiting-boot" ? "intro" : p));
+    };
+
+    window.addEventListener("boot:done", startIntro);
     if (typeof window !== "undefined" && window.__portfolioBootDone) {
-      handler();
+      startIntro();
     }
-    return () => window.removeEventListener("boot:done", handler);
+    return () => window.removeEventListener("boot:done", startIntro);
   }, []);
 
   useEffect(() => {
