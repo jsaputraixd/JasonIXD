@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, useDragControls } from "framer-motion";
-import { playWindowWhoosh } from "@/lib/typingSound";
+import { playWindowClose, playWindowWhoosh } from "@/lib/typingSound";
 
 const ACCENT = "#FF7A29";
 const EASE = [0.16, 1, 0.3, 1];
@@ -61,6 +61,7 @@ export default function Window({
 
   const handleClose = (e) => {
     e.stopPropagation();
+    playWindowClose();
     setClosing(true);
     setTimeout(() => {
       setOpen(false);

@@ -1,6 +1,7 @@
 "use client";
 
-import { useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { playClick } from "@/lib/typingSound";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { skills } from "@/data/about";
@@ -22,6 +23,34 @@ const FS_MOB = 9;
 
 const ORBIT_EXTRA_REST = 26;
 const ORBIT_EXTRA_HOVER = 58;
+
+function OurHomeLabel({ fontSize, margin }) {
+  return (
+    <button
+      type="button"
+      data-cursor="hover"
+      aria-label="our home"
+      onClick={() => playClick()}
+      style={{
+        display: "block",
+        width: "100%",
+        margin,
+        padding: "2px 8px 4px",
+        textAlign: "center",
+        fontFamily: "'Bonbon', cursive",
+        fontSize,
+        color: "rgba(255, 180, 140, 0.95)",
+        textShadow: "0 0 14px rgba(255, 122, 41, 0.35)",
+        lineHeight: 1.2,
+        background: "transparent",
+        border: "none",
+        cursor: "pointer",
+      }}
+    >
+      our home {"<3"}
+    </button>
+  );
+}
 
 export default function SkillsPlanet({
   variant = "desktop",
@@ -59,6 +88,16 @@ export default function SkillsPlanet({
 
   const [expanded, setExpanded] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+
+  const openModal = useCallback(() => {
+    playClick();
+    setModalOpen(true);
+  }, []);
+
+  const closeModal = useCallback(() => {
+    playClick();
+    setModalOpen(false);
+  }, []);
   const [useAsciiFallback, setUseAsciiFallback] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
   const wrapRef = useRef(null);
@@ -137,11 +176,11 @@ export default function SkillsPlanet({
   useLayoutEffect(() => {
     if (!modalOpen) return;
     const onKey = (e) => {
-      if (e.key === "Escape") setModalOpen(false);
+      if (e.key === "Escape") closeModal();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [modalOpen]);
+  }, [modalOpen, closeModal]);
 
   const labelFont = isMobile ? 10 : Math.max(9, Math.round(11 * inlineS));
   const modalLabelFont = isMobile ? 12 : Math.max(11, Math.round(14 * chromeS));
@@ -169,7 +208,7 @@ export default function SkillsPlanet({
             background: "rgba(4, 3, 2, 0.82)",
             backdropFilter: "blur(6px)",
           }}
-          onClick={() => setModalOpen(false)}
+          onClick={closeModal}
         >
           <motion.div
             initial={{ scale: 0.92, opacity: 0 }}
@@ -217,7 +256,7 @@ export default function SkillsPlanet({
                 type="button"
                 data-cursor="hover"
                 aria-label="Close"
-                onClick={() => setModalOpen(false)}
+                onClick={closeModal}
                 style={{
                   flexShrink: 0,
                   background: "transparent",
@@ -355,18 +394,10 @@ export default function SkillsPlanet({
               </div>
             </div>
 
-            <p
-              style={{
-                margin: "12px 4px 0",
-                textAlign: "center",
-                fontFamily: "'Bonbon', cursive",
-                fontSize: isMobile ? 22 : 26,
-                color: "rgba(255, 180, 140, 0.95)",
-                textShadow: "0 0 14px rgba(255, 122, 41, 0.35)",
-              }}
-            >
-              our home {'<3'}
-            </p>
+            <OurHomeLabel
+              fontSize={isMobile ? 22 : 26}
+              margin="12px 4px 0"
+            />
           </motion.div>
         </motion.div>
       ) : null}
@@ -474,7 +505,7 @@ export default function SkillsPlanet({
               onPointerDown={(e) => e.stopPropagation()}
               onClick={(e) => {
                 e.stopPropagation();
-                setModalOpen(true);
+                openModal();
               }}
               style={{
                 display: "block",
@@ -534,19 +565,10 @@ export default function SkillsPlanet({
           </div>
         </div>
 
-        <p
-          style={{
-            margin: "8px 6px 0",
-            textAlign: "center",
-            fontFamily: "'Bonbon', cursive",
-            fontSize: isMobile ? 22 : Math.max(18, Math.round(26 * inlineS)),
-            color: "rgba(255, 180, 140, 0.95)",
-            textShadow: "0 0 14px rgba(255, 122, 41, 0.35)",
-            lineHeight: 1.2,
-          }}
-        >
-          our home {'<3'}
-        </p>
+        <OurHomeLabel
+          fontSize={isMobile ? 22 : Math.max(18, Math.round(26 * inlineS))}
+          margin="8px 6px 0"
+        />
       </div>
 
       {typeof document !== "undefined" &&

@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { otherStuff } from "@/data/otherStuff";
+import { playClick } from "@/lib/typingSound";
 
 const ACCENT = "#FF7A29";
 const ACCENT_DIM = "rgba(255, 180, 112, 0.7)";
@@ -55,7 +56,10 @@ export default function OtherStuffFolder({ variant = "desktop", layoutScale = 1 
             <button
               type="button"
               data-cursor="hover"
-              onClick={() => setActiveCategoryId(null)}
+              onClick={() => {
+                playClick();
+                setActiveCategoryId(null);
+              }}
               style={{
                 alignSelf: "flex-start",
                 margin: 0,
@@ -176,7 +180,10 @@ function CategoryFolderButton({ category, index, layoutScale, onOpen }) {
     <motion.button
       type="button"
       data-cursor="hover"
-      onClick={onOpen}
+      onClick={() => {
+        playClick();
+        onOpen();
+      }}
       initial={reduceMotion ? false : { opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.05 * index, duration: 0.32, ease: EASE }}
@@ -282,7 +289,10 @@ function MediaTile({ item, index, variant, layoutScale, onOpen }) {
     <motion.button
       type="button"
       data-cursor="hover"
-      onClick={onOpen}
+      onClick={() => {
+        playClick();
+        onOpen();
+      }}
       initial={reduceMotion ? false : { opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.04 * index, duration: 0.35, ease: EASE }}
@@ -335,6 +345,11 @@ function MediaTile({ item, index, variant, layoutScale, onOpen }) {
 }
 
 function MediaLightbox({ item, onClose }) {
+  const dismiss = () => {
+    playClick();
+    onClose();
+  };
+
   return (
     <motion.div
       role="dialog"
@@ -342,7 +357,7 @@ function MediaLightbox({ item, onClose }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      onClick={onClose}
+      onClick={dismiss}
       style={{
         position: "fixed",
         inset: 0,
@@ -390,7 +405,7 @@ function MediaLightbox({ item, onClose }) {
           <button
             type="button"
             data-cursor="hover"
-            onClick={onClose}
+            onClick={dismiss}
             style={{
               fontFamily: "'VT323', monospace",
               fontSize: 12,

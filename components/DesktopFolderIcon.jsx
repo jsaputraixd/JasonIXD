@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { playClick } from "@/lib/typingSound";
 
 const ACCENT = "#FF7A29";
 const EASE = [0.16, 1, 0.3, 1];
@@ -30,11 +31,13 @@ export default function DesktopFolderIcon({
       data-cursor="hover"
       aria-label={`Open ${label}`}
       onClick={() => {
+        playClick();
         onFocus?.();
         onOpen?.();
       }}
       onDoubleClick={(e) => {
         e.preventDefault();
+        playClick();
         onFocus?.();
         onOpen?.();
       }}

@@ -11,6 +11,8 @@ import {
 } from "framer-motion";
 import Window from "./Window";
 import StatusBar from "./StatusBar";
+import IdleScreensaver, { IDLE_MS } from "./IdleScreensaver";
+import RecycleBinIcon from "./RecycleBinIcon";
 import SkillsPlanet from "./SkillsPlanet";
 import { projects } from "@/data/projects";
 import { about } from "@/data/about";
@@ -174,6 +176,8 @@ export default function Desktop() {
   );
   const [welcomeTyped, setWelcomeTyped] = useState("");
   const [otherStuffOpen, setOtherStuffOpen] = useState(false);
+  const [trashMessage, setTrashMessage] = useState(null);
+  const trashMessageTimerRef = useRef(null);
   const welcomeDoneTimerRef = useRef(null);
 
   useEffect(() => {
@@ -330,6 +334,7 @@ export default function Desktop() {
     skills: 10,
     otherStuff: 9,
     otherStuffIcon: 7,
+    trashIcon: 7,
     contact: 9,
   };
   const pShift = {
@@ -342,8 +347,36 @@ export default function Desktop() {
       x: -px * depth.otherStuffIcon,
       y: -py * depth.otherStuffIcon * yz,
     },
+    trashIcon: {
+      x: -px * depth.trashIcon,
+      y: -py * depth.trashIcon * yz,
+    },
     contact: { x: -px * depth.contact, y: -py * depth.contact * yz },
   };
+
+  const screensaverActive = useIdleTimer(
+    IDLE_MS,
+    phase === "dashboard"
+  );
+
+  const showTrashBubble = useCallback(() => {
+    if (trashMessageTimerRef.current) {
+      clearTimeout(trashMessageTimerRef.current);
+    }
+    setTrashMessage(pickTrashMessage());
+    trashMessageTimerRef.current = setTimeout(() => {
+      setTrashMessage(null);
+    }, 5000);
+  }, []);
+
+  useEffect(
+    () => () => {
+      if (trashMessageTimerRef.current) {
+        clearTimeout(trashMessageTimerRef.current);
+      }
+    },
+    []
+  );
 
   const showIntroCard =
     phase === "intro-typing" ||
@@ -506,6 +539,75 @@ export default function Desktop() {
         />
       )}
 
+      {showOtherWindows && (
+        <RecycleBinIcon
+          left={pos.trashIcon.left}
+          top={pos.trashIcon.top}
+          delay={cascadeDelay(2.18)}
+          zIndex={zOf("trashIcon", 15)}
+          onFocus={() => bringToFront("trashIcon")}
+          onActivate={showTrashBubble}
+          parallaxShift={pShift.trashIcon}
+        />
+      )}
+
+      <AnimatePresence>
+        {trashMessage && showOtherWindows ? (
+          <motion.div
+            key="trash-bubble"
+            role="status"
+            initial={{ opacity: 0, y: 8, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 6, scale: 0.96 }}
+            transition={{ duration: 0.28, ease: EASE }}
+            style={{
+              position: "absolute",
+              left: Math.max(
+                12,
+                Math.min(
+                  pos.trashIcon.left - 40,
+                  vw - 280
+                )
+              ),
+              top: Math.max(12, pos.trashIcon.top - 88),
+              width: 248,
+              zIndex: zOf("trashIcon", 15) + 2,
+              padding: "10px 12px",
+              background: "rgba(14, 10, 6, 0.96)",
+              border: "1px solid rgba(255, 122, 41, 0.55)",
+              borderRadius: 3,
+              boxShadow:
+                "0 0 20px rgba(255, 122, 41, 0.18), 0 12px 32px rgba(0,0,0,0.5)",
+              pointerEvents: "none",
+            }}
+          >
+            <p
+              style={{
+                margin: 0,
+                fontFamily: "'VT323', monospace",
+                fontSize: 11,
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+                color: ACCENT_DIM,
+              }}
+            >
+              Recycle Bin
+            </p>
+            <p
+              style={{
+                margin: "6px 0 0",
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: 12,
+                lineHeight: 1.45,
+                color: "rgba(255, 255, 255, 0.88)",
+              }}
+            >
+              {trashMessage}
+            </p>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+
       {showOtherWindows && otherStuffOpen && (
         <Window
           id="otherStuff"
@@ -667,6 +769,7 @@ export default function Desktop() {
 
       <NomineeTab />
       <StatusBar />
+      <IdleScreensaver active={screensaverActive} />
     </div>
   );
 }

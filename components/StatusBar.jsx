@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
+import { getQuoteOfDay } from "@/lib/quoteOfDay";
 
 const ACCENT = "#FF7A29";
 const MOBILE_BREAK = 900;
@@ -25,6 +26,7 @@ export default function StatusBar() {
   const [time, setTime] = useState("--:--:--");
   const [isMobile, setIsMobile] = useState(false);
   const reduceMotion = useReducedMotion();
+  const quote = useMemo(() => getQuoteOfDay(), []);
 
   useEffect(() => {
     const tick = () => {
@@ -111,6 +113,41 @@ export default function StatusBar() {
           ))}
         </motion.div>
       </div>
+
+      <motion.div
+        style={{
+          padding: isMobile ? "6px 10px 4px" : "5px 14px 4px",
+          borderBottom: "1px solid rgba(255, 122, 41, 0.12)",
+          textAlign: "center",
+        }}
+      >
+        <p
+          style={{
+            margin: 0,
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: isMobile ? 10 : 11,
+            lineHeight: 1.45,
+            color: "rgba(255, 200, 160, 0.82)",
+            fontStyle: "italic",
+          }}
+        >
+          <span
+            style={{
+              fontFamily: "'VT323', monospace",
+              fontStyle: "normal",
+              fontSize: isMobile ? 10 : 11,
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+              color: "rgba(255, 122, 41, 0.85)",
+              marginRight: "0.5em",
+            }}
+          >
+            Quote ·
+          </span>
+          &ldquo;{quote.text}&rdquo;
+          <span style={{ opacity: 0.65 }}> — {quote.author}</span>
+        </p>
+      </motion.div>
 
       {isMobile ? (
         <motion.div
