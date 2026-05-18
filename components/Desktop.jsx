@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Window from "./Window";
 import StatusBar from "./StatusBar";
@@ -1358,29 +1358,44 @@ function MobileProjectsCarousel() {
   const dragRef = useRef(null);
   const [activeIdx, setActiveIdx] = useState(0);
 
+  const syncActiveFromScroll = useCallback(() => {
+    const carousel = carouselRef.current;
+    if (!carousel) return;
+    const centerX = carousel.scrollLeft + carousel.clientWidth / 2;
+    let bestIdx = 0;
+    let bestDist = Infinity;
+    cardsRef.current.forEach((el, i) => {
+      if (!el) return;
+      const cardCenter = el.offsetLeft + el.offsetWidth / 2;
+      const dist = Math.abs(cardCenter - centerX);
+      if (dist < bestDist) {
+        bestDist = dist;
+        bestIdx = i;
+      }
+    });
+    setActiveIdx((prev) => (prev === bestIdx ? prev : bestIdx));
+  }, []);
+
   useEffect(() => {
     const carousel = carouselRef.current;
     if (!carousel) return;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        let best = { idx: -1, ratio: 0 };
-        entries.forEach((entry) => {
-          if (entry.intersectionRatio > best.ratio) {
-            best = {
-              idx: parseInt(entry.target.dataset.idx, 10),
-              ratio: entry.intersectionRatio,
-            };
-          }
-        });
-        if (best.ratio >= 0.45 && best.idx >= 0) setActiveIdx(best.idx);
-      },
-      { root: carousel, threshold: [0.35, 0.5, 0.65, 0.8, 1] }
-    );
+    let raf = 0;
+    const onScroll = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(syncActiveFromScroll);
+    };
 
-    cardsRef.current.forEach((el) => el && observer.observe(el));
-    return () => observer.disconnect();
-  }, []);
+    carousel.addEventListener("scroll", onScroll, { passive: true });
+    carousel.addEventListener("scrollend", syncActiveFromScroll);
+    syncActiveFromScroll();
+
+    return () => {
+      cancelAnimationFrame(raf);
+      carousel.removeEventListener("scroll", onScroll);
+      carousel.removeEventListener("scrollend", syncActiveFromScroll);
+    };
+  }, [syncActiveFromScroll]);
 
   const onCarouselPointerDown = (e) => {
     const el = carouselRef.current;

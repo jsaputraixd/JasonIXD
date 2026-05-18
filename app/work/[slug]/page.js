@@ -419,8 +419,9 @@ export function generateStaticParams() {
   return projects.map((p) => ({ slug: p.slug }));
 }
 
-export function generateMetadata({ params }) {
-  const project = projects.find((p) => p.slug === params.slug);
+export async function generateMetadata({ params }) {
+  const { slug } = await params;
+  const project = projects.find((p) => p.slug === slug);
   if (!project) return { title: "Work — Jason Saputra" };
   return {
     title: `${project.title} — Jason Saputra`,
@@ -428,11 +429,12 @@ export function generateMetadata({ params }) {
   };
 }
 
-export default function ProjectPage({ params }) {
-  const project = projects.find((p) => p.slug === params.slug);
+export default async function ProjectPage({ params }) {
+  const { slug } = await params;
+  const project = projects.find((p) => p.slug === slug);
   if (!project) notFound();
 
-  const idx = projects.findIndex((p) => p.slug === params.slug);
+  const idx = projects.findIndex((p) => p.slug === slug);
   const nextProject = projects[(idx + 1) % projects.length];
 
   const linkStyle = {
