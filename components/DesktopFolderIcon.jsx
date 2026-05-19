@@ -63,7 +63,7 @@ export default function DesktopFolderIcon({
         alignItems: "center",
         gap: 4,
         transform: `translate3d(${parallaxShift.x}px, ${parallaxShift.y}px, 0)`,
-        transition: "transform 0.14s ease-out, background 140ms ease",
+        transition: "background 140ms ease",
       }}
     >
       <span

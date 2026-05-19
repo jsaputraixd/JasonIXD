@@ -22,7 +22,14 @@ const MARQUEE_ITEMS = [
   "★",
 ];
 
-export default function StatusBar() {
+/**
+ * @param {{ id: string, title: string }[]} [minimizedWindows]
+ * @param {(id: string) => void} [onRestoreWindow]
+ */
+export default function StatusBar({
+  minimizedWindows = [],
+  onRestoreWindow,
+}) {
   const [time, setTime] = useState("--:--:--");
   const [isMobile, setIsMobile] = useState(false);
   const reduceMotion = useReducedMotion();
@@ -84,12 +91,14 @@ export default function StatusBar() {
         pointerEvents: "none",
       }}
     >
-      <div
+      <motion.div
         style={{
           padding: isMobile ? "3px 0" : "4px 0",
           overflow: "hidden",
           whiteSpace: "nowrap",
-          borderBottom: "1px solid rgba(255, 122, 41, 0.15)",
+          borderBottom: isMobile
+            ? "1px solid rgba(255, 122, 41, 0.12)"
+            : "1px solid rgba(255, 122, 41, 0.15)",
           background: "rgba(0, 0, 0, 0.25)",
         }}
       >
@@ -112,98 +121,140 @@ export default function StatusBar() {
             </span>
           ))}
         </motion.div>
-      </div>
+      </motion.div>
 
-      <motion.div
-        style={{
-          padding: isMobile ? "6px 10px 4px" : "5px 14px 4px",
-          borderBottom: "1px solid rgba(255, 122, 41, 0.12)",
-          textAlign: "center",
-        }}
-      >
-        <p
+      {minimizedWindows.length > 0 ? (
+        <motion.div
           style={{
-            margin: 0,
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: isMobile ? 10 : 11,
-            lineHeight: 1.45,
-            color: "rgba(255, 200, 160, 0.82)",
-            fontStyle: "italic",
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            padding: isMobile ? "6px 10px 5px" : "6px 12px 5px",
+            borderBottom: "1px solid rgba(255, 122, 41, 0.2)",
+            background: "rgba(0, 0, 0, 0.35)",
+            overflowX: "auto",
+            pointerEvents: "auto",
           }}
         >
           <span
             style={{
+              flexShrink: 0,
               fontFamily: "'VT323', monospace",
-              fontStyle: "normal",
               fontSize: isMobile ? 10 : 11,
-              letterSpacing: "0.14em",
+              letterSpacing: "0.2em",
               textTransform: "uppercase",
-              color: "rgba(255, 122, 41, 0.85)",
-              marginRight: "0.5em",
+              color: "rgba(255, 122, 41, 0.7)",
             }}
           >
-            Quote ·
+            ▢ Minimized
           </span>
-          &ldquo;{quote.text}&rdquo;
-          <span style={{ opacity: 0.65 }}> — {quote.author}</span>
-        </p>
-      </motion.div>
+          {minimizedWindows.map(({ id, title }) => (
+            <button
+              key={id}
+              type="button"
+              data-cursor="hover"
+              onClick={() => onRestoreWindow?.(id)}
+              style={{
+                flexShrink: 0,
+                margin: 0,
+                padding: isMobile ? "3px 8px" : "4px 10px",
+                border: "1px solid rgba(255, 122, 41, 0.45)",
+                borderRadius: 2,
+                background: "rgba(255, 122, 41, 0.12)",
+                fontFamily: "'VT323', monospace",
+                fontSize: isMobile ? 11 : 12,
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                color: ACCENT,
+                cursor: "pointer",
+                textShadow: "0 0 6px rgba(255, 122, 41, 0.4)",
+                maxWidth: isMobile ? 120 : 160,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {title}
+            </button>
+          ))}
+        </motion.div>
+      ) : null}
+
+      {!isMobile ? (
+        <motion.div
+          style={{
+            padding: "5px 14px 4px",
+            borderBottom: "1px solid rgba(255, 122, 41, 0.12)",
+            textAlign: "center",
+            pointerEvents: "none",
+          }}
+        >
+          <p
+            style={{
+              margin: 0,
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: 11,
+              lineHeight: 1.45,
+              color: "rgba(255, 200, 160, 0.82)",
+              fontStyle: "italic",
+            }}
+          >
+            <span
+              style={{
+                fontFamily: "'VT323', monospace",
+                fontStyle: "normal",
+                fontSize: 11,
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
+                color: "rgba(255, 122, 41, 0.85)",
+                marginRight: "0.5em",
+              }}
+            >
+              Quote ·
+            </span>
+            &ldquo;{quote.text}&rdquo;
+            <span style={{ opacity: 0.65 }}> — {quote.author}</span>
+          </p>
+        </motion.div>
+      ) : null}
 
       {isMobile ? (
         <motion.div
+          className="status-bar-mobile-footer"
           style={{
             display: "flex",
-            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "space-between",
             gap: 8,
-            padding: "8px 12px 10px",
+            padding: "6px 12px max(8px, env(safe-area-inset-bottom, 0px))",
+            pointerEvents: "none",
             fontFamily: "'VT323', monospace",
             fontSize: 11,
-            letterSpacing: "0.22em",
+            letterSpacing: "0.2em",
             textTransform: "uppercase",
             color: "rgba(255, 180, 112, 0.75)",
           }}
         >
           <span
             style={{
-              textAlign: "center",
-              letterSpacing: "0.26em",
-              lineHeight: 1.35,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              minWidth: 0,
             }}
           >
-            ▢ Made in San Francisco // Bali
+            SF // Bali
           </span>
-          <div
+          <span
             style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "6px 12px",
-              alignItems: "center",
+              color: ACCENT,
+              textShadow: "0 0 6px rgba(255,122,41,0.5)",
+              flexShrink: 0,
             }}
           >
-            <span
-              style={{
-                color: ACCENT,
-                textShadow: "0 0 6px rgba(255,122,41,0.5)",
-                whiteSpace: "nowrap",
-              }}
-            >
-              ◉ Rec
-            </span>
-            <span style={{ textAlign: "right", whiteSpace: "nowrap" }}>☕ Cups</span>
-            <span
-              style={{
-                color: ACCENT,
-                textShadow: "0 0 6px rgba(255,122,41,0.5)",
-                fontSize: 13,
-                letterSpacing: "0.18em",
-              }}
-            >
-              {time}
-            </span>
-            <span style={{ textAlign: "right", fontSize: 13, letterSpacing: "0.18em" }}>
-              1,247
-            </span>
-          </div>
+            {time}
+          </span>
+          <span style={{ flexShrink: 0 }}>☕ 1,247</span>
         </motion.div>
       ) : (
         <motion.div
@@ -212,6 +263,7 @@ export default function StatusBar() {
             alignItems: "center",
             justifyContent: "space-between",
             padding: "5px 16px",
+            pointerEvents: "none",
             fontFamily: "'VT323', monospace",
             fontSize: 13,
             letterSpacing: "0.32em",

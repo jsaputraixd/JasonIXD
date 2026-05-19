@@ -23,6 +23,41 @@ const FS_MOB = 9;
 
 const ORBIT_EXTRA_REST = 26;
 const ORBIT_EXTRA_HOVER = 58;
+const EASE = [0.16, 1, 0.3, 1];
+
+function skillOrbitPoint(box, orbitR, index, total) {
+  const angleDeg = (index * 360) / total - 90;
+  const rad = (angleDeg * Math.PI) / 180;
+  const cx = box / 2;
+  const cy = box / 2;
+  return {
+    x: cx + Math.cos(rad) * orbitR,
+    y: cy + Math.sin(rad) * orbitR,
+  };
+}
+
+/** Spoke from globe rim to orbit node — stays behind the disc, not through it. */
+function skillSpokeSegment(box, orbitR, discR, index, total) {
+  const { x, y } = skillOrbitPoint(box, orbitR, index, total);
+  const cx = box / 2;
+  const cy = box / 2;
+  const dx = x - cx;
+  const dy = y - cy;
+  const dist = Math.hypot(dx, dy) || 1;
+  const rim = discR + 6;
+  return {
+    x1: cx + (dx / dist) * rim,
+    y1: cy + (dy / dist) * rim,
+    x2: x,
+    y2: y,
+  };
+}
+
+function pulseSkill() {
+  if (typeof navigator !== "undefined" && navigator.vibrate) {
+    navigator.vibrate(10);
+  }
+}
 
 function OurHomeLabel({ fontSize, margin }) {
   return (
@@ -88,6 +123,8 @@ export default function SkillsPlanet({
 
   const [expanded, setExpanded] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+  const [activeSkill, setActiveSkill] = useState(null);
+  const [constellationDrawn, setConstellationDrawn] = useState(false);
 
   const openModal = useCallback(() => {
     playClick();
@@ -131,13 +168,15 @@ export default function SkillsPlanet({
 
     const obs = new IntersectionObserver(
       ([entry]) => {
-        setExpanded(entry.isIntersecting && entry.intersectionRatio > 0.25);
+        const next = entry.isIntersecting && entry.intersectionRatio > 0.25;
+        setExpanded(next);
+        if (next && !constellationDrawn) setConstellationDrawn(true);
       },
       { root, threshold: [0, 0.15, 0.25, 0.4] }
     );
     obs.observe(el);
     return () => obs.disconnect();
-  }, [variant, scrollRootSelector]);
+  }, [variant, scrollRootSelector, constellationDrawn]);
 
   const showVideo = !reduceMotion && !useAsciiFallback;
 
@@ -425,75 +464,94 @@ export default function SkillsPlanet({
             margin: "0 auto",
           }}
         >
-          <div
-            className={isMobile && expanded ? "skills-orbit-rotor" : ""}
-            aria-hidden
-            style={{
-              position: "absolute",
-              left: "50%",
-              top: "50%",
-              width: box - 8,
-              height: box - 8,
-              marginLeft: -(box - 8) / 2,
-              marginTop: -(box - 8) / 2,
-              pointerEvents: "none",
-              zIndex: 2,
-            }}
-          >
-            {skills.map((skill, i) => {
-              const angle = (i * 360) / skills.length;
-              return (
-                <div
-                  key={skill}
-                  style={{
-                    position: "absolute",
-                    top: "50%",
-                    left: "50%",
-                    transform: `rotate(${angle}deg) translate(0, -${orbitR}px) rotate(-${angle}deg)`,
-                    transition: isMobile
-                      ? "transform 0.45s cubic-bezier(0.16, 1, 0.3, 1)"
-                      : undefined,
-                  }}
-                >
-                  <span
-                    className={
-                      isMobile && expanded ? "skills-orbit-label" : ""
-                    }
-                    style={{
-                      display: "inline-block",
-                      transform: "translate(-50%, -50%)",
-                      fontFamily: "'VT323', monospace",
-                      fontSize: labelFont,
-                      letterSpacing: "0.12em",
-                      textTransform: "uppercase",
-                      color: ACCENT,
-                      textShadow: "0 0 8px rgba(255, 122, 41, 0.55)",
-                      padding: "1px 7px",
-                      border: "1px solid rgba(255, 122, 41, 0.5)",
-                      background: "rgba(12, 10, 8, 0.96)",
-                      borderRadius: 2,
-                      whiteSpace: "nowrap",
-                      opacity: isMobile ? (expanded ? 1 : 0) : 0,
-                      pointerEvents: "none",
-                      transition: isMobile ? "opacity 0.35s ease" : undefined,
-                      transitionDelay:
-                        isMobile && expanded ? `${i * 35}ms` : "0ms",
+          {isMobile ? (
+            <svg
+              aria-hidden
+              width={box}
+              height={box}
+              viewBox={`0 0 ${box} ${box}`}
+              style={{
+                position: "absolute",
+                inset: 0,
+                zIndex: 0,
+                pointerEvents: "none",
+                overflow: "visible",
+              }}
+            >
+              {skills.map((_, i) => {
+                const { x1, y1, x2, y2 } = skillSpokeSegment(
+                  box,
+                  orbitR,
+                  discR,
+                  i,
+                  skills.length
+                );
+                const len = Math.hypot(x2 - x1, y2 - y1);
+                return (
+                  <motion.line
+                    key={`spoke-${i}`}
+                    x1={x1}
+                    y1={y1}
+                    x2={x2}
+                    y2={y2}
+                    stroke="rgba(255, 122, 41, 0.32)"
+                    strokeWidth={1}
+                    strokeDasharray={len}
+                    initial={{ strokeDashoffset: len, opacity: 0 }}
+                    animate={{
+                      strokeDashoffset: expanded ? 0 : len,
+                      opacity: expanded ? 0.7 : 0,
                     }}
-                  >
-                    {skill}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
+                    transition={{
+                      duration: 0.55,
+                      delay: constellationDrawn ? i * 0.045 : 0,
+                      ease: EASE,
+                    }}
+                  />
+                );
+              })}
+              {skills.map((_, i) => {
+                const a = skillOrbitPoint(box, orbitR, i, skills.length);
+                const b = skillOrbitPoint(
+                  box,
+                  orbitR,
+                  (i + 1) % skills.length,
+                  skills.length
+                );
+                const len = Math.hypot(b.x - a.x, b.y - a.y);
+                return (
+                  <motion.line
+                    key={`ring-${i}`}
+                    x1={a.x}
+                    y1={a.y}
+                    x2={b.x}
+                    y2={b.y}
+                    stroke="rgba(255, 122, 41, 0.18)"
+                    strokeWidth={1}
+                    strokeDasharray={len}
+                    initial={{ strokeDashoffset: len, opacity: 0 }}
+                    animate={{
+                      strokeDashoffset: expanded ? 0 : len,
+                      opacity: expanded ? 0.55 : 0,
+                    }}
+                    transition={{
+                      duration: 0.65,
+                      delay: constellationDrawn ? 0.18 + i * 0.04 : 0,
+                      ease: EASE,
+                    }}
+                  />
+                );
+              })}
+            </svg>
+          ) : null}
 
-          <div
+          <motion.div
             style={{
               position: "absolute",
               left: "50%",
               top: "50%",
               transform: "translate(-50%, -50%)",
-              zIndex: 4,
+              zIndex: 3,
             }}
           >
             <button
@@ -516,10 +574,11 @@ export default function SkillsPlanet({
                 border: "none",
                 padding: 0,
                 margin: 0,
-                background: "rgba(0,0,0,0.15)",
+                background: "rgba(0,0,0,0.92)",
                 cursor: isMobile ? "pointer" : "none",
                 lineHeight: 0,
                 position: "relative",
+                boxShadow: "0 0 0 2px rgba(12, 10, 8, 0.95)",
               }}
             >
               {showVideo ? (
@@ -562,7 +621,116 @@ export default function SkillsPlanet({
                 </span>
               )}
             </button>
+          </motion.div>
+
+          <div
+            className={isMobile && expanded ? "skills-orbit-rotor" : ""}
+            aria-hidden
+            style={{
+              position: "absolute",
+              left: "50%",
+              top: "50%",
+              width: box - 8,
+              height: box - 8,
+              marginLeft: -(box - 8) / 2,
+              marginTop: -(box - 8) / 2,
+              pointerEvents: "none",
+              zIndex: 4,
+            }}
+          >
+            {skills.map((skill, i) => {
+              const angle = (i * 360) / skills.length;
+              const isActive = activeSkill === i;
+              return (
+                <div
+                  key={skill}
+                  style={{
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    transform: `rotate(${angle}deg) translate(0, -${orbitR}px) rotate(-${angle}deg)`,
+                    transition: isMobile
+                      ? "transform 0.45s cubic-bezier(0.16, 1, 0.3, 1)"
+                      : undefined,
+                    zIndex: isActive ? 6 : 3,
+                  }}
+                >
+                  {isMobile ? (
+                    <motion.button
+                      type="button"
+                      className={expanded ? "skills-orbit-label" : ""}
+                      aria-label={`Skill: ${skill}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        playClick();
+                        pulseSkill();
+                        setActiveSkill(i);
+                      }}
+                      animate={{
+                        scale: isActive ? [1, 1.1, 1] : 1,
+                        boxShadow: isActive
+                          ? "0 0 18px rgba(255, 122, 41, 0.75)"
+                          : "0 0 0 rgba(255, 122, 41, 0)",
+                      }}
+                      transition={{ duration: 0.35, ease: EASE }}
+                      style={{
+                        display: "inline-block",
+                        transform: "translate(-50%, -50%)",
+                        fontFamily: "'VT323', monospace",
+                        fontSize: labelFont,
+                        letterSpacing: "0.12em",
+                        textTransform: "uppercase",
+                        color: ACCENT,
+                        textShadow: "0 0 8px rgba(255, 122, 41, 0.55)",
+                        padding: "2px 8px",
+                        border: `1px solid rgba(255, 122, 41, ${isActive ? 0.85 : 0.5})`,
+                        background: "rgba(12, 10, 8, 0.96)",
+                        borderRadius: 2,
+                        whiteSpace: "nowrap",
+                        opacity: expanded ? 1 : 0,
+                        pointerEvents: expanded ? "auto" : "none",
+                        cursor: "pointer",
+                        transition: "opacity 0.35s ease, border-color 0.2s ease",
+                        transitionDelay:
+                          expanded ? `${i * 35}ms` : "0ms",
+                      }}
+                    >
+                      {skill}
+                    </motion.button>
+                  ) : (
+                    <span
+                      className={
+                        isMobile && expanded ? "skills-orbit-label" : ""
+                      }
+                      style={{
+                        display: "inline-block",
+                        transform: "translate(-50%, -50%)",
+                        fontFamily: "'VT323', monospace",
+                        fontSize: labelFont,
+                        letterSpacing: "0.12em",
+                        textTransform: "uppercase",
+                        color: ACCENT,
+                        textShadow: "0 0 8px rgba(255, 122, 41, 0.55)",
+                        padding: "1px 7px",
+                        border: "1px solid rgba(255, 122, 41, 0.5)",
+                        background: "rgba(12, 10, 8, 0.96)",
+                        borderRadius: 2,
+                        whiteSpace: "nowrap",
+                        opacity: isMobile ? (expanded ? 1 : 0) : 0,
+                        pointerEvents: "none",
+                        transition: isMobile ? "opacity 0.35s ease" : undefined,
+                        transitionDelay:
+                          isMobile && expanded ? `${i * 35}ms` : "0ms",
+                      }}
+                    >
+                      {skill}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
           </div>
+
         </div>
 
         <OurHomeLabel

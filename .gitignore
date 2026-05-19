@@ -13,3 +13,6 @@ npm-debug.log*
 # Huge ProRes / misnamed QT exports — transcode to a small .webm for the site; keep these local only.
 public/videos/Earth Ascii.mov
 public/videos/Earth Ascii.webm
+
+# Over GitHub’s 100MB limit — keep local; compress or use Git LFS before committing.
+public/images/other-stuff/motion/JasonSaputra_TitleSeq3_fa25.mp4

@@ -2,6 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { projects } from "@/data/projects";
 import { about } from "@/data/about";
+import {
+  projectHeroTransitionName,
+  projectTitleTransitionName,
+} from "@/lib/viewTransition";
 import ProjectPageListen from "@/components/ProjectPageListen";
 import CaseStudyVideos from "@/components/CaseStudyVideos";
 
@@ -480,6 +484,7 @@ export default async function ProjectPage({ params }) {
             fontFamily: "'Bonbon', cursive",
             fontSize: "clamp(48px, 8vw, 88px)",
             lineHeight: 1.05,
+            viewTransitionName: projectTitleTransitionName(project.slug),
           }}
         >
           {project.title}
@@ -503,7 +508,13 @@ export default async function ProjectPage({ params }) {
         {rich ? (
           <CaseStudyRichLayout project={project} frameStyle={frameStyle} />
         ) : hero ? (
-          <div className="mt-16 w-full" style={frameStyle}>
+          <div
+            className="mt-16 w-full"
+            style={{
+              ...frameStyle,
+              viewTransitionName: projectHeroTransitionName(project.slug),
+            }}
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={encodeURI(hero)}
@@ -524,6 +535,7 @@ export default async function ProjectPage({ params }) {
               background: "#1e1e1e",
               borderRadius: 12,
               border: "1px solid rgba(255,255,255,0.06)",
+              viewTransitionName: projectHeroTransitionName(project.slug),
             }}
           >
             <div

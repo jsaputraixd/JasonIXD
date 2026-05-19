@@ -10,6 +10,10 @@ const ACCENT = "#FF7A29";
 const ACCENT_DIM = "rgba(255, 180, 112, 0.7)";
 const EASE = [0.16, 1, 0.3, 1];
 
+function isVideoItem(item) {
+  return item.type === "video" || /\.(mp4|webm|mov)(\?|$)/i.test(item.src);
+}
+
 export default function OtherStuffFolder({ variant = "desktop", layoutScale = 1 }) {
   const reduceMotion = useReducedMotion();
   const [activeCategoryId, setActiveCategoryId] = useState(null);
@@ -124,7 +128,13 @@ export default function OtherStuffFolder({ variant = "desktop", layoutScale = 1 
                 ))}
               </div>
             ) : (
-              <EmptyCategoryNote layoutScale={s} mono={mono} bio={bio} />
+              <EmptyCategoryNote
+                layoutScale={s}
+                mono={mono}
+                bio={bio}
+                categoryId={activeCategory.id}
+                categoryLabel={activeCategory.label}
+              />
             )}
           </>
         ) : (
@@ -147,7 +157,7 @@ export default function OtherStuffFolder({ variant = "desktop", layoutScale = 1 
                 gridTemplateColumns:
                   variant === "mobile"
                     ? "repeat(2, minmax(0, 1fr))"
-                    : "repeat(3, minmax(0, 1fr))",
+                    : "repeat(auto-fill, minmax(108px, 1fr))",
                 gap: Math.round(14 * s),
               }}
             >
@@ -235,13 +245,21 @@ function CategoryFolderButton({ category, index, layoutScale, onOpen }) {
           color: ACCENT_DIM,
         }}
       >
-        {count === 0 ? "empty" : `${count} file${count === 1 ? "" : "s"}`}
+        {count === 0 ? "ready" : `${count} file${count === 1 ? "" : "s"}`}
       </span>
     </motion.button>
   );
 }
 
-function EmptyCategoryNote({ layoutScale, mono, bio }) {
+function EmptyCategoryNote({
+  layoutScale,
+  mono,
+  bio,
+  categoryId,
+  categoryLabel,
+}) {
+  const folderPath = `public/images/other-stuff/${categoryId}/`;
+
   return (
     <motion.div
       style={{
@@ -262,20 +280,21 @@ function EmptyCategoryNote({ layoutScale, mono, bio }) {
           color: ACCENT_DIM,
         }}
       >
-        ▢ Folder empty
+        ▢ {categoryLabel} — ready for files
       </p>
       <p
         style={{
-          margin: "8px 0 0",
+          margin: "10px 0 0",
           fontFamily: "'DM Sans', sans-serif",
           fontSize: Math.max(11, bio - 1),
-          lineHeight: 1.5,
+          lineHeight: 1.55,
           color: "rgba(255, 255, 255, 0.55)",
         }}
       >
-        Add files in{" "}
-        <code style={{ color: ACCENT }}>data/otherStuff.js</code> for this
-        category.
+        Drop images in{" "}
+        <code style={{ color: ACCENT, fontSize: "0.92em" }}>{folderPath}</code>
+        , then list them in{" "}
+        <code style={{ color: ACCENT }}>data/otherStuff.js</code>.
       </p>
     </motion.div>
   );
@@ -310,19 +329,58 @@ function MediaTile({ item, index, variant, layoutScale, onOpen }) {
       }}
     >
       <div style={{ position: "relative", aspectRatio: "1 / 1", width: "100%" }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={encodeURI(item.src)}
-          alt={item.alt ?? item.caption ?? "Media item"}
-          loading="lazy"
-          style={{
-            position: "absolute",
-            inset: 0,
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-          }}
-        />
+        {isVideoItem(item) ? (
+          <video
+            src={encodeURI(item.src)}
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            aria-label={item.alt ?? item.caption ?? "Video"}
+            style={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              background: "#0a0806",
+            }}
+          />
+        ) : (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            src={encodeURI(item.src)}
+            alt={item.alt ?? item.caption ?? "Media item"}
+            loading="lazy"
+            style={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+            }}
+          />
+        )}
+        {isVideoItem(item) ? (
+          <span
+            aria-hidden
+            style={{
+              position: "absolute",
+              right: 6,
+              bottom: 6,
+              fontFamily: "'VT323', monospace",
+              fontSize: 10,
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+              color: ACCENT,
+              padding: "2px 5px",
+              border: "1px solid rgba(255, 122, 41, 0.5)",
+              background: "rgba(10, 6, 4, 0.85)",
+            }}
+          >
+            ▶
+          </span>
+        ) : null}
       </div>
       {item.caption ? (
         <p
@@ -383,17 +441,33 @@ function MediaLightbox({ item, onClose }) {
           overflow: "hidden",
         }}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={encodeURI(item.src)}
-          alt={item.alt ?? item.caption ?? ""}
-          style={{
-            display: "block",
-            maxWidth: "100%",
-            maxHeight: "72vh",
-            margin: "0 auto",
-          }}
-        />
+        {isVideoItem(item) ? (
+          <video
+            src={encodeURI(item.src)}
+            controls
+            autoPlay
+            playsInline
+            style={{
+              display: "block",
+              width: "100%",
+              maxHeight: "72vh",
+              margin: "0 auto",
+              background: "#0a0806",
+            }}
+          />
+        ) : (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            src={encodeURI(item.src)}
+            alt={item.alt ?? item.caption ?? ""}
+            style={{
+              display: "block",
+              maxWidth: "100%",
+              maxHeight: "72vh",
+              margin: "0 auto",
+            }}
+          />
+        )}
         <motion.div
           style={{
             display: "flex",

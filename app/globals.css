@@ -95,10 +95,99 @@ body {
   overscroll-behavior-x: contain;
 }
 
+.mobile-os {
+  position: relative;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+}
+
 .mobile-os-scroll {
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
   gap: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+
+.mobile-window-body {
+  padding: 16px 16px 18px;
+}
+
+.mobile-window-body--compact {
+  padding: 10px 8px 12px;
+}
+
+.mobile-skills-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 4px 8px 20px;
+}
+
+.mobile-project-card {
+  transition:
+    transform 0.18s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.mobile-project-card:active {
+  transform: scale(0.985);
+}
+
+.mobile-dock-nav__btn:active,
+.mobile-open-strip:active,
+.mobile-recycle-dock__btn:active,
+.mobile-carousel-dot:active {
+  transform: scale(0.96);
+}
+
+.mobile-section-label {
+  font-size: 12px !important;
+  letter-spacing: 0.26em !important;
+}
+
+.mobile-journey-chapter {
+  scroll-margin-top: calc(52px + env(safe-area-inset-top, 0px));
+  padding: 4px 0 8px;
+}
+
+.mobile-work-section {
+  isolation: isolate;
+}
+
+.mobile-dock-progress-fill {
+  will-change: transform;
+}
+
+@media (max-width: 899px) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 0.42s;
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  ::view-transition-group(*) {
+    animation-duration: 0.48s;
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root),
+  ::view-transition-group(*) {
+    animation-duration: 0.01ms !important;
+  }
+}
+
+.mobile-scroll-hint {
+  user-select: none;
+  pointer-events: none;
 }
 
 .mobile-window-card {
@@ -151,10 +240,14 @@ body {
 @media (max-width: 899px) {
   .status-bar--mobile {
     max-width: none;
+    left: 10px !important;
+    right: 10px !important;
+    bottom: max(8px, env(safe-area-inset-bottom, 0px)) !important;
   }
 
   .mobile-os [data-mobile-scroll] {
-    padding-bottom: calc(118px + env(safe-area-inset-bottom, 0px)) !important;
+    padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px)) !important;
+    scroll-behavior: smooth;
   }
 }
 

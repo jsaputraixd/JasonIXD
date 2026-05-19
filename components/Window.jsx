@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, useDragControls } from "framer-motion";
-import { playWindowClose, playWindowWhoosh } from "@/lib/typingSound";
+import { playClick, playWindowWhoosh } from "@/lib/typingSound";
 
 const ACCENT = "#FF7A29";
 const EASE = [0.16, 1, 0.3, 1];
@@ -17,7 +17,13 @@ export default function Window({
   minWidth,
   zIndex = 1,
   onFocus,
+  /** Called when the user hits minimize (—). */
+  onMinimize,
+  /** @deprecated Use onMinimize */
   onClose,
+  minimized = false,
+  minimizable = true,
+  /** @deprecated Use minimizable */
   closable = true,
   delay = 0,
   dragConstraints,
@@ -31,8 +37,8 @@ export default function Window({
   /** Play a short whoosh when the window first appears (cascade delay respected). */
   playOpenSound = true,
 }) {
-  const [open, setOpen] = useState(true);
-  const [closing, setClosing] = useState(false);
+  const canMinimize = minimizable ?? closable;
+  const handleMinimizeCb = onMinimize ?? onClose;
   const [isHeld, setIsHeld] = useState(false);
   const [hasBeenHeld, setHasBeenHeld] = useState(false);
   const dragControls = useDragControls();
@@ -59,14 +65,10 @@ export default function Window({
     };
   }, [isHeld]);
 
-  const handleClose = (e) => {
+  const handleMinimize = (e) => {
     e.stopPropagation();
-    playWindowClose();
-    setClosing(true);
-    setTimeout(() => {
-      setOpen(false);
-      onClose?.();
-    }, 220);
+    playClick();
+    handleMinimizeCb?.();
   };
 
   const startDrag = (event) => {
@@ -78,8 +80,9 @@ export default function Window({
 
   return (
     <AnimatePresence>
-      {open && (
+      {!minimized && (
         <motion.div
+          key={id}
           drag
           dragListener={false}
           dragControls={dragControls}
@@ -88,10 +91,9 @@ export default function Window({
           dragConstraints={dragConstraints}
           onPointerDown={() => onFocus?.(id)}
           initial={{ opacity: 0, scale: 0.94 }}
+          exit={{ opacity: 0, scale: 0.94, transition: { duration: 0.22, ease: EASE } }}
           animate={
-            closing
-              ? { opacity: 0, scale: 0.94 }
-              : isHeld
+            isHeld
               ? {
                   opacity: 1,
                   scale: 1.04,
@@ -101,14 +103,8 @@ export default function Window({
               : { opacity: 1, scale: 1, rotate: 0, skewX: 0 }
           }
           transition={{
-            duration: closing
-              ? 0.22
-              : isHeld
-              ? 0.08
-              : hasBeenHeld
-              ? 0
-              : 0.28,
-            delay: closing || isHeld || hasBeenHeld ? 0 : delay,
+            duration: isHeld ? 0.08 : hasBeenHeld ? 0 : 0.28,
+            delay: isHeld || hasBeenHeld ? 0 : delay,
             ease: EASE,
           }}
           style={{
@@ -134,7 +130,6 @@ export default function Window({
               userSelect: "none",
               overflow: clipContent ? "hidden" : "visible",
               transform: `translate3d(${parallaxShift.x}px, ${parallaxShift.y}px, 0)`,
-              transition: "transform 0.14s ease-out",
             }}
           >
             {/* Title bar — only drag handle */}
@@ -192,13 +187,13 @@ export default function Window({
                   {titleBarExtra}
                 </span>
               ) : null}
-              {closable && (
+              {canMinimize && (
                 <button
                   type="button"
                   onPointerDown={(e) => e.stopPropagation()}
-                  onClick={handleClose}
+                  onClick={handleMinimize}
                   data-cursor="hover"
-                  aria-label={`Close ${title}`}
+                  aria-label={`Minimize ${title}`}
                   style={{
                     flexShrink: 0,
                     marginLeft: 10,
@@ -206,14 +201,14 @@ export default function Window({
                     border: "none",
                     color: isHeld ? "#ffe2c4" : ACCENT,
                     fontFamily: "'VT323', monospace",
-                    fontSize: Math.max(14, Math.round(18 * uiScale)),
+                    fontSize: Math.max(13, Math.round(16 * uiScale)),
                     lineHeight: 1,
                     cursor: "pointer",
-                    padding: "0 2px",
+                    padding: "0 4px",
                     textShadow: "0 0 6px rgba(255, 122, 41, 0.55)",
                   }}
                 >
-                  ×
+                  —
                 </button>
               )}
             </div>

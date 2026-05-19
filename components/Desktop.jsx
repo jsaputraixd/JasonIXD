@@ -18,6 +18,9 @@ import {
 } from "framer-motion";
 import Window from "./Window";
 import StatusBar from "./StatusBar";
+import { MobileProjectPreviewPanel } from "@/components/ProjectPreviewPane";
+import ProjectViewLink from "@/components/ProjectViewLink";
+import { projectHeroTransitionName } from "@/lib/viewTransition";
 import DesktopIdleLayer from "./DesktopIdleLayer";
 import RecycleBinIcon from "./RecycleBinIcon";
 import SkillsPlanet from "./SkillsPlanet";
@@ -39,7 +42,11 @@ import {
   shouldSkipIntro,
   signalBootComplete,
 } from "@/lib/introSession";
-import { playTypingClick } from "@/lib/typingSound";
+import {
+  playClick,
+  playTypingClick,
+  playTypingClickThrottled,
+} from "@/lib/typingSound";
 import { pickTrashMessage } from "@/lib/trashMessage";
 
 const ACCENT = "#FF7A29";
@@ -47,6 +54,29 @@ const ACCENT_DIM = "rgba(255, 180, 112, 0.7)";
 const EASE = [0.16, 1, 0.3, 1];
 
 const WELCOME_HEIGHT_GUESS = 380;
+
+function getWindowTitle(id) {
+  switch (id) {
+    case "welcome":
+      return "welcome.exe";
+    case "me":
+      return "me.txt";
+    case "skills":
+      return "skills.log";
+    case "contact":
+      return "contact.msg";
+    case "otherStuff":
+      return otherStuff.windowTitle;
+    default: {
+      const m = /^proj-(\d+)$/.exec(id);
+      if (m) {
+        const idx = Number(m[1]) - 1;
+        return projects[idx]?.title ?? id;
+      }
+      return id;
+    }
+  }
+}
 
 const ASCII_PORTRAIT_SRC = "/images/ascii-portrait.png";
 /** Intrinsic size from source PNG (next/image uses this for aspect ratio). */
@@ -185,6 +215,7 @@ export default function Desktop() {
   const [phase, setPhase] = useState("waiting-boot");
   const [welcomeTyped, setWelcomeTyped] = useState("");
   const [otherStuffOpen, setOtherStuffOpen] = useState(false);
+  const [minimizedIds, setMinimizedIds] = useState([]);
   const [trashMessage, setTrashMessage] = useState(null);
   const trashMessageTimerRef = useRef(null);
   const welcomeDoneTimerRef = useRef(null);
@@ -312,23 +343,56 @@ export default function Desktop() {
     setZMap((m) => ({ ...m, [id]: topZ + 1 }));
   };
 
+  const minimizeWindow = useCallback((id) => {
+    setMinimizedIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
+  }, []);
+
+  const restoreWindow = useCallback((id) => {
+    setMinimizedIds((prev) => prev.filter((x) => x !== id));
+  }, []);
+
+  const isMinimized = useCallback(
+    (id) => minimizedIds.includes(id),
+    [minimizedIds]
+  );
+
+  const minimizedTaskbarItems = useMemo(
+    () => minimizedIds.map((id) => ({ id, title: getWindowTitle(id) })),
+    [minimizedIds]
+  );
+
   const zOf = (id, base) => zMap[id] ?? base;
 
   useEffect(() => {
     if (!viewport || viewport.w < 900 || phase !== "dashboard") return;
     const el = stageRef.current;
     if (!el) return;
+
+    let raf = 0;
+    let lastX = 0;
+    let lastY = 0;
+
     const onMove = (e) => {
       const r = el.getBoundingClientRect();
-      const nx = ((e.clientX - r.left) / r.width - 0.5) * 2;
-      const ny = ((e.clientY - r.top) / r.height - 0.5) * 2;
-      setParallax({
-        x: Math.max(-1, Math.min(1, nx)),
-        y: Math.max(-1, Math.min(1, ny)),
+      const nx = Math.max(-1, Math.min(1, ((e.clientX - r.left) / r.width - 0.5) * 2));
+      const ny = Math.max(-1, Math.min(1, ((e.clientY - r.top) / r.height - 0.5) * 2));
+
+      if (Math.abs(nx - lastX) < 0.012 && Math.abs(ny - lastY) < 0.012) return;
+
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        lastX = nx;
+        lastY = ny;
+        setParallax({ x: nx, y: ny });
       });
     };
+
     el.addEventListener("mousemove", onMove, { passive: true });
-    return () => el.removeEventListener("mousemove", onMove);
+    return () => {
+      el.removeEventListener("mousemove", onMove);
+      if (raf) cancelAnimationFrame(raf);
+    };
   }, [viewport, phase]);
 
   const vwSafe = viewport?.w ?? 1280;
@@ -476,6 +540,8 @@ export default function Desktop() {
           playOpenSound={false}
           zIndex={zOf("welcome", 12)}
           onFocus={bringToFront}
+          minimized={isMinimized("welcome")}
+          onMinimize={() => minimizeWindow("welcome")}
           dragConstraints={stageRef}
           parallaxShift={pShift.welcome}
           uiScale={layoutScale}
@@ -499,6 +565,8 @@ export default function Desktop() {
           delay={cascadeDelay(0.45)}
           zIndex={zOf("me", 13)}
           onFocus={bringToFront}
+          minimized={isMinimized("me")}
+          onMinimize={() => minimizeWindow("me")}
           dragConstraints={stageRef}
           parallaxShift={pShift.me}
           uiScale={layoutScale}
@@ -524,6 +592,8 @@ export default function Desktop() {
               delay={cascadeDelay(0.62 + projectIndex * 0.28)}
               zIndex={zOf(id, zBase)}
               onFocus={bringToFront}
+              minimized={isMinimized(id)}
+              onMinimize={() => minimizeWindow(id)}
               dragConstraints={stageRef}
               parallaxShift={pShift.proj}
               uiScale={layoutScale}
@@ -645,7 +715,8 @@ export default function Desktop() {
           delay={0}
           zIndex={zOf("otherStuff", 22)}
           onFocus={bringToFront}
-          onClose={() => setOtherStuffOpen(false)}
+          minimized={isMinimized("otherStuff")}
+          onMinimize={() => minimizeWindow("otherStuff")}
           dragConstraints={stageRef}
           parallaxShift={pShift.otherStuff}
           uiScale={layoutScale}
@@ -664,6 +735,8 @@ export default function Desktop() {
           delay={cascadeDelay(2.45)}
           zIndex={zOf("skills", 16)}
           onFocus={bringToFront}
+          minimized={isMinimized("skills")}
+          onMinimize={() => minimizeWindow("skills")}
           dragConstraints={stageRef}
           parallaxShift={pShift.skills}
           uiScale={layoutScale}
@@ -692,6 +765,8 @@ export default function Desktop() {
         delay={cascadeDelay(2.85)}
         zIndex={zOf("contact", 17)}
         onFocus={bringToFront}
+        minimized={isMinimized("contact")}
+        onMinimize={() => minimizeWindow("contact")}
         dragConstraints={stageRef}
         parallaxShift={pShift.contact}
         uiScale={layoutScale}
@@ -791,7 +866,13 @@ export default function Desktop() {
       )}
 
       <NomineeTab />
-      <StatusBar />
+      <StatusBar
+        minimizedWindows={minimizedTaskbarItems}
+        onRestoreWindow={(id) => {
+          restoreWindow(id);
+          bringToFront(id);
+        }}
+      />
       {phase === "dashboard" && <DesktopIdleLayer />}
     </div>
   );
@@ -869,7 +950,7 @@ function ProjectFlipCard({
                   inset: 0,
                   width: "100%",
                   height: "100%",
-                  objectFit: "contain",
+                  objectFit: "cover",
                   objectPosition: "center",
                 }}
               />
@@ -992,49 +1073,69 @@ function WelcomeAsciiPortrait({ sizes, style, priority = false }) {
 function MeTxtBody({ frameWidth, layoutScale = 1 }) {
   const s = layoutScale;
   const inset = Math.max(18, Math.round(26 * s));
+  const isDesktop = frameWidth != null;
   const inner =
     frameWidth != null
-      ? Math.max(Math.round(130 * s), Math.min(Math.round(248 * s), frameWidth - inset))
+      ? Math.max(
+          Math.round(118 * s),
+          Math.min(Math.round(200 * s), frameWidth - inset)
+        )
       : null;
   const box =
     inner != null
       ? { width: `${inner}px`, height: `${inner}px` }
-      : { width: "min(240px, 76vw)", height: "min(240px, 76vw)" };
+      : { width: "min(220px, 72vw)", height: "min(220px, 72vw)" };
+  const bioSize = isDesktop ? Math.max(10, Math.round(11.5 * s)) : 14;
+  const bioPad = isDesktop ? Math.round(8 * s) : 12;
+
   return (
     <div
       style={{
         padding: `${Math.round(12 * s)}px ${Math.round(10 * s)}px ${Math.round(14 * s)}px`,
-        textAlign: "center",
       }}
     >
-      <div
-        style={{
-          ...box,
-          margin: "0 auto",
-          lineHeight: 0,
-        }}
-      >
-        <WelcomeAsciiPortrait
-          sizes={inner != null ? `${Math.ceil(inner * 1.2)}px` : "min(280px, 85vw)"}
+      <div style={{ textAlign: "center" }}>
+        <div
           style={{
-            width: "100%",
-            height: "100%",
-            maxWidth: "none",
+            ...box,
+            margin: "0 auto",
+            lineHeight: 0,
           }}
-        />
+        >
+          <WelcomeAsciiPortrait
+            sizes={inner != null ? `${Math.ceil(inner * 1.2)}px` : "min(280px, 85vw)"}
+            style={{
+              width: "100%",
+              height: "100%",
+              maxWidth: "none",
+            }}
+          />
+        </div>
+        <p
+          style={{
+            margin: `${Math.round(10 * s)}px 0 0`,
+            fontFamily: "'VT323', monospace",
+            fontSize: Math.max(10, Math.round(13 * s)),
+            letterSpacing: "0.32em",
+            textTransform: "uppercase",
+            color: ACCENT_DIM,
+            textShadow: "0 0 8px rgba(255, 122, 41, 0.38)",
+          }}
+        >
+          It&apos;s me :D
+        </p>
       </div>
       <p
         style={{
-          margin: `${Math.round(11 * s)}px 0 0`,
-          fontFamily: "'VT323', monospace",
-          fontSize: Math.max(10, Math.round(13 * s)),
-          letterSpacing: "0.32em",
-          textTransform: "uppercase",
-          color: ACCENT_DIM,
-          textShadow: "0 0 8px rgba(255, 122, 41, 0.38)",
+          margin: `${bioPad}px 0 0`,
+          fontFamily: "'DM Sans', sans-serif",
+          fontSize: bioSize,
+          lineHeight: 1.65,
+          color: "rgba(255, 255, 255, 0.82)",
+          textAlign: "left",
         }}
       >
-        It&apos;s me :D
+        {about.bio}
       </p>
     </div>
   );
@@ -1048,7 +1149,6 @@ function WelcomeBody({
   const s = layoutScale;
   const px = Math.round;
   const mono = px(14 * s);
-  const bio = Math.max(11, Math.round(13 * s));
   const [typingDone, setTypingDone] = useState(skipTyping);
 
   useEffect(() => {
@@ -1116,38 +1216,21 @@ function WelcomeBody({
         }}
       />
       {typingDone ? (
-        <>
-          <FadeInLine delay={skipTyping ? 0 : 120}>
-            <p
-              className="mt-4"
-              style={{
-                fontFamily: "'DM Sans', sans-serif",
-                fontSize: bio,
-                color: "rgba(255,255,255,0.78)",
-                lineHeight: 1.7,
-                maxWidth: px(420 * s),
-                margin: `${px(16 * s)}px 0 0`,
-              }}
-            >
-              {about.bio}
-            </p>
-          </FadeInLine>
-          <FadeInLine delay={skipTyping ? 80 : 420}>
-            <p
-              className="mt-4"
-              style={{
-                fontFamily: "'VT323', monospace",
-                fontSize: Math.max(10, px(13 * s)),
-                letterSpacing: "0.35em",
-                textTransform: "uppercase",
-                color: ACCENT_DIM,
-                margin: `${px(16 * s)}px 0 0`,
-              }}
-            >
-              ─ Dream · Think · Build ─
-            </p>
-          </FadeInLine>
-        </>
+        <FadeInLine delay={skipTyping ? 0 : 120}>
+          <p
+            className="mt-4"
+            style={{
+              fontFamily: "'VT323', monospace",
+              fontSize: Math.max(10, px(13 * s)),
+              letterSpacing: "0.35em",
+              textTransform: "uppercase",
+              color: ACCENT_DIM,
+              margin: `${px(16 * s)}px 0 0`,
+            }}
+          >
+            ─ Dream · Think · Build ─
+          </p>
+        </FadeInLine>
       ) : null}
     </div>
   );
@@ -1158,6 +1241,9 @@ function TypedLine({
   charMs = 40,
   delay = 0,
   skipTyping = false,
+  enabled = true,
+  soundEvery = 1,
+  useThrottledSound = false,
   onComplete,
   as: Tag = "span",
   style,
@@ -1166,6 +1252,8 @@ function TypedLine({
   const [done, setDone] = useState(skipTyping);
 
   useEffect(() => {
+    if (!enabled) return;
+
     if (skipTyping) {
       setTyped(text);
       setDone(true);
@@ -1175,13 +1263,18 @@ function TypedLine({
     setTyped("");
     setDone(false);
     const timers = [];
+    const tickSound =
+      useThrottledSound
+        ? () => playTypingClickThrottled(58)
+        : () => playTypingClick();
+
     timers.push(
       setTimeout(() => {
         for (let i = 1; i <= text.length; i++) {
           timers.push(
             setTimeout(() => {
               setTyped(text.slice(0, i));
-              playTypingClick();
+              if (i % soundEvery === 0) tickSound();
             }, i * charMs)
           );
         }
@@ -1194,13 +1287,229 @@ function TypedLine({
       }, delay)
     );
     return () => timers.forEach(clearTimeout);
-  }, [text, charMs, delay, skipTyping, onComplete]);
+  }, [
+    text,
+    charMs,
+    delay,
+    skipTyping,
+    enabled,
+    soundEvery,
+    useThrottledSound,
+    onComplete,
+  ]);
 
   return (
     <Tag style={style}>
-      {typed}
-      {!done && typed.length > 0 && <BlinkCursor />}
+      {enabled || skipTyping ? typed : "\u00a0"}
+      {enabled && !done && typed.length > 0 && <BlinkCursor />}
     </Tag>
+  );
+}
+
+/** Starts typing when scrolled into the mobile column (once). */
+function ScrollTypedLine({
+  scrollRoot,
+  amount = 0.38,
+  ...typedProps
+}) {
+  const ref = useRef(null);
+  const reduceMotion = useReducedMotion();
+  const inView = useInView(ref, {
+    root: scrollRoot ?? undefined,
+    once: true,
+    amount,
+    margin: "0px 0px -8% 0px",
+  });
+  const active = reduceMotion || typedProps.skipTyping || inView;
+
+  return (
+    <span ref={ref} style={{ display: typedProps.style?.display ?? "block" }}>
+      <TypedLine {...typedProps} enabled={active} />
+    </span>
+  );
+}
+
+function ScrollTypedParagraph({
+  text,
+  scrollRoot,
+  skipTyping = false,
+  charMs = 14,
+  delay = 120,
+  style,
+}) {
+  const ref = useRef(null);
+  const reduceMotion = useReducedMotion();
+  const inView = useInView(ref, {
+    root: scrollRoot ?? undefined,
+    once: true,
+    amount: 0.32,
+    margin: "0px 0px -6% 0px",
+  });
+  const active = reduceMotion || skipTyping || inView;
+
+  return (
+    <p ref={ref} style={style}>
+      <TypedLine
+        text={text}
+        charMs={charMs}
+        delay={delay}
+        skipTyping={skipTyping}
+        enabled={active}
+        soundEvery={3}
+        useThrottledSound
+        style={{ display: "inline" }}
+      />
+    </p>
+  );
+}
+
+function MobileJourneyChapter({ children, scrollRoot, variant = "up" }) {
+  return (
+    <div className="mobile-journey-chapter">
+      <MobileScrollReveal scrollRoot={scrollRoot} variant={variant} delay={0.02}>
+        {children}
+      </MobileScrollReveal>
+    </div>
+  );
+}
+
+function MobileWorkSection({ scrollRoot }) {
+  const [activeIdx, setActiveIdx] = useState(0);
+  const [focusStrength, setFocusStrength] = useState(0);
+  const sectionRef = useRef(null);
+  const project = projects[activeIdx] ?? projects[0];
+
+  useEffect(() => {
+    const root = scrollRoot?.current;
+    const el = sectionRef.current;
+    if (!root || !el) return;
+
+    const obs = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (!entry) return;
+        const ratio = entry.intersectionRatio;
+        const strength = entry.isIntersecting
+          ? Math.min(1, Math.max(0, (ratio - 0.08) / 0.52))
+          : 0;
+        setFocusStrength((prev) =>
+          Math.abs(prev - strength) < 0.02 ? prev : strength
+        );
+      },
+      { root, threshold: [0, 0.08, 0.15, 0.25, 0.35, 0.45, 0.55, 0.65, 0.8, 1] }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [scrollRoot]);
+
+  return (
+    <motion.div ref={sectionRef} className="mobile-work-section" style={{ position: "relative" }}>
+      <MobileSectionAnchor id="mobile-work" />
+      <MobileScrollReveal scrollRoot={scrollRoot} variant="up" delay={0.04}>
+        <MobileProjectsCarousel
+          scrollRoot={scrollRoot}
+          activeIdx={activeIdx}
+          onActiveChange={setActiveIdx}
+          focusStrength={focusStrength}
+        />
+      </MobileScrollReveal>
+      <MobileScrollReveal scrollRoot={scrollRoot} variant="fade" delay={0.06}>
+        <motion.div
+          style={{
+            margin: `8px ${MOBILE_CARD_INSET}px 0`,
+            position: "relative",
+            zIndex: 2,
+          }}
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          <MobileProjectPreviewPanel project={project} />
+        </motion.div>
+      </MobileScrollReveal>
+    </motion.div>
+  );
+}
+
+function MobileJourneySectionLabel({ children, scrollRoot, skipTyping }) {
+  return (
+    <ScrollTypedLine
+      scrollRoot={scrollRoot}
+      text={typeof children === "string" ? children : ""}
+      skipTyping={skipTyping}
+      charMs={22}
+      delay={80}
+      amount={0.45}
+      style={{
+        margin: `0 ${MOBILE_CARD_INSET + 4}px 16px`,
+        fontFamily: "'VT323', monospace",
+        fontSize: 13,
+        letterSpacing: "0.32em",
+        textTransform: "uppercase",
+        color: ACCENT_DIM,
+        textShadow: "0 0 6px rgba(255, 122, 41, 0.32)",
+        display: "block",
+      }}
+    />
+  );
+}
+
+function MobileMeTxtJourney({ scrollRoot, skipTyping = false }) {
+  const box = { width: "min(220px, 72vw)", height: "min(220px, 72vw)" };
+
+  return (
+    <div>
+      <div style={{ textAlign: "center" }}>
+        <div
+          style={{
+            ...box,
+            margin: "0 auto",
+            lineHeight: 0,
+          }}
+        >
+          <WelcomeAsciiPortrait
+            sizes="min(280px, 85vw)"
+            style={{
+              width: "100%",
+              height: "100%",
+              maxWidth: "none",
+            }}
+          />
+        </div>
+        <ScrollTypedLine
+          scrollRoot={scrollRoot}
+          skipTyping={skipTyping}
+          text="It's me :D"
+          charMs={42}
+          delay={200}
+          amount={0.42}
+          style={{
+            margin: "12px 0 0",
+            fontFamily: "'VT323', monospace",
+            fontSize: 13,
+            letterSpacing: "0.32em",
+            textTransform: "uppercase",
+            color: ACCENT_DIM,
+            textShadow: "0 0 8px rgba(255, 122, 41, 0.38)",
+            display: "block",
+          }}
+        />
+        </div>
+      <ScrollTypedParagraph
+        scrollRoot={scrollRoot}
+        skipTyping={skipTyping}
+        text={about.bio}
+        charMs={13}
+        delay={380}
+        style={{
+          margin: "14px 0 0",
+          fontFamily: "'DM Sans', sans-serif",
+          fontSize: 14,
+          lineHeight: 1.65,
+          color: "rgba(255, 255, 255, 0.82)",
+          textAlign: "left",
+        }}
+      />
+    </div>
   );
 }
 
@@ -1283,8 +1592,17 @@ function BlinkCursor() {
 /*                              MOBILE EXPERIENCE                             */
 /* -------------------------------------------------------------------------- */
 
-const MOBILE_BLOCK_GAP = 44;
-const MOBILE_CARD_INSET = 18;
+const MOBILE_BLOCK_GAP = 40;
+const MOBILE_CARD_INSET = 16;
+const MOBILE_DOCK_HEIGHT = 44;
+
+const MOBILE_NAV_SECTIONS = [
+  { id: "mobile-about", label: "About" },
+  { id: "mobile-work", label: "Work" },
+  { id: "mobile-skills", label: "Skills" },
+  { id: "mobile-more", label: "More" },
+  { id: "mobile-contact", label: "Contact" },
+];
 
 /** Scroll-triggered entrance — uses the mobile column as intersection root. */
 function MobileScrollReveal({
@@ -1369,6 +1687,7 @@ function MobileOpenForWorkStrip() {
       target="_blank"
       rel="noopener noreferrer"
       className="mobile-open-strip"
+      onClick={() => playClick()}
       style={{
         display: "flex",
         alignItems: "center",
@@ -1403,6 +1722,440 @@ function MobileOpenForWorkStrip() {
       />
       J.S. · Open for work
     </a>
+  );
+}
+
+function MobileSectionAnchor({ id }) {
+  return (
+    <motion.div
+      id={id}
+      aria-hidden
+      className="mobile-section-anchor"
+      style={{ height: 0, scrollMarginTop: MOBILE_DOCK_HEIGHT + 28 }}
+    />
+  );
+}
+
+function useMobileScrollProgress(scrollRoot, enabled) {
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    if (!enabled) return;
+    const root = scrollRoot?.current;
+    if (!root) return;
+
+    const update = () => {
+      const max = root.scrollHeight - root.clientHeight;
+      setProgress(max <= 4 ? 0 : Math.min(1, root.scrollTop / max));
+    };
+
+    update();
+    root.addEventListener("scroll", update, { passive: true });
+    const ro = new ResizeObserver(update);
+    ro.observe(root);
+    return () => {
+      root.removeEventListener("scroll", update);
+      ro.disconnect();
+    };
+  }, [scrollRoot, enabled]);
+
+  return progress;
+}
+
+function MobileDockNav({ scrollRoot, activeId, visible }) {
+  const progress = useMobileScrollProgress(scrollRoot, visible);
+  const reduceMotion = useReducedMotion();
+
+  const scrollTo = (sectionId) => {
+    const root = scrollRoot?.current;
+    const target = document.getElementById(sectionId);
+    if (!root || !target) return;
+    playClick();
+    const rootTop = root.getBoundingClientRect().top;
+    const targetTop = target.getBoundingClientRect().top;
+    root.scrollTo({
+      top: root.scrollTop + targetTop - rootTop - (MOBILE_DOCK_HEIGHT + 20),
+      behavior: "smooth",
+    });
+  };
+
+  return (
+    <AnimatePresence>
+      {visible ? (
+        <motion.nav
+          key="mobile-dock"
+          className="mobile-dock-nav"
+          aria-label="Jump to section"
+          initial={reduceMotion ? false : { y: -22, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: -14, opacity: 0 }}
+          transition={{ duration: 0.52, ease: EASE, delay: 0.1 }}
+          style={{
+            position: "absolute",
+            top: "max(10px, env(safe-area-inset-top, 0px))",
+            left: MOBILE_CARD_INSET,
+            right: MOBILE_CARD_INSET,
+            zIndex: 35,
+            display: "flex",
+            gap: 4,
+            padding: 4,
+            paddingBottom: 6,
+            borderRadius: 3,
+            border: "1px solid rgba(255, 122, 41, 0.35)",
+            background: "rgba(10, 6, 4, 0.88)",
+            backdropFilter: "blur(10px)",
+            boxShadow: "0 8px 28px rgba(0, 0, 0, 0.45)",
+            pointerEvents: "auto",
+            overflow: "hidden",
+          }}
+        >
+          {MOBILE_NAV_SECTIONS.map(({ id, label }) => {
+            const isActive = activeId === id;
+            return (
+              <button
+                key={id}
+                type="button"
+                className={
+                  isActive
+                    ? "mobile-dock-nav__btn mobile-dock-nav__btn--active"
+                    : "mobile-dock-nav__btn"
+                }
+                onClick={() => scrollTo(id)}
+                aria-current={isActive ? "true" : undefined}
+                style={{
+                  flex: "1 1 0",
+                  minWidth: 0,
+                  margin: 0,
+                  padding: "6px 2px",
+                  border: isActive
+                    ? "1px solid rgba(255, 122, 41, 0.65)"
+                    : "1px solid transparent",
+                  borderRadius: 2,
+                  background: isActive
+                    ? "rgba(255, 122, 41, 0.18)"
+                    : "transparent",
+                  fontFamily: "'VT323', monospace",
+                  fontSize: 11,
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                  color: isActive ? ACCENT : "rgba(255, 180, 112, 0.72)",
+                  textShadow: isActive
+                    ? "0 0 8px rgba(255, 122, 41, 0.5)"
+                    : "none",
+                  cursor: "pointer",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {label}
+              </button>
+            );
+          })}
+          <div
+            className="mobile-dock-progress-track"
+            aria-hidden
+            style={{
+              position: "absolute",
+              left: 6,
+              right: 6,
+              bottom: 3,
+              height: 2,
+              borderRadius: 1,
+              background: "rgba(255, 122, 41, 0.14)",
+              overflow: "hidden",
+            }}
+          >
+            <motion.div
+              className="mobile-dock-progress-fill"
+              initial={false}
+              animate={{ scaleX: progress }}
+              transition={{ duration: 0.12, ease: "linear" }}
+              style={{
+                height: "100%",
+                width: "100%",
+                transformOrigin: "left center",
+                background:
+                  "linear-gradient(90deg, rgba(255,122,41,0.55), #ff7a29)",
+                boxShadow: "0 0 10px rgba(255, 122, 41, 0.55)",
+              }}
+            />
+          </div>
+        </motion.nav>
+      ) : null}
+    </AnimatePresence>
+  );
+}
+
+function useMobileSectionSpy(scrollRoot, enabled) {
+  const [activeId, setActiveId] = useState(MOBILE_NAV_SECTIONS[0].id);
+
+  useEffect(() => {
+    if (!enabled) return;
+    const root = scrollRoot?.current;
+    if (!root) return;
+
+    const targets = MOBILE_NAV_SECTIONS.map(({ id }) =>
+      document.getElementById(id)
+    ).filter(Boolean);
+    if (targets.length === 0) return;
+
+    const ratios = new Map();
+    const obs = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          ratios.set(entry.target.id, entry.intersectionRatio);
+        });
+        let bestId = MOBILE_NAV_SECTIONS[0].id;
+        let bestRatio = 0;
+        MOBILE_NAV_SECTIONS.forEach(({ id }) => {
+          const ratio = ratios.get(id) ?? 0;
+          if (ratio > bestRatio) {
+            bestRatio = ratio;
+            bestId = id;
+          }
+        });
+        if (bestRatio > 0.08) {
+          setActiveId((prev) => (prev === bestId ? prev : bestId));
+        }
+      },
+      { root, threshold: [0, 0.12, 0.25, 0.4, 0.55] }
+    );
+
+    targets.forEach((el) => obs.observe(el));
+    return () => obs.disconnect();
+  }, [scrollRoot, enabled]);
+
+  return activeId;
+}
+
+function MobileProjectOverlay({ project, isActive = true, size = "card" }) {
+  const titleSize = size === "hero" ? "clamp(22px, 6vw, 30px)" : "clamp(15px, 4.2vw, 19px)";
+  const tagSize = size === "hero" ? 13 : 11;
+
+  return (
+    <motion.div
+      initial={false}
+      animate={{ opacity: isActive ? 1 : 0.88 }}
+      style={{
+        position: "absolute",
+        inset: 0,
+        zIndex: 2,
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "flex-end",
+        padding: size === "hero" ? "18px 16px 16px" : "12px 12px 11px",
+        background:
+          "linear-gradient(180deg, transparent 0%, rgba(8, 5, 4, 0.35) 35%, rgba(6, 4, 3, 0.88) 100%)",
+        pointerEvents: "none",
+      }}
+    >
+      <p
+        style={{
+          margin: 0,
+          fontFamily: "'VT323', monospace",
+          fontSize: titleSize,
+          letterSpacing: "0.12em",
+          textTransform: "uppercase",
+          color: "#fff",
+          textShadow: "0 0 14px rgba(255, 122, 41, 0.35)",
+          lineHeight: 1.1,
+        }}
+      >
+        {project.title}
+      </p>
+      <p
+        style={{
+          margin: "6px 0 0",
+          fontFamily: "'DM Sans', sans-serif",
+          fontSize: tagSize,
+          lineHeight: 1.35,
+          color: "rgba(255, 220, 190, 0.9)",
+        }}
+      >
+        {project.tagline}
+      </p>
+      <span
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 6,
+          marginTop: 10,
+          fontFamily: "'VT323', monospace",
+          fontSize: size === "hero" ? 13 : 12,
+          letterSpacing: "0.22em",
+          textTransform: "uppercase",
+          color: ACCENT,
+          textShadow: "0 0 8px rgba(255, 122, 41, 0.45)",
+        }}
+      >
+        Case study →
+      </span>
+    </motion.div>
+  );
+}
+
+function MobileRecycleDock() {
+  const [message, setMessage] = useState(null);
+  const timerRef = useRef(null);
+
+  const activate = () => {
+    playClick();
+    if (timerRef.current) clearTimeout(timerRef.current);
+    setMessage(pickTrashMessage());
+    timerRef.current = setTimeout(() => setMessage(null), 4800);
+  };
+
+  useEffect(
+    () => () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    },
+    []
+  );
+
+  return (
+    <motion.div
+      className="mobile-recycle-dock"
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ delay: 0.35, duration: 0.4, ease: EASE }}
+      style={{
+        position: "absolute",
+        right: MOBILE_CARD_INSET,
+        bottom: "calc(72px + env(safe-area-inset-bottom, 0px))",
+        zIndex: 32,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "flex-end",
+        gap: 8,
+        pointerEvents: "none",
+      }}
+    >
+      <AnimatePresence>
+        {message ? (
+          <motion.div
+            key="trash-msg"
+            role="status"
+            initial={{ opacity: 0, y: 8, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 6, scale: 0.96 }}
+            transition={{ duration: 0.28, ease: EASE }}
+            style={{
+              maxWidth: 220,
+              padding: "10px 12px",
+              border: "1px solid rgba(255, 122, 41, 0.55)",
+              borderRadius: 3,
+              background: "rgba(14, 10, 6, 0.96)",
+              boxShadow: "0 0 20px rgba(255, 122, 41, 0.18)",
+              pointerEvents: "none",
+            }}
+          >
+            <p
+              style={{
+                margin: 0,
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: 12,
+                lineHeight: 1.45,
+                color: "rgba(255, 255, 255, 0.9)",
+              }}
+            >
+              {message}
+            </p>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+      <button
+        type="button"
+        className="mobile-recycle-dock__btn"
+        aria-label="Recycle Bin"
+        onClick={activate}
+        style={{
+          pointerEvents: "auto",
+          margin: 0,
+          padding: "6px 8px 8px",
+          border: "1px solid rgba(255, 122, 41, 0.45)",
+          borderRadius: 3,
+          background: "rgba(10, 6, 4, 0.92)",
+          cursor: "pointer",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 4,
+          boxShadow: "0 6px 20px rgba(0, 0, 0, 0.45)",
+        }}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/images/trash-bin-icon.png"
+          alt=""
+          width={32}
+          height={28}
+          style={{ objectFit: "contain" }}
+          draggable={false}
+        />
+        <span
+          style={{
+            fontFamily: "'VT323', monospace",
+            fontSize: 9,
+            letterSpacing: "0.12em",
+            textTransform: "uppercase",
+            color: ACCENT,
+          }}
+        >
+          Bin
+        </span>
+      </button>
+    </motion.div>
+  );
+}
+
+function MobileBootReady({ show }) {
+  const [dismissed, setDismissed] = useState(false);
+  const reduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (!show) return;
+    setDismissed(false);
+    const t = setTimeout(() => setDismissed(true), reduceMotion ? 1200 : 2200);
+    return () => clearTimeout(t);
+  }, [show, reduceMotion]);
+
+  return (
+    <AnimatePresence>
+      {show && !dismissed ? (
+        <motion.p
+          key="boot-ready"
+          className="mobile-boot-ready"
+          initial={reduceMotion ? false : { opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -4 }}
+          transition={{ duration: 0.42, ease: EASE, delay: 0.18 }}
+          aria-live="polite"
+          style={{
+            position: "absolute",
+            top: "calc(max(10px, env(safe-area-inset-top, 0px)) + 52px)",
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 34,
+            margin: 0,
+            padding: "4px 12px",
+            borderRadius: 2,
+            border: "1px solid rgba(255, 122, 41, 0.4)",
+            background: "rgba(10, 6, 4, 0.9)",
+            fontFamily: "'VT323', monospace",
+            fontSize: 11,
+            letterSpacing: "0.28em",
+            textTransform: "uppercase",
+            color: ACCENT_DIM,
+            textShadow: "0 0 8px rgba(255, 122, 41, 0.35)",
+            pointerEvents: "none",
+            whiteSpace: "nowrap",
+          }}
+        >
+          ▢ Boot complete · scroll to explore
+        </motion.p>
+      ) : null}
+    </AnimatePresence>
   );
 }
 
@@ -1481,28 +2234,26 @@ function MobileDesktop() {
   const showMobileRest = phase === "dashboard";
   const skipWelcomeTyping = phase === "dashboard";
   const scrollRef = useRef(null);
+  const activeSection = useMobileSectionSpy(scrollRef, showMobileRest);
 
   return (
-    <motion.div
-      className="mobile-os"
-      style={{ position: "relative", height: "100vh" }}
-    >
+    <motion.div className="mobile-os">
+      <MobileDockNav
+        scrollRoot={scrollRef}
+        activeId={activeSection}
+        visible={showMobileRest}
+      />
+      <MobileBootReady show={showMobileRest} />
+
       <motion.div
         ref={scrollRef}
         data-mobile-scroll
         className="mobile-os-scroll"
         style={{
-          position: "absolute",
-          inset: 0,
-          overflowY: "auto",
-          overflowX: "hidden",
-          WebkitOverflowScrolling: "touch",
-          touchAction: "pan-y",
-          paddingTop: 20,
-          paddingBottom: 140,
+          paddingTop: showMobileRest ? MOBILE_DOCK_HEIGHT + 24 : 20,
         }}
       >
-        <MobileScrollReveal scrollRoot={scrollRef} variant="fade" delay={0.05}>
+        <MobileJourneyChapter scrollRoot={scrollRef} variant="fade">
           <MobileCard title="welcome.exe" titleExtra={<WelcomeReadAloud compact />}>
             <MobileWelcomeMorph
               phase={phase}
@@ -1511,74 +2262,87 @@ function MobileDesktop() {
               onTypingComplete={handleWelcomeTypingComplete}
             />
           </MobileCard>
-        </MobileScrollReveal>
+        </MobileJourneyChapter>
 
         {showMobileRest ? (
           <>
-        <MobileSectionRule />
+            <MobileJourneyChapter scrollRoot={scrollRef}>
+              <MobileSectionAnchor id="mobile-about" />
+              <MobileJourneySectionLabel scrollRoot={scrollRef} skipTyping={skipWelcomeTyping}>
+                ▢ About
+              </MobileJourneySectionLabel>
+              <MobileCard title="me.txt" titleUppercase={false}>
+                <MobileMeTxtJourney
+                  scrollRoot={scrollRef}
+                  skipTyping={skipWelcomeTyping}
+                />
+              </MobileCard>
+              <div style={{ marginTop: 18 }}>
+                <MobileOpenForWorkStrip />
+              </div>
+            </MobileJourneyChapter>
 
-        <MobileScrollReveal scrollRoot={scrollRef} variant="left" delay={0.04}>
-          <SectionLabel>▢ Selected work · swipe →</SectionLabel>
-        </MobileScrollReveal>
-        <MobileScrollReveal scrollRoot={scrollRef} variant="up" delay={0.1}>
-          <MobileProjectsCarousel scrollRoot={scrollRef} />
-        </MobileScrollReveal>
+            <MobileSectionRule />
 
-        <MobileSectionRule />
+            <MobileJourneyChapter scrollRoot={scrollRef} variant="right">
+              <MobileWorkSection scrollRoot={scrollRef} />
+            </MobileJourneyChapter>
 
-        <MobileScrollReveal scrollRoot={scrollRef} variant="right" delay={0.04}>
-          <SectionLabel>▢ Skills · orbiting</SectionLabel>
-        </MobileScrollReveal>
-        <MobileScrollReveal scrollRoot={scrollRef} variant="up" delay={0.12}>
-          <motion.div
-            style={{
-              padding: "8px 14px 28px",
-              display: "flex",
-              justifyContent: "center",
-            }}
-          >
-            <SkillsPlanet variant="mobile" scrollRootSelector="[data-mobile-scroll]" />
-          </motion.div>
-        </MobileScrollReveal>
+            <MobileSectionRule />
 
-        <MobileSectionRule />
+            <MobileJourneyChapter scrollRoot={scrollRef} variant="left">
+              <MobileSectionAnchor id="mobile-skills" />
+              <MobileJourneySectionLabel scrollRoot={scrollRef} skipTyping={skipWelcomeTyping}>
+                ▢ Skills · tap a node
+              </MobileJourneySectionLabel>
+              <motion.div className="mobile-skills-wrap">
+                <SkillsPlanet variant="mobile" scrollRootSelector="[data-mobile-scroll]" />
+              </motion.div>
+            </MobileJourneyChapter>
 
-        <MobileScrollReveal scrollRoot={scrollRef} variant="left" delay={0.06}>
-          <MobileCard title="me.txt" titleUppercase={false}>
-            <MeTxtBody />
-          </MobileCard>
-        </MobileScrollReveal>
+            <MobileSectionRule />
 
-        <MobileSectionRule />
+            <MobileJourneyChapter scrollRoot={scrollRef}>
+              <MobileSectionAnchor id="mobile-more" />
+              <MobileJourneySectionLabel scrollRoot={scrollRef} skipTyping={skipWelcomeTyping}>
+                ▢ Other stuff
+              </MobileJourneySectionLabel>
+              <MobileCard title="Other stuff" titleUppercase={false} compactBody>
+                <OtherStuffFolder variant="mobile" />
+              </MobileCard>
+            </MobileJourneyChapter>
 
-        <MobileScrollReveal scrollRoot={scrollRef} variant="right" delay={0.05}>
-          <SectionLabel>▢ Other stuff · photos & sketches</SectionLabel>
-        </MobileScrollReveal>
-        <MobileScrollReveal scrollRoot={scrollRef} variant="up" delay={0.1}>
-          <MobileCard title="Other stuff" titleUppercase={false}>
-            <OtherStuffFolder variant="mobile" />
-          </MobileCard>
-        </MobileScrollReveal>
+            <MobileSectionRule />
 
-        <MobileScrollReveal scrollRoot={scrollRef} variant="fade" delay={0.08}>
-          <MobileOpenForWorkStrip />
-        </MobileScrollReveal>
-
-        <MobileScrollReveal scrollRoot={scrollRef} variant="right" delay={0.1}>
-          <MobileCard title="contact.msg">
-            <MobileContact />
-          </MobileCard>
-        </MobileScrollReveal>
+            <MobileJourneyChapter scrollRoot={scrollRef}>
+              <MobileSectionAnchor id="mobile-contact" />
+              <MobileJourneySectionLabel scrollRoot={scrollRef} skipTyping={skipWelcomeTyping}>
+                ▢ Contact
+              </MobileJourneySectionLabel>
+              <MobileCard title="contact.msg">
+                <MobileContact
+                  scrollRoot={scrollRef}
+                  skipTyping={skipWelcomeTyping}
+                />
+              </MobileCard>
+            </MobileJourneyChapter>
           </>
         ) : null}
       </motion.div>
 
+      {showMobileRest ? <MobileRecycleDock /> : null}
       <StatusBar />
     </motion.div>
   );
 }
 
-function MobileCard({ title, children, titleUppercase = true, titleExtra }) {
+function MobileCard({
+  title,
+  children,
+  titleUppercase = true,
+  titleExtra,
+  compactBody = false,
+}) {
   return (
     <section
       className="mobile-window-card"
@@ -1631,7 +2395,14 @@ function MobileCard({ title, children, titleUppercase = true, titleExtra }) {
           <span style={{ flexShrink: 0, display: "inline-flex" }}>{titleExtra}</span>
         ) : null}
       </div>
-      <div style={{ padding: "16px 16px 18px", position: "relative", zIndex: 1 }}>
+      <div
+        className={
+          compactBody
+            ? "mobile-window-body mobile-window-body--compact"
+            : "mobile-window-body"
+        }
+        style={{ position: "relative", zIndex: 1 }}
+      >
         {children}
       </div>
     </section>
@@ -1641,8 +2412,9 @@ function MobileCard({ title, children, titleUppercase = true, titleExtra }) {
 function SectionLabel({ children }) {
   return (
     <p
+      className="mobile-section-label"
       style={{
-        margin: `${MOBILE_BLOCK_GAP}px ${MOBILE_CARD_INSET + 4}px 14px`,
+        margin: `${MOBILE_BLOCK_GAP}px ${MOBILE_CARD_INSET + 4}px 12px`,
         fontFamily: "'VT323', monospace",
         fontSize: 13,
         letterSpacing: "0.32em",
@@ -1798,44 +2570,60 @@ function MobileWelcomeBody({ skipTyping = false, onTypingComplete }) {
       />
       {typingDone ? (
         <>
-      <FadeInLine delay={skipTyping ? 0 : 120}>
-        <p
-          style={{
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: 14,
-            color: "rgba(255,255,255,0.8)",
-            lineHeight: 1.7,
-            margin: 0,
-          }}
-        >
-          {about.bio}
-        </p>
-      </FadeInLine>
-      <FadeInLine delay={skipTyping ? 80 : 420}>
-        <p
-          style={{
-            fontFamily: "'VT323', monospace",
-            fontSize: 13,
-            letterSpacing: "0.45em",
-            textTransform: "uppercase",
-            color: ACCENT_DIM,
-            margin: "18px 0 0",
-          }}
-        >
-          ─ Dream · Think · Build ─
-        </p>
-      </FadeInLine>
+          <FadeInLine delay={skipTyping ? 0 : 120}>
+            <p
+              style={{
+                fontFamily: "'VT323', monospace",
+                fontSize: 13,
+                letterSpacing: "0.45em",
+                textTransform: "uppercase",
+                color: ACCENT_DIM,
+                margin: "14px 0 0",
+              }}
+            >
+              ─ Dream · Think · Build ─
+            </p>
+          </FadeInLine>
+          {!skipTyping ? (
+            <motion.p
+              className="mobile-scroll-hint"
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: [0.35, 0.85, 0.35], y: 0 }}
+              transition={{
+                opacity: { duration: 2.4, repeat: Infinity, ease: "easeInOut" },
+                y: { duration: 0.5, delay: 0.35 },
+              }}
+              style={{
+                margin: "28px 0 0",
+                textAlign: "center",
+                fontFamily: "'VT323', monospace",
+                fontSize: 12,
+                letterSpacing: "0.35em",
+                textTransform: "uppercase",
+                color: "rgba(255, 180, 112, 0.55)",
+              }}
+            >
+              ▼ scroll to explore
+            </motion.p>
+          ) : null}
         </>
       ) : null}
     </div>
   );
 }
 
-function MobileProjectsCarousel({ scrollRoot }) {
+function MobileProjectsCarousel({
+  scrollRoot,
+  activeIdx: controlledIdx,
+  onActiveChange,
+  focusStrength = 0,
+}) {
   const carouselRef = useRef(null);
   const cardsRef = useRef([]);
   const dragRef = useRef(null);
-  const [activeIdx, setActiveIdx] = useState(0);
+  const [internalIdx, setInternalIdx] = useState(0);
+  const activeIdx = controlledIdx ?? internalIdx;
+  const setActiveIdx = onActiveChange ?? setInternalIdx;
   const reduceMotion = useReducedMotion();
   const sectionRef = useRef(null);
   const sectionInView = useInView(sectionRef, {
@@ -1918,6 +2706,11 @@ function MobileProjectsCarousel({ scrollRoot }) {
   };
 
   const showCards = reduceMotion || sectionInView;
+  const focus = Math.min(1, Math.max(0, focusStrength));
+  const activeScale = 1 + 0.07 * focus;
+  const inactiveScale = 0.86 - 0.04 * focus;
+  const inactiveOpacity = 0.52 - 0.18 * focus;
+  const inactiveBlur = focus > 0.12 ? `${Math.round(5 * focus)}px` : "0px";
 
   return (
     <motion.div ref={sectionRef} style={{ marginBottom: 4 }}>
@@ -1938,7 +2731,7 @@ function MobileProjectsCarousel({ scrollRoot }) {
         scrollPaddingInline: "14vw",
         display: "flex",
         gap: "7vw",
-        padding: "18px 14vw 32px",
+        padding: "12px 12vw 20px",
         WebkitOverflowScrolling: "touch",
         touchAction: "pan-x",
         overscrollBehaviorX: "contain",
@@ -1955,61 +2748,159 @@ function MobileProjectsCarousel({ scrollRoot }) {
             ref={(el) => (cardsRef.current[i] = el)}
             data-idx={i}
             style={{
-              flex: "0 0 68vw",
-              maxWidth: 360,
-              aspectRatio: "1 / 1",
+              flex: "0 0 52vw",
+              maxWidth: 260,
+              aspectRatio: "5 / 4",
               scrollSnapAlign: "center",
               willChange: "transform, opacity",
             }}
             initial={reduceMotion ? false : { opacity: 0, y: 36, scale: 0.88 }}
             animate={{
-              opacity: showCards ? (isActive ? 1 : 0.52) : 0,
-              y: showCards ? (isActive ? 0 : 8) : 36,
-              scale: showCards ? (isActive ? 1 : 0.86) : 0.88,
+              opacity: showCards ? (isActive ? 1 : inactiveOpacity) : 0,
+              y: showCards ? (isActive ? 0 : 8 + 4 * focus) : 36,
+              scale: showCards ? (isActive ? activeScale : inactiveScale) : 0.88,
+              filter: showCards
+                ? isActive
+                  ? "blur(0px)"
+                  : `blur(${inactiveBlur})`
+                : "blur(0px)",
             }}
             transition={{
               opacity: {
-                duration: 0.45,
-                delay: showCards ? i * 0.09 : 0,
+                duration: isActive ? 0.34 : 0.45,
+                delay: showCards && !isActive ? 0 : showCards ? i * 0.09 : 0,
               },
               y: { duration: 0.62, ease: EASE, delay: showCards ? i * 0.09 : 0 },
               scale: {
-                duration: isActive ? 0.34 : 0.62,
+                duration: isActive ? 0.34 : 0.52,
                 ease: EASE,
                 delay: showCards ? i * 0.09 : 0,
               },
+              filter: { duration: 0.38, ease: EASE },
             }}
           >
             <MobileProjectCard
               project={p}
               gradient={PROJECT_GRADIENTS[i % PROJECT_GRADIENTS.length]}
+              isActive={isActive}
+              showOverlay={false}
             />
           </motion.div>
         );
       })}
       </motion.div>
+      <div
+        className="mobile-carousel-meta"
+        aria-live="polite"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 12,
+          padding: "0 16px 8px",
+        }}
+      >
+        <span
+          style={{
+            fontFamily: "'VT323', monospace",
+            fontSize: 12,
+            letterSpacing: "0.28em",
+            textTransform: "uppercase",
+            color: ACCENT,
+            textShadow: "0 0 6px rgba(255, 122, 41, 0.4)",
+          }}
+        >
+          {String(activeIdx + 1).padStart(2, "0")} / {String(projects.length).padStart(2, "0")}
+        </span>
+        <motion.div
+          style={{ display: "flex", gap: 6, alignItems: "center" }}
+          aria-hidden
+        >
+          {projects.map((p, i) => (
+            <button
+              key={p.id}
+              type="button"
+              className="mobile-carousel-dot"
+              aria-label={`Go to ${p.title}`}
+              onClick={() => {
+                const el = cardsRef.current[i];
+                const carousel = carouselRef.current;
+                if (!el || !carousel) return;
+                playClick();
+                const target =
+                  el.offsetLeft - (carousel.clientWidth - el.offsetWidth) / 2;
+                carousel.scrollTo({ left: target, behavior: "smooth" });
+              }}
+              style={{
+                width: i === activeIdx ? 18 : 7,
+                height: 7,
+                margin: 0,
+                padding: 0,
+                border: "none",
+                borderRadius: 1,
+                background:
+                  i === activeIdx
+                    ? ACCENT
+                    : "rgba(255, 122, 41, 0.28)",
+                boxShadow:
+                  i === activeIdx
+                    ? "0 0 10px rgba(255, 122, 41, 0.65)"
+                    : "none",
+                cursor: "pointer",
+                transition: "width 0.25s ease, background 0.25s ease",
+              }}
+            />
+          ))}
+        </motion.div>
+      </div>
+      <p
+        style={{
+          margin: "0 0 4px",
+          textAlign: "center",
+          fontFamily: "'VT323', monospace",
+          fontSize: 11,
+          letterSpacing: "0.22em",
+          textTransform: "uppercase",
+          color: "rgba(255, 180, 112, 0.55)",
+        }}
+      >
+        Swipe for more →
+      </p>
     </motion.div>
   );
 }
 
-function MobileProjectCard({ project, gradient }) {
+function MobileProjectCard({
+  project,
+  gradient,
+  size = "card",
+  isActive = true,
+  showOverlay = true,
+}) {
   const heroSrc = project.thumb ?? project.caseStudyHero ?? null;
   const heroSrcEnc = heroSrc ? encodeURI(heroSrc) : null;
+  const isHero = size === "hero";
 
   return (
-    <Link
+    <ProjectViewLink
       href={`/work/${project.slug}`}
       prefetch
+      className={isHero ? "mobile-project-card mobile-project-card--hero" : "mobile-project-card"}
       aria-label={`Open case study: ${project.title}`}
+      onClick={() => playClick()}
       style={{
         position: "relative",
         display: "block",
         width: "100%",
-        height: "100%",
+        height: isHero ? undefined : "100%",
+        aspectRatio: isHero ? "4 / 5" : undefined,
+        maxHeight: isHero ? "min(72vh, 520px)" : undefined,
         overflow: "hidden",
         borderRadius: 3,
-        border: "1px solid rgba(255, 122, 41, 0.45)",
-        boxShadow: "0 8px 24px rgba(0, 0, 0, 0.5)",
+        border: `1px solid rgba(255, 122, 41, ${isActive ? 0.55 : 0.35})`,
+        boxShadow: isActive
+          ? "0 12px 36px rgba(0, 0, 0, 0.55), 0 0 24px rgba(255, 122, 41, 0.14)"
+          : "0 8px 24px rgba(0, 0, 0, 0.5)",
         cursor: "pointer",
         color: "inherit",
         textDecoration: "none",
@@ -2022,6 +2913,9 @@ function MobileProjectCard({ project, gradient }) {
           position: "absolute",
           inset: 0,
           background: gradient,
+          viewTransitionName: isActive
+            ? projectHeroTransitionName(project.slug)
+            : undefined,
         }}
       >
         {heroSrcEnc ? (
@@ -2062,14 +2956,63 @@ function MobileProjectCard({ project, gradient }) {
           }}
         />
       </div>
+      {showOverlay ? (
+        <MobileProjectOverlay project={project} isActive={isActive} size={size} />
+      ) : null}
+    </ProjectViewLink>
+  );
+}
+
+function MobileScrollTypedMailto({ scrollRoot, skipTyping = false }) {
+  const ref = useRef(null);
+  const reduceMotion = useReducedMotion();
+  const inView = useInView(ref, {
+    root: scrollRoot ?? undefined,
+    once: true,
+    amount: 0.35,
+  });
+  const active = reduceMotion || skipTyping || inView;
+
+  return (
+    <Link
+      ref={ref}
+      href={`mailto:${about.email}`}
+      style={{
+        display: "block",
+        fontFamily: "'VT323', monospace",
+        fontSize: "clamp(20px, 5vw, 26px)",
+        letterSpacing: "0.12em",
+        color: "#fff",
+        textShadow: "0 0 10px rgba(255, 122, 41, 0.45)",
+        wordBreak: "break-word",
+        textDecoration: "none",
+      }}
+    >
+      <TypedLine
+        text={about.email}
+        charMs={20}
+        delay={480}
+        skipTyping={skipTyping}
+        enabled={active}
+        soundEvery={2}
+        useThrottledSound
+        as="span"
+        style={{ display: "block" }}
+      />
     </Link>
   );
 }
 
-function MobileContact() {
+function MobileContact({ scrollRoot, skipTyping = false }) {
   return (
     <div style={{ paddingTop: 4 }}>
-      <p
+      <ScrollTypedLine
+        scrollRoot={scrollRoot}
+        skipTyping={skipTyping}
+        text="▢ Get in touch"
+        charMs={28}
+        delay={100}
+        amount={0.4}
         style={{
           fontFamily: "'VT323', monospace",
           fontSize: 13,
@@ -2077,24 +3020,10 @@ function MobileContact() {
           textTransform: "uppercase",
           color: ACCENT_DIM,
           marginBottom: 16,
-        }}
-      >
-        ▢ Get in touch
-      </p>
-      <a
-        href={`mailto:${about.email}`}
-        style={{
           display: "block",
-          fontFamily: "'VT323', monospace",
-          fontSize: "clamp(20px, 5vw, 26px)",
-          letterSpacing: "0.12em",
-          color: "#fff",
-          textShadow: "0 0 10px rgba(255, 122, 41, 0.45)",
-          wordBreak: "break-word",
         }}
-      >
-        {about.email}
-      </a>
+      />
+      <MobileScrollTypedMailto scrollRoot={scrollRoot} skipTyping={skipTyping} />
       <div
         style={{
           marginTop: 20,
@@ -2156,18 +3085,6 @@ function MobileContact() {
           Instagram
         </a>
       </div>
-      <p
-        style={{
-          marginTop: 28,
-          fontFamily: "'VT323', monospace",
-          fontSize: 13,
-          letterSpacing: "0.4em",
-          textTransform: "uppercase",
-          color: ACCENT_DIM,
-        }}
-      >
-        ─ Currently open for work ─
-      </p>
     </div>
   );
 }
