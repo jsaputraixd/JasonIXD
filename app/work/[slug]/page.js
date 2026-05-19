@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { projects } from "@/data/projects";
-import { about } from "@/data/about";
 import {
   projectHeroTransitionName,
   projectTitleTransitionName,
 } from "@/lib/viewTransition";
 import ProjectPageListen from "@/components/ProjectPageListen";
 import CaseStudyVideos from "@/components/CaseStudyVideos";
+import CaseStudyEndcap from "@/components/CaseStudyEndcap";
 
 const ACCENT = "#FF7A29";
 
@@ -53,186 +53,6 @@ function CaseStudySubTitle({ children }) {
 function normalizeCaseStudyImage(entry) {
   if (typeof entry === "string") return { src: entry, alt: "" };
   return { src: entry.src, alt: entry.alt ?? "" };
-}
-const ACCENT_SOFT = "rgba(255, 180, 112, 0.85)";
-
-function ContactEndIcon() {
-  return (
-    <svg
-      width={44}
-      height={44}
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden
-      style={{ opacity: 0.9 }}
-    >
-      <path
-        d="M6.5 3h11c1 0 2 .9 2 2v14c0 1.1-.9 2-2 2h-11c-1.1 0-2-.9-2-2V5c0-1.1.9-2 2-2z"
-        fill="rgba(255,122,41,0.08)"
-        stroke={ACCENT}
-        strokeWidth={1.25}
-        strokeLinejoin="round"
-      />
-      <path
-        d="M9 6.5h6M10 18h4"
-        stroke={ACCENT}
-        strokeWidth={1.1}
-        strokeLinecap="round"
-        opacity={0.85}
-      />
-    </svg>
-  );
-}
-
-function CaseStudyEndcap({ nextProject, linkStyle, hasRichCaseStudy }) {
-  const rowBase = {
-    display: "flex",
-    flexWrap: "wrap",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 12,
-    padding: "14px 18px",
-    borderRadius: 3,
-    border: "1px solid rgba(255, 122, 41, 0.42)",
-    background: "rgba(18, 12, 8, 0.92)",
-    boxShadow:
-      "inset 0 1px 0 rgba(255, 122, 41, 0.12), 0 0 20px rgba(0,0,0,0.35)",
-  };
-
-  const labelStyle = {
-    fontFamily: "'VT323', monospace",
-    fontSize: 14,
-    letterSpacing: "0.32em",
-    textTransform: "uppercase",
-    color: ACCENT_SOFT,
-    textShadow: "0 0 8px rgba(255, 122, 41, 0.35)",
-  };
-
-  const valueLinkStyle = {
-    fontFamily: "'DM Sans', sans-serif",
-    fontSize: 15,
-    color: "#e8e8e8",
-    textDecoration: "none",
-  };
-
-  const rows = [
-    {
-      label: "Email",
-      href: `mailto:${about.email}`,
-      value: about.email,
-    },
-    {
-      label: "LinkedIn",
-      href: about.socials.linkedin,
-      value: "linkedin.com/in/jasonixd",
-    },
-    {
-      label: "Instagram",
-      href: about.socials.instagram,
-      value: "@jason.iv_s",
-    },
-  ];
-
-  return (
-    <footer
-      className="mt-28 pt-16 pb-8 px-6 md:px-12"
-      style={{
-        /* Full-bleed from constrained parent: gradient spans entire viewport */
-        width: "100vw",
-        maxWidth: "100vw",
-        marginLeft: "calc(50% - 50vw)",
-        marginRight: "calc(50% - 50vw)",
-        borderTop: "1px solid rgba(255, 122, 41, 0.28)",
-        backgroundColor: "#171717",
-        backgroundImage: [
-          "radial-gradient(ellipse 130% 75% at 50% 0%, rgba(255, 122, 41, 0.14) 0%, transparent 58%)",
-          "linear-gradient(to bottom, rgba(255, 122, 41, 0.06), transparent 52%)",
-        ].join(", "),
-      }}
-    >
-      <div
-        className="mx-auto w-full"
-        style={{ maxWidth: 960 }}
-      >
-      <div
-        className="flex flex-wrap items-center justify-between gap-6"
-        style={{ marginBottom: 40 }}
-      >
-        <Link href="/#sketchbook" data-cursor="hover" style={linkStyle}>
-          ← Back to home
-        </Link>
-        {nextProject ? (
-          <Link
-            href={`/work/${nextProject.slug}`}
-            data-cursor="hover"
-            style={linkStyle}
-          >
-            Next: {nextProject.title} →
-          </Link>
-        ) : (
-          <span style={{ ...linkStyle, opacity: 0.35 }}>End of the reel</span>
-        )}
-      </div>
-
-      <div className="flex flex-col items-center text-center" style={{ marginBottom: 36 }}>
-        <ContactEndIcon />
-        <h2
-          className="mt-5 mb-3"
-          style={{
-            fontFamily: "'Bonbon', cursive",
-            fontSize: "clamp(34px, 6.5vw, 56px)",
-            lineHeight: 1.1,
-            color: "#ffffff",
-            textShadow: "0 0 28px rgba(255, 122, 41, 0.22)",
-            maxWidth: 520,
-            margin: "20px auto 12px",
-          }}
-        >
-          Ready to build something together?
-        </h2>
-        <p
-          style={{
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: 16,
-            color: "#9a9a9a",
-            lineHeight: 1.6,
-            maxWidth: 420,
-            margin: 0,
-          }}
-        >
-          {hasRichCaseStudy
-            ? "I’d love to hear what you’re making — collaborations, freelance, or a quick hello."
-            : "Full process write-ups are on the way. Meanwhile, say hi — I’m open to new work."}
-        </p>
-      </div>
-
-      <ul
-        className="m-0 p-0 list-none flex flex-col gap-3"
-        style={{ maxWidth: 640, margin: "0 auto" }}
-      >
-        {rows.map((row) => (
-          <li key={row.label}>
-            <a
-              href={row.href}
-              data-cursor="hover"
-              rel={row.href.startsWith("http") ? "noopener noreferrer" : undefined}
-              target={row.href.startsWith("http") ? "_blank" : undefined}
-              style={{
-                ...rowBase,
-                textDecoration: "none",
-                color: "inherit",
-              }}
-            >
-              <span style={labelStyle}>{row.label}</span>
-              <span style={valueLinkStyle}>{row.value}</span>
-            </a>
-          </li>
-        ))}
-      </ul>
-      </div>
-    </footer>
-  );
 }
 
 function CaseStudyRichLayout({ project, frameStyle }) {
@@ -720,7 +540,6 @@ export default async function ProjectPage({ params }) {
 
       <CaseStudyEndcap
         nextProject={nextProject}
-        linkStyle={linkStyle}
         hasRichCaseStudy={hasRichCaseStudy}
       />
     </main>

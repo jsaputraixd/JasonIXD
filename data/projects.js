@@ -249,7 +249,7 @@ const kitsCaseStudyRich = {
 
 /** Dairy Delight */
 const DA = `${P}/dairy-delight`;
-const dairyHero = `${DA}/Dairy & Delight Poster 1.jpg`;
+const dairyHero = `${DA}/Hero_Image.png`;
 
 const dairyCaseStudyRich = {
   overview: {
@@ -412,7 +412,7 @@ export const projects = [
     tags: ["Brand", "Product Design"],
     slug: "dairy-delight",
     thumb: dairyHero,
-    caseStudyHero: null,
+    caseStudyHero: dairyHero,
     caseStudyGallery: [],
     caseStudyPdfs: [],
     caseStudyRich: dairyCaseStudyRich,
