@@ -13,12 +13,82 @@ const dreamDetectiveGallery = Array.from({ length: 17 }, (_, i) => {
   return `${DD}/${dreamDetectiveSlideBase(i)}.jpg`;
 });
 
-const dreamDetectivePdfs = Array.from({ length: 17 }, (_, i) => ({
-  label: `Slide ${dreamDetectiveSlideBase(i)} · PDF`,
-  href: `${DD_PDF}/${dreamDetectiveSlideBase(i)}.pdf`,
-}));
+/** Built at dev/build from PDF Slides/*.pdf → Dream-Detective-full-deck.pdf */
+const dreamDetectiveDeckPdf = {
+  label: "Full slide deck (PDF, 17 pages)",
+  href: `${DD}/Dream-Detective-full-deck.pdf`,
+};
 
 const dreamDetectiveHero = `${DD}/DreamDetectiveHero 1.jpg`;
+
+function ddSlide(n) {
+  const label = n === 1 ? "01" : String(n);
+  return `${DD}/Dream Detective - ${label}.jpg`;
+}
+
+const dreamDetectiveCaseStudyRich = {
+  overview: {
+    client: "Academic UX Project (Concept App)",
+    industry: "Health / Wellness · Mobile",
+    timeline: "3 Weeks",
+    role: "UX & Interaction Designer",
+  },
+  introParagraphs: [
+    "Dream Detective is an iOS alarm app that replaces the snooze button with a daily episodic audio mystery. Each morning, users wake up to the next chapter of a story — but only if they get up. Snoozing doesn’t pause the narrative: it locks that day’s chapter permanently, using loss aversion to make oversleeping feel like missing a plot beat, not just being late.",
+    "The design challenge was making a punitive mechanic feel fair and motivating. I mapped the wake-up journey, prototyped audio-first interactions, and shaped a visual system that reads clearly at 6 AM — high contrast, minimal steps, and obvious consequences before the user commits to snooze.",
+  ],
+  finalDesign: {
+    images: [
+      {
+        src: dreamDetectiveHero,
+        alt: "Dream Detective hero — alarm screen with mystery chapter branding.",
+      },
+    ],
+  },
+  videos: [
+    // Add your screen recording here, then uncomment:
+    // {
+    //   kind: "file",
+    //   src: `${DD}/DreamDetective-flow.mp4`,
+    //   label: "Alarm & chapter flow",
+    // },
+  ],
+  processWork: {
+    title: "Process & deck",
+    blocks: [
+      {
+        title: "Concept & problem framing",
+        paragraphs: [
+          "Early slides establish the insight: standard alarms train users to snooze without consequence. Dream Detective reframes waking up as serial storytelling — progress is the reward, and skipping a day is irreversible.",
+        ],
+        images: [ddSlide(1), ddSlide(2), ddSlide(3), ddSlide(4)],
+      },
+      {
+        title: "Journey & interaction model",
+        paragraphs: [
+          "User flows explore how someone discovers the app, sets their first mystery, experiences the alarm, and faces the snooze decision. The interaction model keeps audio central while UI supports scan-ability in low-light, half-awake moments.",
+        ],
+        images: [ddSlide(5), ddSlide(6), ddSlide(7), ddSlide(8)],
+      },
+      {
+        title: "Visual & UI direction",
+        paragraphs: [
+          "Mood, typography, and screen layouts evolve toward a noir-adjacent tone without sacrificing legibility. Components are sized for thumb reach, with clear hierarchy between “start chapter,” timer, and destructive snooze actions.",
+        ],
+        images: [ddSlide(9), ddSlide(10), ddSlide(11), ddSlide(12)],
+      },
+      {
+        title: "Final screens & alarm experience",
+        paragraphs: [
+          "High-fidelity screens show the chapter player, daily lock state, and library of past episodes. The system communicates what you’ll lose if you snooze before the user taps — making the mechanic legible, not hidden.",
+        ],
+        images: [ddSlide(13), ddSlide(14), ddSlide(15), ddSlide(16), ddSlide(17)],
+      },
+    ],
+  },
+  conclusion:
+    "Dream Detective was an exercise in designing behavior change through narrative stakes. The strongest lesson: when the product goal is to disrupt a habit (snoozing), the interface has to make tradeoffs obvious early — and the story has to be good enough that missing a chapter actually hurts.",
+};
 
 /** Eleara */
 const EL = `${P}/eleara`;
@@ -27,7 +97,87 @@ const elearaGallery = Array.from({ length: 19 }, (_, i) => {
   return `${EL}/Eleara_pages-to-jpg-${n}.jpg`;
 });
 const elearaHero = elearaGallery[0];
-const elearaCaseStudyGallery = elearaGallery.slice(1);
+
+/** Built at dev/build from slide JPGs → Eleara-full-deck.pdf */
+const elearaDeckPdf = {
+  label: "Full slide deck (PDF, 19 pages)",
+  href: `${EL}/Eleara-full-deck.pdf`,
+};
+
+function elearaSlide(n) {
+  return `${EL}/Eleara_pages-to-jpg-${String(n).padStart(4, "0")}.jpg`;
+}
+
+const elearaCaseStudyRich = {
+  overview: {
+    client: "Academic UX Project (Concept System)",
+    industry: "Health Tech · Wearables",
+    timeline: "3 Weeks",
+    role: "UX & Systems Designer",
+  },
+  introParagraphs: [
+    "Eleara is a predictive vestibular companion for people who experience dizziness and balance risk. The system combines wearable sensing, a support network, and adaptive stimulation to catch episodes early — and help users feel steadier in everyday movement.",
+    "I designed across hardware touchpoints, caregiver alerts, and a companion app. The work focused on trust: users need to understand what the device is doing, when it will intervene, and who gets notified — without adding anxiety to an already stressful health experience.",
+  ],
+  finalDesign: {
+    images: [
+      {
+        src: elearaHero,
+        alt: "Eleara overview — wearable companion and app ecosystem.",
+      },
+    ],
+  },
+  videos: [
+    // Add your flow recording here, then uncomment:
+    // {
+    //   kind: "file",
+    //   src: `${EL}/Eleara-flow.mp4`,
+    //   label: "Companion app flow",
+    // },
+  ],
+  processWork: {
+    title: "Process & deck",
+    blocks: [
+      {
+        title: "Problem & stakeholders",
+        paragraphs: [
+          "The deck opens on vestibular disorders as an invisible, episodic problem — and the gap between clinical visits and daily life. Stakeholders include the wearer, clinicians, and family or caregivers who may receive alerts.",
+        ],
+        images: [elearaSlide(2), elearaSlide(3), elearaSlide(4)],
+      },
+      {
+        title: "Research & product vision",
+        paragraphs: [
+          "Research synthesis and personas ground the concept in real constraints: battery life, skin contact, false positives, and social stigma of wearing a medical device. The vision positions Eleara as proactive, not punitive.",
+        ],
+        images: [elearaSlide(5), elearaSlide(6), elearaSlide(7), elearaSlide(8)],
+      },
+      {
+        title: "Wearable & system architecture",
+        paragraphs: [
+          "Hardware explorations and system diagrams show how sensing, risk scoring, and stimulation map to physical form. The goal is a device that feels like gear, not a hospital bracelet — while still signaling medical credibility.",
+        ],
+        images: [elearaSlide(9), elearaSlide(10), elearaSlide(11), elearaSlide(12)],
+      },
+      {
+        title: "App experience & alerts",
+        paragraphs: [
+          "Mobile flows cover onboarding, daily check-ins, alert thresholds, and caregiver views. Information density is tuned for quick scanning during an episode — large type, calm color, and explicit next steps.",
+        ],
+        images: [elearaSlide(13), elearaSlide(14), elearaSlide(15), elearaSlide(16)],
+      },
+      {
+        title: "Final vision",
+        paragraphs: [
+          "Closing frames summarize the end-to-end experience: wearable + app + network, and how Eleara supports confidence in movement over time.",
+        ],
+        images: [elearaSlide(17), elearaSlide(18), elearaSlide(19)],
+      },
+    ],
+  },
+  conclusion:
+    "Eleara pushed me to design for uncertainty — predictions fail, users panic, caregivers overreact. The interface work that mattered most was calibrating language and alert severity so the system feels like a partner, not an alarm bell on your wrist.",
+};
 
 /** Kits! */
 const KT = `${P}/kits`;
@@ -94,7 +244,7 @@ const kitsCaseStudyRich = {
     },
   ],
   conclusion:
-    "This project was quite the journey — conducting research, testing, and iteration upon iteration really shows the amount of detail that goes into perfecting the experience of an app for all users, both borrower and lender. Each component is carefully designed and thought out to ensure proper understanding and minimize confusion. This project has opened my mind to receiving feedback from others and acting upon it, understanding that there will always be improvements to be made, and grasping that will open your doors to becoming a better designer. Design is everywhere you go: seek it out and learn from it, ask a friend and maybe get together and talk about your ideas. Getting opinions from others is one of the best ways to understand how your users might react to using your interface or to how the home screen layout looks to them, and even how the color gives them a certain feeling that might be fitting or flat out bad for the app.",
+    "Kits! reinforced how service design scales through clarity — two roles, one kiosk, one app. Testing with paper prototypes early saved high-fidelity rework later, and separating borrower vs. lender flows kept permissions and mental models honest.",
 };
 
 /** Dairy Delight */
@@ -218,8 +368,9 @@ export const projects = [
     slug: "dream-detective",
     thumb: dreamDetectiveHero,
     caseStudyHero: dreamDetectiveHero,
-    caseStudyGallery: dreamDetectiveGallery,
-    caseStudyPdfs: dreamDetectivePdfs,
+    caseStudyGallery: [],
+    caseStudyDeckPdf: dreamDetectiveDeckPdf,
+    caseStudyRich: dreamDetectiveCaseStudyRich,
   },
   {
     id: 2,
@@ -232,8 +383,9 @@ export const projects = [
     slug: "eleara",
     thumb: elearaHero,
     caseStudyHero: elearaHero,
-    caseStudyGallery: elearaCaseStudyGallery,
-    caseStudyPdfs: [],
+    caseStudyGallery: [],
+    caseStudyDeckPdf: elearaDeckPdf,
+    caseStudyRich: elearaCaseStudyRich,
   },
   {
     id: 3,

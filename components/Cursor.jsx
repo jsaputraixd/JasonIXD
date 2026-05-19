@@ -3,8 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { projects } from "@/data/projects";
 import ProjectPreviewPane from "@/components/ProjectPreviewPane";
-import { getUniformProjectCardSize } from "@/lib/projectDesktopCards";
-
 const ACCENT = "#FF7A29";
 
 const VARIANTS = {
@@ -14,7 +12,11 @@ const VARIANTS = {
   enter: { size: 64, opacity: 0.95, label: "enter" },
 };
 
-const CURSOR_CARD = getUniformProjectCardSize(1);
+/** Text-only project blurb — no thumb (card already shows the image). */
+const PROJECT_PREVIEW_W = 300;
+const PROJECT_PREVIEW_TITLE_H = 28;
+const PROJECT_PREVIEW_BODY_H = 168;
+const PROJECT_PREVIEW_H = PROJECT_PREVIEW_TITLE_H + PROJECT_PREVIEW_BODY_H;
 
 export default function Cursor() {
   const [variant, setVariant] = useState("default");
@@ -86,8 +88,8 @@ export default function Cursor() {
 
   const isProject = variant === "project" && projectPreview;
   const v = VARIANTS[variant] ?? VARIANTS.default;
-  const size = isProject ? CURSOR_CARD.width : v.size;
-  const height = isProject ? CURSOR_CARD.windowHeight : size;
+  const size = isProject ? PROJECT_PREVIEW_W : v.size;
+  const height = isProject ? PROJECT_PREVIEW_H : size;
   const isDefault = variant === "default" && !isProject;
 
   return (
@@ -133,8 +135,8 @@ export default function Cursor() {
           <ProjectPreviewPane
             project={projectPreview}
             variant="cursor"
-            frameWidth={CURSOR_CARD.width}
-            frameHeight={CURSOR_CARD.bodyHeight}
+            frameWidth={PROJECT_PREVIEW_W}
+            frameHeight={PROJECT_PREVIEW_BODY_H}
           />
         ) : (
           <div

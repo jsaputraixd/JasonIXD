@@ -407,6 +407,98 @@ function CaseStudyRichLayout({ project, frameStyle }) {
         </div>
       ) : null}
 
+      {project.caseStudyDeckPdf ? (
+        <div className="mt-16">
+          <CaseStudySectionTitle>Full deck · PDF</CaseStudySectionTitle>
+          <p
+            className="m-0 mb-4"
+            style={{
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: 15,
+              color: "#888",
+              lineHeight: 1.6,
+              maxWidth: 680,
+            }}
+          >
+            Complete presentation in one file — scroll or download below.
+          </p>
+          <a
+            href={encodeURI(project.caseStudyDeckPdf.href)}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-cursor="hover"
+            style={{
+              display: "inline-block",
+              marginBottom: 16,
+              fontFamily: "'VT323', monospace",
+              fontSize: 14,
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              color: "#FF7A29",
+              textDecoration: "none",
+              border: "1px solid rgba(255, 122, 41, 0.45)",
+              padding: "8px 14px",
+              borderRadius: 2,
+            }}
+          >
+            {project.caseStudyDeckPdf.label} ↗
+          </a>
+          <div
+            style={{
+              ...frameStyle,
+              width: "100%",
+              maxWidth: 960,
+              aspectRatio: "16 / 10",
+              position: "relative",
+              background: "#0a0a0a",
+            }}
+          >
+            <iframe
+              title={`${project.title} slide deck`}
+              src={`${encodeURI(project.caseStudyDeckPdf.href)}#view=FitH`}
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                border: "none",
+                display: "block",
+              }}
+            />
+          </div>
+        </div>
+      ) : null}
+
+      {!project.caseStudyDeckPdf && project.caseStudyPdfs?.length > 0 ? (
+        <div className="mt-16">
+          <CaseStudySectionTitle>Downloads · PDF</CaseStudySectionTitle>
+          <ul
+            className="m-0 p-0 list-none flex flex-col gap-2"
+            style={{ maxWidth: 680 }}
+          >
+            {project.caseStudyPdfs.map((item) => (
+              <li key={item.href}>
+                <a
+                  href={encodeURI(item.href)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  data-cursor="hover"
+                  style={{
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontSize: 14,
+                    color: "#bbb",
+                    textDecoration: "underline",
+                    textUnderlineOffset: 4,
+                  }}
+                >
+                  {item.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
       <div className="mt-16">
         <CaseStudySectionTitle>
           {conclusionTitle || "Conclusion"}
@@ -455,7 +547,11 @@ export default async function ProjectPage({ params }) {
   const hero = project.caseStudyHero ?? null;
   const rich = project.caseStudyRich ?? null;
   const hasRichCaseStudy =
-    Boolean(hero) || gallery.length > 0 || pdfs.length > 0 || Boolean(rich);
+    Boolean(hero) ||
+    gallery.length > 0 ||
+    pdfs.length > 0 ||
+    Boolean(project.caseStudyDeckPdf) ||
+    Boolean(rich);
 
   const frameStyle = {
     borderRadius: 12,

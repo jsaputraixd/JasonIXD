@@ -30,45 +30,6 @@ export default function ProjectPreviewPane({
   const inner = (
     <>
       <div aria-hidden className="project-cursor-scanlines" />
-      {isCursor && thumbH && heroSrcEnc ? (
-        <div
-          style={{
-            position: "relative",
-            zIndex: 1,
-            flexShrink: 0,
-            width: "100%",
-            height: thumbH,
-            overflow: "hidden",
-            borderBottom: "1px solid rgba(255, 122, 41, 0.45)",
-            background: "#0a0806",
-          }}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={heroSrcEnc}
-            alt=""
-            aria-hidden
-            style={{
-              position: "absolute",
-              inset: 0,
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              objectPosition: "center",
-            }}
-          />
-          <div
-            aria-hidden
-            style={{
-              position: "absolute",
-              inset: 0,
-              background:
-                "linear-gradient(180deg, rgba(12, 8, 6, 0.05) 0%, rgba(8, 5, 4, 0.35) 100%)",
-              pointerEvents: "none",
-            }}
-          />
-        </div>
-      ) : null}
       <div
         style={{
           position: "relative",
@@ -78,8 +39,7 @@ export default function ProjectPreviewPane({
           gap: 8,
           flexShrink: 0,
           padding: isMobile ? "4px 8px" : "5px 10px",
-          borderBottom:
-            isCursor && thumbH ? "none" : "1px solid rgba(255, 122, 41, 0.45)",
+          borderBottom: "1px solid rgba(255, 122, 41, 0.45)",
           background:
             "linear-gradient(to bottom, rgba(255,122,41,0.16), rgba(255,122,41,0.06))",
           fontFamily: "'VT323', monospace",

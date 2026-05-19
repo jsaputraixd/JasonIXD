@@ -89,7 +89,7 @@ export default function CaseStudyVideos({ videos, frameStyle }) {
           marginBottom: 14,
         }}
       >
-        Videos
+        Interaction demos
       </h2>
 
       {fileItems.length > 0 ? (
