@@ -1,40 +1,80 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { otherStuff } from "@/data/otherStuff";
+import {
+  otherStuffLightboxSrc,
+  otherStuffThumbSrc,
+} from "@/lib/otherStuffMedia";
 import { playClick } from "@/lib/typingSound";
 
 const ACCENT = "#FF7A29";
 const ACCENT_DIM = "rgba(255, 180, 112, 0.7)";
-const EASE = [0.16, 1, 0.3, 1];
 
 function isVideoItem(item) {
   return item.type === "video" || /\.(mp4|webm|mov)(\?|$)/i.test(item.src);
 }
 
-export default function OtherStuffFolder({ variant = "desktop", layoutScale = 1 }) {
-  const reduceMotion = useReducedMotion();
+export default function OtherStuffFolder({
+  variant = "desktop",
+  layoutScale = 1,
+  onBrowseChange,
+}) {
   const [activeCategoryId, setActiveCategoryId] = useState(null);
-  const [lightbox, setLightbox] = useState(null);
+  const [lightboxIndex, setLightboxIndex] = useState(null);
   const s = variant === "desktop" ? layoutScale : 1;
 
   const activeCategory = otherStuff.categories.find(
     (c) => c.id === activeCategoryId
   );
   const items = activeCategory?.items ?? [];
-
-  const closeLightbox = useCallback(() => setLightbox(null), []);
+  const lightboxItem =
+    lightboxIndex != null && items[lightboxIndex] ? items[lightboxIndex] : null;
 
   useEffect(() => {
-    if (!lightbox) return;
+    onBrowseChange?.(Boolean(activeCategoryId));
+  }, [activeCategoryId, onBrowseChange]);
+
+  const openCategory = (id) => {
+    playClick();
+    setActiveCategoryId(id);
+    setLightboxIndex(null);
+  };
+
+  const closeCategory = () => {
+    playClick();
+    setActiveCategoryId(null);
+    setLightboxIndex(null);
+  };
+
+  const openLightbox = (index) => {
+    playClick();
+    setLightboxIndex(index);
+  };
+
+  const closeLightbox = useCallback(() => setLightboxIndex(null), []);
+
+  const stepLightbox = useCallback(
+    (delta) => {
+      if (lightboxIndex == null || items.length === 0) return;
+      playClick();
+      setLightboxIndex((i) => (i + delta + items.length) % items.length);
+    },
+    [lightboxIndex, items.length]
+  );
+
+  useEffect(() => {
+    if (lightboxIndex == null) return;
     const onKey = (e) => {
       if (e.key === "Escape") closeLightbox();
+      if (e.key === "ArrowLeft") stepLightbox(-1);
+      if (e.key === "ArrowRight") stepLightbox(1);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [lightbox, closeLightbox]);
+  }, [lightboxIndex, closeLightbox, stepLightbox]);
 
   const pad = variant === "desktop" ? Math.round(14 * s) : 14;
   const mono = variant === "desktop" ? Math.max(10, Math.round(11 * s)) : 11;
@@ -42,16 +82,13 @@ export default function OtherStuffFolder({ variant = "desktop", layoutScale = 1 
 
   return (
     <>
-      <motion.div
+      <div
         className="other-stuff-body"
-        initial={reduceMotion ? false : { opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.4, ease: EASE }}
         style={{
           padding: pad,
           display: "flex",
           flexDirection: "column",
-          gap: Math.round(12 * s),
+          gap: Math.round(10 * s),
           minHeight: 0,
         }}
       >
@@ -60,72 +97,33 @@ export default function OtherStuffFolder({ variant = "desktop", layoutScale = 1 
             <button
               type="button"
               data-cursor="hover"
-              onClick={() => {
-                playClick();
-                setActiveCategoryId(null);
-              }}
-              style={{
-                alignSelf: "flex-start",
-                margin: 0,
-                padding: "4px 8px",
-                border: "1px solid rgba(255, 122, 41, 0.4)",
-                borderRadius: 2,
-                background: "rgba(255, 122, 41, 0.08)",
-                fontFamily: "'VT323', monospace",
-                fontSize: mono,
-                letterSpacing: "0.18em",
-                textTransform: "uppercase",
-                color: ACCENT,
-                cursor: "pointer",
-              }}
+              onClick={closeCategory}
+              className="other-stuff-back"
+              style={{ fontSize: mono }}
             >
               ← Other stuff
             </button>
-            <p
-              style={{
-                margin: 0,
-                fontFamily: "'VT323', monospace",
-                fontSize: Math.max(12, Math.round(13 * s)),
-                letterSpacing: "0.2em",
-                textTransform: "uppercase",
-                color: ACCENT,
-                textShadow: "0 0 8px rgba(255, 122, 41, 0.4)",
-              }}
-            >
+            <p className="other-stuff-category-title" style={{ fontSize: Math.max(12, Math.round(13 * s)) }}>
               {activeCategory.label}
+              {items.length > 0 ? (
+                <span className="other-stuff-category-count"> · {items.length}</span>
+              ) : null}
             </p>
             {items.length > 0 ? (
-              <div
-                className={
-                  variant === "mobile" ? "other-stuff-track" : "other-stuff-grid"
-                }
-                style={
-                  variant === "mobile"
-                    ? {
-                        display: "flex",
-                        gap: 10,
-                        overflowX: "auto",
-                        paddingBottom: 4,
-                      }
-                    : {
-                        display: "grid",
-                        gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-                        gap: Math.round(8 * s),
-                        overflowY: "auto",
-                        alignContent: "start",
-                      }
-                }
-              >
-                {items.map((item, index) => (
-                  <MediaTile
-                    key={item.id}
-                    item={item}
-                    index={index}
-                    variant={variant}
-                    layoutScale={s}
-                    onOpen={() => setLightbox(item)}
-                  />
-                ))}
+              <div className="other-stuff-gallery">
+                <div
+                  className={`other-stuff-masonry${
+                    variant === "desktop" ? " other-stuff-masonry--desktop" : ""
+                  }`}
+                >
+                  {items.map((item, index) => (
+                    <MasonryTile
+                      key={item.id}
+                      item={item}
+                      onOpen={() => openLightbox(index)}
+                    />
+                  ))}
+                </div>
               </div>
             ) : (
               <EmptyCategoryNote
@@ -150,53 +148,45 @@ export default function OtherStuffFolder({ variant = "desktop", layoutScale = 1 
             >
               {otherStuff.blurb}
             </p>
-            <motion.div
-              className="other-stuff-category-grid"
-              style={{
-                display: "grid",
-                gridTemplateColumns:
-                  variant === "mobile"
-                    ? "repeat(2, minmax(0, 1fr))"
-                    : "repeat(auto-fill, minmax(108px, 1fr))",
-                gap: Math.round(14 * s),
-              }}
-            >
-              {otherStuff.categories.map((cat, index) => (
+            <div className="other-stuff-category-grid">
+              {otherStuff.categories.map((cat) => (
                 <CategoryFolderButton
                   key={cat.id}
                   category={cat}
-                  index={index}
                   layoutScale={s}
-                  onOpen={() => setActiveCategoryId(cat.id)}
+                  onOpen={() => openCategory(cat.id)}
                 />
               ))}
-            </motion.div>
+            </div>
           </>
         )}
-      </motion.div>
+      </div>
 
-      <AnimatePresence>
-        {lightbox ? <MediaLightbox item={lightbox} onClose={closeLightbox} /> : null}
-      </AnimatePresence>
+      {lightboxItem && typeof document !== "undefined"
+        ? createPortal(
+            <MediaLightbox
+              item={lightboxItem}
+              index={lightboxIndex}
+              total={items.length}
+              onClose={closeLightbox}
+              onPrev={() => stepLightbox(-1)}
+              onNext={() => stepLightbox(1)}
+            />,
+            document.body
+          )
+        : null}
     </>
   );
 }
 
-function CategoryFolderButton({ category, index, layoutScale, onOpen }) {
-  const reduceMotion = useReducedMotion();
+function CategoryFolderButton({ category, layoutScale, onOpen }) {
   const count = category.items?.length ?? 0;
 
   return (
-    <motion.button
+    <button
       type="button"
       data-cursor="hover"
-      onClick={() => {
-        playClick();
-        onOpen();
-      }}
-      initial={reduceMotion ? false : { opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.05 * index, duration: 0.32, ease: EASE }}
+      onClick={onOpen}
       style={{
         margin: 0,
         padding: "10px 8px 12px",
@@ -247,7 +237,7 @@ function CategoryFolderButton({ category, index, layoutScale, onOpen }) {
       >
         {count === 0 ? "ready" : `${count} file${count === 1 ? "" : "s"}`}
       </span>
-    </motion.button>
+    </button>
   );
 }
 
@@ -261,7 +251,7 @@ function EmptyCategoryNote({
   const folderPath = `public/images/other-stuff/${categoryId}/`;
 
   return (
-    <motion.div
+    <div
       style={{
         padding: `${Math.round(16 * layoutScale)}px 10px`,
         border: "1px dashed rgba(255, 122, 41, 0.35)",
@@ -296,207 +286,203 @@ function EmptyCategoryNote({
         , then list them in{" "}
         <code style={{ color: ACCENT }}>data/otherStuff.js</code>.
       </p>
-    </motion.div>
+    </div>
   );
 }
 
-function MediaTile({ item, index, variant, layoutScale, onOpen }) {
-  const reduceMotion = useReducedMotion();
-  const tileW = variant === "mobile" ? "min(72vw, 220px)" : "100%";
+function MasonryTile({ item, onOpen }) {
+  const [src, setSrc] = useState(() => otherStuffThumbSrc(item.src));
 
   return (
-    <motion.button
+    <button
       type="button"
       data-cursor="hover"
-      onClick={() => {
-        playClick();
-        onOpen();
-      }}
-      initial={reduceMotion ? false : { opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.04 * index, duration: 0.35, ease: EASE }}
-      style={{
-        flex: variant === "mobile" ? `0 0 ${tileW}` : undefined,
-        width: variant === "mobile" ? tileW : "100%",
-        margin: 0,
-        padding: 0,
-        border: "1px solid rgba(255, 122, 41, 0.4)",
-        borderRadius: 2,
-        background: "rgba(12, 8, 6, 0.9)",
-        cursor: "pointer",
-        overflow: "hidden",
-        textAlign: "left",
-      }}
+      onClick={onOpen}
+      className="other-stuff-tile"
     >
-      <div style={{ position: "relative", aspectRatio: "1 / 1", width: "100%" }}>
-        {isVideoItem(item) ? (
-          <video
-            src={encodeURI(item.src)}
-            muted
-            loop
-            playsInline
-            preload="metadata"
-            aria-label={item.alt ?? item.caption ?? "Video"}
-            style={{
-              position: "absolute",
-              inset: 0,
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              background: "#0a0806",
-            }}
-          />
-        ) : (
-          /* eslint-disable-next-line @next/next/no-img-element */
-          <img
-            src={encodeURI(item.src)}
-            alt={item.alt ?? item.caption ?? "Media item"}
-            loading="lazy"
-            style={{
-              position: "absolute",
-              inset: 0,
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-            }}
-          />
-        )}
-        {isVideoItem(item) ? (
-          <span
-            aria-hidden
-            style={{
-              position: "absolute",
-              right: 6,
-              bottom: 6,
-              fontFamily: "'VT323', monospace",
-              fontSize: 10,
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              color: ACCENT,
-              padding: "2px 5px",
-              border: "1px solid rgba(255, 122, 41, 0.5)",
-              background: "rgba(10, 6, 4, 0.85)",
-            }}
-          >
+      {isVideoItem(item) ? (
+        <span className="other-stuff-tile__video">
+          <span className="other-stuff-tile__video-placeholder" aria-hidden />
+          <span className="other-stuff-tile__video-badge" aria-hidden>
             ▶
           </span>
-        ) : null}
-      </div>
-      {item.caption ? (
-        <p
-          style={{
-            margin: 0,
-            padding: "6px 8px 8px",
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: Math.max(10, Math.round(11 * layoutScale)),
-            color: "rgba(255, 255, 255, 0.75)",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
+        </span>
+      ) : (
+        /* eslint-disable-next-line @next/next/no-img-element */
+        <img
+          src={src}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          className="other-stuff-tile__img"
+          onError={() => {
+            const fallback = encodeURI(item.src);
+            if (src !== fallback) setSrc(fallback);
           }}
-        >
-          {item.caption}
-        </p>
-      ) : null}
-    </motion.button>
+        />
+      )}
+    </button>
   );
 }
 
-function MediaLightbox({ item, onClose }) {
+function LightboxImage({ src, itemId, onError }) {
+  const frameRef = useRef(null);
+  const [box, setBox] = useState(null);
+
+  const fit = useCallback((img) => {
+    const frame = frameRef.current;
+    if (!frame || !img?.naturalWidth || !img?.naturalHeight) return;
+
+    const styles = getComputedStyle(frame);
+    const padX =
+      parseFloat(styles.paddingLeft) + parseFloat(styles.paddingRight);
+    const padY =
+      parseFloat(styles.paddingTop) + parseFloat(styles.paddingBottom);
+    const maxW = Math.max(1, frame.clientWidth - padX);
+    const maxH = Math.max(1, frame.clientHeight - padY);
+    const scale = Math.min(maxW / img.naturalWidth, maxH / img.naturalHeight, 1);
+
+    setBox({
+      width: Math.max(1, Math.floor(img.naturalWidth * scale)),
+      height: Math.max(1, Math.floor(img.naturalHeight * scale)),
+    });
+  }, []);
+
+  useLayoutEffect(() => {
+    setBox(null);
+    const frame = frameRef.current;
+    if (!frame) return;
+
+    const observer = new ResizeObserver(() => {
+      const img = frame.querySelector("img");
+      if (img?.complete && img.naturalWidth) fit(img);
+    });
+    observer.observe(frame);
+    return () => observer.disconnect();
+  }, [src, itemId, fit]);
+
+  return (
+    <div ref={frameRef} className="other-stuff-lightbox__frame">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        key={itemId}
+        src={src}
+        alt=""
+        decoding="async"
+        className="other-stuff-lightbox__media"
+        style={
+          box
+            ? { width: box.width, height: box.height }
+            : { maxWidth: "100%", maxHeight: "100%" }
+        }
+        onLoad={(e) => fit(e.currentTarget)}
+        onError={onError}
+      />
+    </div>
+  );
+}
+
+function MediaLightbox({ item, index, total, onClose, onPrev, onNext }) {
+  const [lightboxSrc, setLightboxSrc] = useState(() =>
+    otherStuffLightboxSrc(item.src)
+  );
+
+  useEffect(() => {
+    setLightboxSrc(otherStuffLightboxSrc(item.src));
+  }, [item.src]);
+
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, []);
+
   const dismiss = () => {
     playClick();
     onClose();
   };
 
+  const showNav = total > 1;
+  const counter = `${String(index + 1).padStart(2, "0")} / ${String(total).padStart(2, "0")}`;
+
   return (
-    <motion.div
+    <div
       role="dialog"
       aria-modal="true"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+      aria-label="Media viewer"
       onClick={dismiss}
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 60000,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 24,
-        background: "rgba(6, 4, 3, 0.88)",
-        backdropFilter: "blur(6px)",
-      }}
+      className="other-stuff-lightbox"
+      data-cursor="hover"
     >
-      <motion.div
-        initial={{ scale: 0.94, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.96, opacity: 0 }}
+      <div
+        className="other-stuff-lightbox__stage"
         onClick={(e) => e.stopPropagation()}
-        style={{
-          maxWidth: "min(920px, 100%)",
-          border: "1px solid rgba(255, 122, 41, 0.5)",
-          borderRadius: 3,
-          background: "rgba(18, 12, 8, 0.96)",
-          overflow: "hidden",
-        }}
       >
+        {showNav ? (
+          <button
+            type="button"
+            className="other-stuff-lightbox__nav other-stuff-lightbox__nav--prev"
+            data-cursor="hover"
+            aria-label="Previous"
+            onClick={onPrev}
+          >
+            ←
+          </button>
+        ) : null}
+
         {isVideoItem(item) ? (
-          <video
-            src={encodeURI(item.src)}
-            controls
-            autoPlay
-            playsInline
-            style={{
-              display: "block",
-              width: "100%",
-              maxHeight: "72vh",
-              margin: "0 auto",
-              background: "#0a0806",
-            }}
-          />
+          <div className="other-stuff-lightbox__frame other-stuff-lightbox__frame--video">
+            <video
+              src={encodeURI(item.src)}
+              controls
+              autoPlay
+              playsInline
+              className="other-stuff-lightbox__media"
+            />
+          </div>
         ) : (
-          /* eslint-disable-next-line @next/next/no-img-element */
-          <img
-            src={encodeURI(item.src)}
-            alt={item.alt ?? item.caption ?? ""}
-            style={{
-              display: "block",
-              maxWidth: "100%",
-              maxHeight: "72vh",
-              margin: "0 auto",
+          <LightboxImage
+            itemId={item.id}
+            src={lightboxSrc}
+            onError={() => {
+              const fallback = encodeURI(item.src);
+              if (lightboxSrc !== fallback) setLightboxSrc(fallback);
             }}
           />
         )}
-        <motion.div
-          style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            padding: "10px 12px",
-            borderTop: "1px solid rgba(255, 122, 41, 0.35)",
-          }}
-        >
+
+        {showNav ? (
           <button
             type="button"
+            className="other-stuff-lightbox__nav other-stuff-lightbox__nav--next"
             data-cursor="hover"
-            onClick={dismiss}
-            style={{
-              fontFamily: "'VT323', monospace",
-              fontSize: 12,
-              letterSpacing: "0.2em",
-              textTransform: "uppercase",
-              color: ACCENT,
-              background: "transparent",
-              border: "1px solid rgba(255, 122, 41, 0.45)",
-              borderRadius: 2,
-              padding: "6px 12px",
-              cursor: "pointer",
-            }}
+            aria-label="Next"
+            onClick={onNext}
           >
-            Close
+            →
           </button>
-        </motion.div>
-      </motion.div>
-    </motion.div>
+        ) : null}
+      </div>
+
+      <div
+        className="other-stuff-lightbox__bar"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {showNav ? (
+          <span className="other-stuff-lightbox__counter">{counter}</span>
+        ) : (
+          <span />
+        )}
+        <button
+          type="button"
+          data-cursor="hover"
+          onClick={dismiss}
+          className="other-stuff-lightbox__close"
+        >
+          Close
+        </button>
+      </div>
+    </div>
   );
 }

@@ -101,7 +101,7 @@ export default function Cursor() {
         top: 0,
         left: 0,
         pointerEvents: "none",
-        zIndex: 50000,
+        zIndex: 70000,
         mixBlendMode: isProject ? "normal" : "screen",
         transform: "translate3d(-100px, -100px, 0)",
         willChange: "transform",

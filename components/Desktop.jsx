@@ -35,8 +35,9 @@ import {
   getDeterministicDesktopPositions,
   LEFT_COLUMN_INSET,
   PROJECT_WINDOW_GAP,
+  RIGHT_RESERVE,
 } from "@/lib/desktopWindowPlacement";
-import { getProjectDesktopCards } from "@/lib/projectDesktopCards";
+import { getProjectDesktopCards, projectGridMetrics } from "@/lib/projectDesktopCards";
 import {
   markIntroSeen,
   shouldSkipIntro,
@@ -105,7 +106,7 @@ function getDesktopLayout(vw, vh) {
     welcome: Math.round(clamp(380, 540, 400 + 130 * u)),
     me: Math.round(clamp(208, 288, 218 + 70 * u)),
     skills: Math.round(clamp(300, 440, 330 + 100 * u)),
-    otherStuff: Math.round(clamp(300, 380, 340 + 28 * u)),
+    otherStuff: Math.round(clamp(340, 520, 420 + 32 * u)),
     contact: Math.round(clamp(248, 298, 260 + 28 * u)),
   };
 
@@ -142,12 +143,13 @@ function getDesktopLayout(vw, vh) {
   const projectGap = Math.max(14, Math.round(PROJECT_WINDOW_GAP * layoutScale));
   let projectCards = getProjectDesktopCards(projects, layoutScale);
 
+  const maxGridW = Math.max(0, vw - 2 * edge - RIGHT_RESERVE);
   const bandInner = Math.max(0, skillsLeft - edge - g);
-  const rowW0 =
-    projectCards.reduce((sum, c) => sum + c.width, 0) +
-    Math.max(0, nProj - 1) * projectGap;
-  if (rowW0 > bandInner && bandInner > 0 && rowW0 > 0) {
-    const shrink = bandInner / rowW0;
+  const gridFitW = Math.min(maxGridW, bandInner > 0 ? bandInner : maxGridW);
+  const { gridWidth: gridW0 } = projectGridMetrics(projectCards, projectGap);
+
+  if (gridW0 > gridFitW && gridFitW > 0 && gridW0 > 0) {
+    const shrink = gridFitW / gridW0;
     projectCards = projectCards.map((card) => {
       const width = Math.max(100, Math.round(card.width * shrink));
       const bodyHeight = Math.round(width / card.aspect);
@@ -157,6 +159,7 @@ function getDesktopLayout(vw, vh) {
         width,
         bodyHeight,
         windowHeight: tb + bodyHeight,
+        topOffset: 0,
       };
     });
   }
@@ -215,6 +218,7 @@ export default function Desktop() {
   const [phase, setPhase] = useState("waiting-boot");
   const [welcomeTyped, setWelcomeTyped] = useState("");
   const [otherStuffOpen, setOtherStuffOpen] = useState(false);
+  const [otherStuffBrowsing, setOtherStuffBrowsing] = useState(false);
   const [minimizedIds, setMinimizedIds] = useState([]);
   const [trashMessage, setTrashMessage] = useState(null);
   const trashMessageTimerRef = useRef(null);
@@ -402,6 +406,24 @@ export default function Desktop() {
     () => getDesktopLayout(vwSafe, vhSafe),
     [vwSafe, vhSafe]
   );
+
+  const otherStuffWindowWidth = otherStuffBrowsing
+    ? Math.round(W.otherStuff * 1.55)
+    : W.otherStuff;
+
+  const otherStuffWindowTop = Math.max(
+    12,
+    pos.otherStuff?.top ??
+      Math.round((vhSafe - Math.round(360 * layoutScale)) / 2)
+  );
+  const otherStuffWindowLeft = Math.max(
+    12,
+    Math.round((vwSafe - otherStuffWindowWidth) / 2)
+  );
+
+  useEffect(() => {
+    if (!otherStuffOpen) setOtherStuffBrowsing(false);
+  }, [otherStuffOpen]);
 
   const showTrashBubble = useCallback(() => {
     if (trashMessageTimerRef.current) {
@@ -706,12 +728,9 @@ export default function Desktop() {
           id="otherStuff"
           title={otherStuff.windowTitle}
           titleUppercase={false}
-          left={Math.max(12, pos.otherStuffIcon.left)}
-          top={Math.max(
-            12,
-            pos.otherStuffIcon.top - Math.round(320 * layoutScale)
-          )}
-          width={W.otherStuff}
+          left={otherStuffWindowLeft}
+          top={otherStuffWindowTop}
+          width={otherStuffWindowWidth}
           delay={0}
           zIndex={zOf("otherStuff", 22)}
           onFocus={bringToFront}
@@ -721,7 +740,11 @@ export default function Desktop() {
           parallaxShift={pShift.otherStuff}
           uiScale={layoutScale}
         >
-          <OtherStuffFolder variant="desktop" layoutScale={layoutScale} />
+          <OtherStuffFolder
+            variant="desktop"
+            layoutScale={layoutScale}
+            onBrowseChange={setOtherStuffBrowsing}
+          />
         </Window>
       )}
 

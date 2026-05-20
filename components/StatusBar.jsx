@@ -67,10 +67,14 @@ export default function StatusBar({
       }
     : {
         position: "absolute",
-        left: 90,
-        right: 90,
-        bottom: 14,
+        left: 0,
+        right: 0,
+        bottom: 0,
         zIndex: 30,
+        borderRadius: 0,
+        borderLeft: "none",
+        borderRight: "none",
+        borderBottom: "none",
       };
 
   return (
@@ -85,7 +89,7 @@ export default function StatusBar({
         background:
           "linear-gradient(to top, rgba(10,6,4,0.95), rgba(10,6,4,0.6))",
         border: "1px solid rgba(255, 122, 41, 0.25)",
-        borderRadius: 2,
+        borderRadius: isMobile ? 2 : 0,
         backdropFilter: "blur(2px)",
         overflow: "hidden",
         pointerEvents: "none",
