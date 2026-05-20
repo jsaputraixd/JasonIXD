@@ -3,6 +3,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { getQuoteOfDay } from "@/lib/quoteOfDay";
+import {
+  CRT_BEZEL_RADIUS,
+  CRT_FOOTER_BOTTOM_PAD,
+  CRT_FOOTER_CORNER_INSET,
+} from "@/lib/crtBezel";
 
 const ACCENT = "#FF7A29";
 const MOBILE_BREAK = 900;
@@ -71,11 +76,9 @@ export default function StatusBar({
         right: 0,
         bottom: 0,
         zIndex: 30,
-        borderRadius: 0,
-        borderLeft: "none",
-        borderRight: "none",
-        borderBottom: "none",
       };
+
+  const desktopFooterRadius = `0 0 ${CRT_BEZEL_RADIUS} ${CRT_BEZEL_RADIUS}`;
 
   return (
     <motion.div
@@ -89,7 +92,7 @@ export default function StatusBar({
         background:
           "linear-gradient(to top, rgba(10,6,4,0.95), rgba(10,6,4,0.6))",
         border: "1px solid rgba(255, 122, 41, 0.25)",
-        borderRadius: isMobile ? 2 : 0,
+        borderRadius: isMobile ? 2 : desktopFooterRadius,
         backdropFilter: "blur(2px)",
         overflow: "hidden",
         pointerEvents: "none",
@@ -186,10 +189,10 @@ export default function StatusBar({
 
       {!isMobile ? (
         <motion.div
+          className="status-bar-quote-row"
           style={{
-            padding: "5px 14px 4px",
+            padding: `5px ${CRT_FOOTER_CORNER_INSET} 4px`,
             borderBottom: "1px solid rgba(255, 122, 41, 0.12)",
-            textAlign: "center",
             pointerEvents: "none",
           }}
         >
@@ -201,6 +204,7 @@ export default function StatusBar({
               lineHeight: 1.45,
               color: "rgba(255, 200, 160, 0.82)",
               fontStyle: "italic",
+              textAlign: "center",
             }}
           >
             <span
@@ -262,11 +266,16 @@ export default function StatusBar({
         </motion.div>
       ) : (
         <motion.div
+          className="status-bar-bottom-row"
           style={{
-            display: "flex",
+            display: "grid",
+            gridTemplateColumns: "1fr auto 1fr",
             alignItems: "center",
-            justifyContent: "space-between",
-            padding: "5px 16px",
+            columnGap: 12,
+            paddingTop: 5,
+            paddingLeft: CRT_FOOTER_CORNER_INSET,
+            paddingRight: CRT_FOOTER_CORNER_INSET,
+            paddingBottom: CRT_FOOTER_BOTTOM_PAD,
             pointerEvents: "none",
             fontFamily: "'VT323', monospace",
             fontSize: 13,
@@ -275,11 +284,18 @@ export default function StatusBar({
             color: "rgba(255, 180, 112, 0.75)",
           }}
         >
-          <span>▢ Made in San Francisco // Bali</span>
-          <span style={{ color: ACCENT, textShadow: "0 0 6px rgba(255,122,41,0.5)" }}>
+          <span className="status-bar-bottom-row__side status-bar-bottom-row__side--left">
+            ▢ Made in San Francisco // Bali
+          </span>
+          <span
+            className="status-bar-bottom-row__center"
+            style={{ color: ACCENT, textShadow: "0 0 6px rgba(255,122,41,0.5)" }}
+          >
             ◉ Rec · {time}
           </span>
-          <span>☕ Cups · 1,247</span>
+          <span className="status-bar-bottom-row__side status-bar-bottom-row__side--right">
+            ☕ Cups · 1,247
+          </span>
         </motion.div>
       )}
     </motion.div>

@@ -1,5 +1,7 @@
 "use client";
 
+import { CRT_BEZEL_RADIUS } from "@/lib/crtBezel";
+
 const BEZEL_RADIUS = 80;
 /** Quarter-circle hole in each cap: a few px larger than the bezel arc so black doesn’t eat the frame edge */
 const CORNER_MASK_RADIUS = BEZEL_RADIUS + 8;
@@ -65,7 +67,7 @@ export default function CRTOverlay() {
         style={{
           position: "absolute",
           inset: 0,
-          borderRadius: "min(80px, 5.5vmin)",
+          borderRadius: CRT_BEZEL_RADIUS,
           pointerEvents: "none",
           boxShadow: [
             // Outer-most pitch-black bezel (TV chassis)

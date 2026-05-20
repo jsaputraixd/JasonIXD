@@ -8,6 +8,7 @@ import {
 import ProjectPageListen from "@/components/ProjectPageListen";
 import CaseStudyVideos from "@/components/CaseStudyVideos";
 import CaseStudyEndcap from "@/components/CaseStudyEndcap";
+import { projectCaseStudyHeroSrc } from "@/lib/projectMedia";
 
 const ACCENT = "#FF7A29";
 
@@ -433,7 +434,7 @@ export default async function ProjectPage({ params }) {
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={encodeURI(hero)}
+              src={projectCaseStudyHeroSrc(hero)}
               alt=""
               style={{
                 width: "100%",

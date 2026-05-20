@@ -237,6 +237,31 @@ body {
   box-shadow: 0 0 18px rgba(255, 122, 41, 0.22);
 }
 
+@media (min-width: 900px) {
+  .status-bar-bottom-row__side {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .status-bar-bottom-row__side--left {
+    justify-self: start;
+    text-align: left;
+  }
+
+  .status-bar-bottom-row__side--right {
+    justify-self: end;
+    text-align: right;
+  }
+
+  .status-bar-bottom-row__center {
+    justify-self: center;
+    text-align: center;
+    white-space: nowrap;
+  }
+}
+
 @media (max-width: 899px) {
   .status-bar--mobile {
     max-width: none;

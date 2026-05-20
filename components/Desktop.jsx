@@ -38,6 +38,7 @@ import {
   RIGHT_RESERVE,
 } from "@/lib/desktopWindowPlacement";
 import { getProjectDesktopCards, projectGridMetrics } from "@/lib/projectDesktopCards";
+import { projectCardThumbSrc } from "@/lib/projectMedia";
 import {
   markIntroSeen,
   shouldSkipIntro,
@@ -901,6 +902,30 @@ export default function Desktop() {
   );
 }
 
+function ProjectCardHeroImage({ src, style }) {
+  const [displaySrc, setDisplaySrc] = useState(() => projectCardThumbSrc(src));
+
+  useEffect(() => {
+    setDisplaySrc(projectCardThumbSrc(src));
+  }, [src]);
+
+  return (
+    /* eslint-disable-next-line @next/next/no-img-element */
+    <img
+      src={displaySrc}
+      alt=""
+      aria-hidden
+      loading="lazy"
+      decoding="async"
+      style={style}
+      onError={() => {
+        const fallback = encodeURI(src);
+        if (displaySrc !== fallback) setDisplaySrc(fallback);
+      }}
+    />
+  );
+}
+
 function ProjectFlipCard({
   project,
   gradient,
@@ -917,7 +942,6 @@ function ProjectFlipCard({
     Math.round(innerW / (aspectRatio ?? 4 / 5));
 
   const heroSrc = project.thumb ?? project.caseStudyHero ?? null;
-  const heroSrcEnc = heroSrc ? encodeURI(heroSrc) : null;
 
   return (
     <Link
@@ -961,13 +985,10 @@ function ProjectFlipCard({
             background: gradient,
           }}
         >
-          {heroSrcEnc ? (
+          {heroSrc ? (
             <>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={heroSrcEnc}
-                alt=""
-                aria-hidden
+              <ProjectCardHeroImage
+                src={heroSrc}
                 style={{
                   position: "absolute",
                   inset: 0,
@@ -2901,7 +2922,6 @@ function MobileProjectCard({
   showOverlay = true,
 }) {
   const heroSrc = project.thumb ?? project.caseStudyHero ?? null;
-  const heroSrcEnc = heroSrc ? encodeURI(heroSrc) : null;
   const isHero = size === "hero";
 
   return (
@@ -2941,13 +2961,10 @@ function MobileProjectCard({
             : undefined,
         }}
       >
-        {heroSrcEnc ? (
+        {heroSrc ? (
           <>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={heroSrcEnc}
-              alt=""
-              aria-hidden
+            <ProjectCardHeroImage
+              src={heroSrc}
               style={{
                 position: "absolute",
                 inset: 0,
