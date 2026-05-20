@@ -503,7 +503,7 @@ export default function Desktop() {
     <div
       ref={stageRef}
       className="relative w-full"
-      style={{ height: "100vh", overflow: "visible" }}
+      style={{ height: "100%", overflow: "hidden" }}
     >
       {phase === "waiting-boot" && (
         <div

@@ -6,7 +6,7 @@ export default function Home() {
   return (
     <main
       className="relative crt-tilt"
-      style={{ height: "100vh", overflow: "hidden" }}
+      style={{ height: "100%", overflow: "hidden" }}
     >
       <Desktop />
     </main>
