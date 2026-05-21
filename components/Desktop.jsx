@@ -51,6 +51,7 @@ import {
   playClick,
   playTypingClick,
   playTypingClickThrottled,
+  playWindowRestore,
 } from "@/lib/typingSound";
 import { pickTrashMessage } from "@/lib/trashMessage";
 
@@ -361,6 +362,7 @@ export default function Desktop() {
 
   const restoreWindow = useCallback((id) => {
     setMinimizedIds((prev) => prev.filter((x) => x !== id));
+    playWindowRestore();
   }, []);
 
   const isMinimized = useCallback(
