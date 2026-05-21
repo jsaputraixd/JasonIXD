@@ -11,6 +11,7 @@ import {
 
 const ACCENT = "#FF7A29";
 const MOBILE_BREAK = 900;
+const BUILD_LABEL = "JS-OS · v1.1";
 
 const MARQUEE_ITEMS = [
   "Dream",
@@ -262,7 +263,7 @@ export default function StatusBar({
           >
             {time}
           </span>
-          <span style={{ flexShrink: 0 }}>☕ 1,247</span>
+          <span style={{ flexShrink: 0, opacity: 0.82 }}>{BUILD_LABEL}</span>
         </motion.div>
       ) : (
         <motion.div
@@ -294,7 +295,7 @@ export default function StatusBar({
             ◉ Rec · {time}
           </span>
           <span className="status-bar-bottom-row__side status-bar-bottom-row__side--right">
-            ☕ Cups · 1,247
+            {BUILD_LABEL}
           </span>
         </motion.div>
       )}

@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { useDesktopIconDrag } from "@/hooks/useDesktopIconDrag";
 import { playClick } from "@/lib/typingSound";
 
 const ACCENT = "#FF7A29";
@@ -13,11 +14,15 @@ const EASE = [0.16, 1, 0.3, 1];
 export default function DesktopFolderIcon({
   label,
   iconSrc,
-  left,
-  top,
+  left: baseLeft,
+  top: baseTop,
   width = 76,
+  height = 96,
+  iconId = "otherStuffIcon",
+  stageRef,
   onOpen,
   onFocus,
+  onOffsetChange,
   zIndex = 14,
   parallaxShift = { x: 0, y: 0 },
   delay = 0,
@@ -25,45 +30,74 @@ export default function DesktopFolderIcon({
 }) {
   const iconH = Math.round(width * 0.82);
 
+  const drag = useDesktopIconDrag({
+    iconId,
+    baseLeft,
+    baseTop,
+    width,
+    height,
+    stageRef,
+    onFocus,
+    onOffsetChange,
+  });
+
+  const parallax = drag.isDragging ? { x: 0, y: 0 } : parallaxShift;
+
+  const activate = () => {
+    playClick();
+    onFocus?.();
+    onOpen?.();
+  };
+
   return (
     <motion.button
       type="button"
       data-cursor="hover"
       aria-label={`Open ${label}`}
+      onPointerDown={drag.onPointerDown}
+      onPointerMove={drag.onPointerMove}
+      onPointerUp={drag.onPointerUp}
+      onPointerCancel={drag.onPointerCancel}
       onClick={() => {
-        playClick();
-        onFocus?.();
-        onOpen?.();
+        if (drag.consumeClickIfDragged()) return;
+        activate();
       }}
       onDoubleClick={(e) => {
         e.preventDefault();
-        playClick();
-        onFocus?.();
-        onOpen?.();
+        if (drag.consumeClickIfDragged()) return;
+        activate();
       }}
       initial={{ opacity: 0, scale: 0.92 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.32, delay, ease: EASE }}
+      animate={{
+        opacity: 1,
+        scale: drag.isDragging ? 1.05 : 1,
+      }}
+      transition={{ duration: drag.isDragging ? 0.08 : 0.32, delay, ease: EASE }}
       style={{
         position: "absolute",
-        left,
-        top,
+        left: drag.left,
+        top: drag.top,
         width,
-        zIndex,
+        zIndex: drag.isDragging ? zIndex + 20 : zIndex,
         margin: 0,
         padding: "4px 2px 6px",
         border: "none",
         background: selected
           ? "rgba(255, 122, 41, 0.14)"
-          : "transparent",
+          : drag.isDragging
+            ? "rgba(255, 122, 41, 0.12)"
+            : "transparent",
         borderRadius: 2,
-        cursor: "pointer",
+        cursor: drag.isDragging ? "grabbing" : "grab",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         gap: 4,
-        transform: `translate3d(${parallaxShift.x}px, ${parallaxShift.y}px, 0)`,
+        transform: `translate3d(${parallax.x}px, ${parallax.y}px, 0)`,
         transition: "background 140ms ease",
+        boxShadow: drag.isDragging
+          ? "0 10px 28px rgba(0,0,0,0.45)"
+          : undefined,
       }}
     >
       <span

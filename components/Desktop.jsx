@@ -20,6 +20,8 @@ import {
 } from "framer-motion";
 import Window from "./Window";
 import StatusBar from "./StatusBar";
+import CoffeeSnakeGame from "./CoffeeSnakeGame";
+import HiddenCoffeeIcon from "./HiddenCoffeeIcon";
 import { MobileProjectPreviewPanel } from "@/components/ProjectPreviewPane";
 import ProjectViewLink from "@/components/ProjectViewLink";
 import { projectHeroTransitionName } from "@/lib/viewTransition";
@@ -53,7 +55,9 @@ import {
   playTypingClickThrottled,
   playWindowRestore,
 } from "@/lib/typingSound";
-import { pickTrashMessage } from "@/lib/trashMessage";
+import { pickTrashMessageForClick } from "@/lib/trashMessage";
+import { incrementCoffeeCount } from "@/lib/coffeeCounter";
+import { readIconOffset } from "@/lib/desktopIconPositions";
 
 const ACCENT = "#FF7A29";
 const ACCENT_DIM = "rgba(255, 180, 112, 0.7)";
@@ -73,6 +77,8 @@ function getWindowTitle(id) {
       return "contact.msg";
     case "otherStuff":
       return otherStuff.windowTitle;
+    case "coffee-snake":
+      return "COFFEE_SNAKE.EXE";
     default: {
       const m = /^proj-(\d+)$/.exec(id);
       if (m) {
@@ -228,11 +234,20 @@ export default function Desktop() {
   const [welcomeTyped, setWelcomeTyped] = useState("");
   const [otherStuffOpen, setOtherStuffOpen] = useState(false);
   const [otherStuffBrowsing, setOtherStuffBrowsing] = useState(false);
+  const [coffeeSnakeOpen, setCoffeeSnakeOpen] = useState(false);
   const [minimizedIds, setMinimizedIds] = useState([]);
   const [trashMessage, setTrashMessage] = useState(null);
   const trashMessageTimerRef = useRef(null);
+  const trashClickCountRef = useRef(0);
   const welcomeDoneTimerRef = useRef(null);
   const [parallax, setParallax] = useState({ x: 0, y: 0 });
+  const [iconOffsets, setIconOffsets] = useState(() => ({
+    trashIcon: readIconOffset("trashIcon"),
+  }));
+
+  const handleIconOffset = useCallback((id, offset) => {
+    setIconOffsets((prev) => ({ ...prev, [id]: offset }));
+  }, []);
 
   useLayoutEffect(() => {
     if (shouldSkipIntro()) {
@@ -351,10 +366,23 @@ export default function Desktop() {
     []
   );
 
-  const bringToFront = (id) => {
-    setTopZ((z) => z + 1);
-    setZMap((m) => ({ ...m, [id]: topZ + 1 }));
-  };
+  const bringToFront = useCallback((id) => {
+    setTopZ((z) => {
+      const next = z + 1;
+      setZMap((m) => ({ ...m, [id]: next }));
+      return next;
+    });
+  }, []);
+
+  useLayoutEffect(() => {
+    if (coffeeSnakeOpen) bringToFront("coffee-snake");
+  }, [coffeeSnakeOpen, bringToFront]);
+
+  const openCoffeeSnake = useCallback(() => {
+    playClick();
+    incrementCoffeeCount(1);
+    setCoffeeSnakeOpen(true);
+  }, []);
 
   const minimizeWindow = useCallback((id) => {
     setMinimizedIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
@@ -441,7 +469,10 @@ export default function Desktop() {
     if (trashMessageTimerRef.current) {
       clearTimeout(trashMessageTimerRef.current);
     }
-    setTrashMessage(pickTrashMessage());
+    trashClickCountRef.current += 1;
+    setTrashMessage(
+      pickTrashMessageForClick(trashClickCountRef.current)
+    );
     trashMessageTimerRef.current = setTimeout(() => {
       setTrashMessage(null);
     }, 5000);
@@ -480,6 +511,7 @@ export default function Desktop() {
     otherStuff: 9,
     otherStuffIcon: 7,
     trashIcon: 7,
+    coffeeIcon: 6,
     contact: 9,
   };
   const pShift = {
@@ -496,8 +528,17 @@ export default function Desktop() {
       x: -px * depth.trashIcon,
       y: -py * depth.trashIcon * yz,
     },
+    coffeeIcon: {
+      x: -px * depth.coffeeIcon,
+      y: -py * depth.coffeeIcon * yz,
+    },
     contact: { x: -px * depth.contact, y: -py * depth.contact * yz },
   };
+
+  const trashIconLeft = pos.trashIcon.left + iconOffsets.trashIcon.dx;
+  const trashIconTop = pos.trashIcon.top + iconOffsets.trashIcon.dy;
+  const snakeRevealed =
+    Math.hypot(iconOffsets.trashIcon.dx, iconOffsets.trashIcon.dy) > 36;
 
   const showIntroCard =
     phase === "intro-typing" ||
@@ -656,7 +697,9 @@ export default function Desktop() {
           top={pos.otherStuffIcon.top}
           delay={cascadeDelay(2.05)}
           zIndex={zOf("otherStuffIcon", 15)}
+          stageRef={stageRef}
           onFocus={() => bringToFront("otherStuffIcon")}
+          onOffsetChange={(offset) => handleIconOffset("otherStuffIcon", offset)}
           onOpen={() => {
             bringToFront("otherStuff");
             setOtherStuffOpen(true);
@@ -667,12 +710,27 @@ export default function Desktop() {
       )}
 
       {showOtherWindows && (
+        <HiddenCoffeeIcon
+          left={pos.coffeeIcon.left}
+          top={pos.coffeeIcon.top}
+          delay={cascadeDelay(2.08)}
+          zIndex={zOf("coffeeIcon", 13)}
+          parallaxShift={pShift.coffeeIcon}
+          revealed={snakeRevealed}
+          selected={coffeeSnakeOpen}
+          onOpen={openCoffeeSnake}
+        />
+      )}
+
+      {showOtherWindows && (
         <RecycleBinIcon
           left={pos.trashIcon.left}
           top={pos.trashIcon.top}
           delay={cascadeDelay(2.18)}
-          zIndex={zOf("trashIcon", 15)}
+          zIndex={zOf("trashIcon", 16)}
+          stageRef={stageRef}
           onFocus={() => bringToFront("trashIcon")}
+          onOffsetChange={(offset) => handleIconOffset("trashIcon", offset)}
           onActivate={showTrashBubble}
           parallaxShift={pShift.trashIcon}
         />
@@ -692,11 +750,11 @@ export default function Desktop() {
               left: Math.max(
                 12,
                 Math.min(
-                  pos.trashIcon.left - 40,
+                  trashIconLeft - 40,
                   vw - 280
                 )
               ),
-              top: Math.max(12, pos.trashIcon.top - 88),
+              top: Math.max(12, trashIconTop - 88),
               width: 248,
               zIndex: zOf("trashIcon", 15) + 2,
               padding: "10px 12px",
@@ -901,6 +959,24 @@ export default function Desktop() {
       )}
 
       <NomineeTab />
+      {coffeeSnakeOpen && showOtherWindows ? (
+        <Window
+          id="coffee-snake"
+          title="COFFEE_SNAKE.EXE"
+          left={Math.max(12, Math.round(vw / 2 - 210))}
+          top={Math.max(12, Math.round(vh / 2 - 230))}
+          width={420}
+          height={438}
+          zIndex={zOf("coffee-snake", 200)}
+          onFocus={bringToFront}
+          onMinimize={() => setCoffeeSnakeOpen(false)}
+          dragConstraints={stageRef}
+          uiScale={layoutScale}
+          clipContent
+        >
+          <CoffeeSnakeGame onQuit={() => setCoffeeSnakeOpen(false)} />
+        </Window>
+      ) : null}
       <StatusBar
         minimizedWindows={minimizedTaskbarItems}
         onRestoreWindow={(id) => {

@@ -315,6 +315,167 @@ body {
   }
 }
 
+.desktop-coffee-icon__glyph {
+  font-size: 28px;
+  line-height: 1;
+  filter: drop-shadow(0 0 6px rgba(255, 122, 41, 0.45));
+  transition: transform 0.16s ease;
+}
+
+.desktop-coffee-icon--revealed {
+  background: rgba(255, 122, 41, 0.1) !important;
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .desktop-coffee-icon--revealed:hover .desktop-coffee-icon__glyph {
+    transform: scale(1.06);
+  }
+}
+
+.coffee-snake-game {
+  padding: 10px 12px 12px;
+  outline: none;
+}
+
+.coffee-snake-game__hud {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-family: "VT323", monospace;
+  font-size: 13px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 180, 112, 0.85);
+}
+
+.coffee-snake-game__status {
+  color: #ff7a29;
+  text-shadow: 0 0 6px rgba(255, 122, 41, 0.45);
+  font-size: 12px;
+}
+
+.coffee-snake-game__canvas {
+  width: 100%;
+  height: auto;
+  display: block;
+  border: 1px solid rgba(255, 122, 41, 0.35);
+  border-radius: 2px;
+  image-rendering: pixelated;
+  background: #0a0604;
+}
+
+.coffee-snake-game__board {
+  position: relative;
+}
+
+.coffee-snake-game__start {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.52);
+  border-radius: 2px;
+}
+
+.coffee-snake-game__start-btn {
+  margin: 0;
+  padding: 10px 18px 11px;
+  border: 1px solid rgba(255, 122, 41, 0.72);
+  border-radius: 2px;
+  background: rgba(255, 122, 41, 0.16);
+  font-family: "VT323", monospace;
+  font-size: 16px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #ffb570;
+  text-shadow: 0 0 8px rgba(255, 122, 41, 0.45);
+  cursor: pointer;
+  transition:
+    background 0.16s ease,
+    border-color 0.16s ease,
+    transform 0.12s ease;
+}
+
+.coffee-snake-game__start-btn:hover {
+  background: rgba(255, 122, 41, 0.26);
+  border-color: rgba(255, 122, 41, 0.95);
+}
+
+.coffee-snake-game__start-btn:active {
+  transform: scale(0.97);
+}
+
+.coffee-snake-game__hint {
+  margin: 8px 0 0;
+  text-align: center;
+  font-family: "VT323", monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 180, 112, 0.55);
+}
+
+.coffee-snake-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(4, 2, 1, 0.72);
+  backdrop-filter: blur(3px);
+}
+
+.coffee-snake-overlay__panel {
+  width: min(100%, 420px);
+  border: 1px solid rgba(255, 122, 41, 0.55);
+  border-radius: 3px;
+  background: rgba(18, 12, 8, 0.96);
+  box-shadow:
+    0 0 40px rgba(255, 122, 41, 0.18),
+    0 24px 64px rgba(0, 0, 0, 0.65);
+  overflow: hidden;
+}
+
+.coffee-snake-overlay__titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  border-bottom: 1px solid rgba(255, 122, 41, 0.45);
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 122, 41, 0.18),
+    rgba(255, 122, 41, 0.08)
+  );
+  font-family: "VT323", monospace;
+  font-size: 13px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #ff7a29;
+  text-shadow: 0 0 6px rgba(255, 122, 41, 0.45);
+}
+
+.coffee-snake-overlay__close {
+  margin: 0;
+  padding: 0 4px;
+  border: none;
+  background: transparent;
+  font-family: "VT323", monospace;
+  font-size: 16px;
+  line-height: 1;
+  color: #ff7a29;
+  cursor: pointer;
+}
+
+.coffee-snake-overlay__body {
+  position: relative;
+}
+
 @media (max-width: 899px) {
   .status-bar--mobile {
     max-width: none;

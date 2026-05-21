@@ -18,3 +18,9 @@ export const trashMessages = [
   "Bin full of could-have-beens. Emptied daily.",
   "Nothing to see. Go build something weird.",
 ];
+
+/** Shown on specific repeat clicks — nudge that something might be under the bin. */
+export const trashSneakHints = {
+  3: "Nothing is behind this bin. Probably.",
+  5: "Seriously — nothing under here. Don't move it.",
+};
