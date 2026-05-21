@@ -11,6 +11,7 @@ import {
   playStartupWordAccent,
   playTypingClick,
 } from "@/lib/typingSound";
+import { preloadPortfolioAssets } from "@/lib/preloadPortfolio";
 
 const ACCENT = "#FF7A29";
 const EASE = [0.16, 1, 0.3, 1];
@@ -62,6 +63,7 @@ export default function LoadingOverlay() {
   const [bootReady, setBootReady] = useState(false);
 
   useLayoutEffect(() => {
+    preloadPortfolioAssets();
     if (shouldSkipIntro()) {
       skipBootRef.current = true;
       setVisible(false);

@@ -39,6 +39,7 @@ import {
 } from "@/lib/desktopWindowPlacement";
 import { getProjectDesktopCards, projectGridMetrics } from "@/lib/projectDesktopCards";
 import { projectCardThumbSrc } from "@/lib/projectMedia";
+import { preloadPortfolioAssets } from "@/lib/preloadPortfolio";
 import {
   markIntroSeen,
   shouldSkipIntro,
@@ -206,6 +207,10 @@ export default function Desktop() {
   const [topZ, setTopZ] = useState(20);
   const [zMap, setZMap] = useState({});
   const [viewport, setViewport] = useState(null);
+
+  useLayoutEffect(() => {
+    preloadPortfolioAssets();
+  }, []);
 
   // Boot/intro state machine:
   //   "waiting-boot"  → LoadingOverlay is still showing
@@ -902,7 +907,7 @@ export default function Desktop() {
   );
 }
 
-function ProjectCardHeroImage({ src, style }) {
+function ProjectCardHeroImage({ src, style, loading = "lazy" }) {
   const [displaySrc, setDisplaySrc] = useState(() => projectCardThumbSrc(src));
 
   useEffect(() => {
@@ -915,7 +920,7 @@ function ProjectCardHeroImage({ src, style }) {
       src={displaySrc}
       alt=""
       aria-hidden
-      loading="lazy"
+      loading={loading}
       decoding="async"
       style={style}
       onError={() => {
@@ -989,6 +994,7 @@ function ProjectFlipCard({
             <>
               <ProjectCardHeroImage
                 src={heroSrc}
+                loading="eager"
                 style={{
                   position: "absolute",
                   inset: 0,
@@ -1434,13 +1440,11 @@ function MobileWorkSection({ scrollRoot }) {
         if (!entry) return;
         const ratio = entry.intersectionRatio;
         const strength = entry.isIntersecting
-          ? Math.min(1, Math.max(0, (ratio - 0.08) / 0.52))
+          ? Math.min(1, Math.max(0, (ratio - 0.02) / 0.28))
           : 0;
-        setFocusStrength((prev) =>
-          Math.abs(prev - strength) < 0.02 ? prev : strength
-        );
+        setFocusStrength(strength);
       },
-      { root, threshold: [0, 0.08, 0.15, 0.25, 0.35, 0.45, 0.55, 0.65, 0.8, 1] }
+      { root, threshold: [0, 0.05, 0.1, 0.2, 0.35, 0.5, 0.65, 0.8, 1] }
     );
     obs.observe(el);
     return () => obs.disconnect();
@@ -2656,6 +2660,27 @@ function MobileWelcomeBody({ skipTyping = false, onTypingComplete }) {
   );
 }
 
+function cardFocusFromScroll(carousel, cards) {
+  if (!carousel) return { focuses: [], bestIdx: 0 };
+  const centerX = carousel.scrollLeft + carousel.clientWidth / 2;
+  const focuses = cards.map((el) => {
+    if (!el) return 0;
+    const cardCenter = el.offsetLeft + el.offsetWidth / 2;
+    const dist = Math.abs(cardCenter - centerX);
+    const falloff = el.offsetWidth * 1.05;
+    return Math.max(0, Math.min(1, 1 - dist / falloff));
+  });
+  let bestIdx = 0;
+  let best = -1;
+  focuses.forEach((f, i) => {
+    if (f > best) {
+      best = f;
+      bestIdx = i;
+    }
+  });
+  return { focuses, bestIdx };
+}
+
 function MobileProjectsCarousel({
   scrollRoot,
   activeIdx: controlledIdx,
@@ -2665,7 +2690,11 @@ function MobileProjectsCarousel({
   const carouselRef = useRef(null);
   const cardsRef = useRef([]);
   const dragRef = useRef(null);
+  const [hasRevealed, setHasRevealed] = useState(false);
   const [internalIdx, setInternalIdx] = useState(0);
+  const [cardFocus, setCardFocus] = useState(() =>
+    projects.map((_, i) => (i === 0 ? 1 : 0))
+  );
   const activeIdx = controlledIdx ?? internalIdx;
   const setActiveIdx = onActiveChange ?? setInternalIdx;
   const reduceMotion = useReducedMotion();
@@ -2677,22 +2706,13 @@ function MobileProjectsCarousel({
   });
 
   const syncActiveFromScroll = useCallback(() => {
-    const carousel = carouselRef.current;
-    if (!carousel) return;
-    const centerX = carousel.scrollLeft + carousel.clientWidth / 2;
-    let bestIdx = 0;
-    let bestDist = Infinity;
-    cardsRef.current.forEach((el, i) => {
-      if (!el) return;
-      const cardCenter = el.offsetLeft + el.offsetWidth / 2;
-      const dist = Math.abs(cardCenter - centerX);
-      if (dist < bestDist) {
-        bestDist = dist;
-        bestIdx = i;
-      }
-    });
+    const { focuses, bestIdx } = cardFocusFromScroll(
+      carouselRef.current,
+      cardsRef.current
+    );
+    setCardFocus(focuses);
     setActiveIdx((prev) => (prev === bestIdx ? prev : bestIdx));
-  }, []);
+  }, [setActiveIdx]);
 
   useEffect(() => {
     const carousel = carouselRef.current;
@@ -2750,11 +2770,17 @@ function MobileProjectsCarousel({
   };
 
   const showCards = reduceMotion || sectionInView;
+
+  useEffect(() => {
+    if (showCards) setHasRevealed(true);
+  }, [showCards]);
+
   const focus = Math.min(1, Math.max(0, focusStrength));
   const activeScale = 1 + 0.07 * focus;
   const inactiveScale = 0.86 - 0.04 * focus;
   const inactiveOpacity = 0.52 - 0.18 * focus;
-  const inactiveBlur = focus > 0.12 ? `${Math.round(5 * focus)}px` : "0px";
+  const scrollEase = { duration: 0.11, ease: "linear" };
+  const revealEase = { duration: 0.48, ease: EASE };
 
   return (
     <motion.div ref={sectionRef} style={{ marginBottom: 4 }}>
@@ -2785,7 +2811,14 @@ function MobileProjectsCarousel({
       }}
     >
       {projects.map((p, i) => {
-        const isActive = i === activeIdx;
+        const f = cardFocus[i] ?? 0;
+        const scale =
+          inactiveScale + (activeScale - inactiveScale) * f;
+        const opacity =
+          (showCards ? inactiveOpacity : 0) +
+          (showCards ? 1 - inactiveOpacity : 0) * f;
+        const y = showCards ? (1 - f) * (8 + 4 * focus) : 36;
+
         return (
           <motion.div
             key={p.id}
@@ -2800,34 +2833,29 @@ function MobileProjectsCarousel({
             }}
             initial={reduceMotion ? false : { opacity: 0, y: 36, scale: 0.88 }}
             animate={{
-              opacity: showCards ? (isActive ? 1 : inactiveOpacity) : 0,
-              y: showCards ? (isActive ? 0 : 8 + 4 * focus) : 36,
-              scale: showCards ? (isActive ? activeScale : inactiveScale) : 0.88,
-              filter: showCards
-                ? isActive
-                  ? "blur(0px)"
-                  : `blur(${inactiveBlur})`
-                : "blur(0px)",
+              opacity,
+              y,
+              scale: showCards ? scale : 0.88,
             }}
-            transition={{
-              opacity: {
-                duration: isActive ? 0.34 : 0.45,
-                delay: showCards && !isActive ? 0 : showCards ? i * 0.09 : 0,
-              },
-              y: { duration: 0.62, ease: EASE, delay: showCards ? i * 0.09 : 0 },
-              scale: {
-                duration: isActive ? 0.34 : 0.52,
-                ease: EASE,
-                delay: showCards ? i * 0.09 : 0,
-              },
-              filter: { duration: 0.38, ease: EASE },
-            }}
+            transition={
+              hasRevealed
+                ? { opacity: scrollEase, y: scrollEase, scale: scrollEase }
+                : {
+                    opacity: {
+                      duration: 0.45,
+                      delay: showCards ? i * 0.09 : 0,
+                    },
+                    y: { ...revealEase, delay: showCards ? i * 0.09 : 0 },
+                    scale: { ...revealEase, delay: showCards ? i * 0.09 : 0 },
+                  }
+            }
           >
             <MobileProjectCard
               project={p}
               gradient={PROJECT_GRADIENTS[i % PROJECT_GRADIENTS.length]}
-              isActive={isActive}
+              isActive={f > 0.55}
               showOverlay={false}
+              imageLoading={f > 0.35 || i === 0 ? "eager" : "lazy"}
             />
           </motion.div>
         );
@@ -2920,6 +2948,7 @@ function MobileProjectCard({
   size = "card",
   isActive = true,
   showOverlay = true,
+  imageLoading = "lazy",
 }) {
   const heroSrc = project.thumb ?? project.caseStudyHero ?? null;
   const isHero = size === "hero";
@@ -2965,6 +2994,7 @@ function MobileProjectCard({
           <>
             <ProjectCardHeroImage
               src={heroSrc}
+              loading={imageLoading}
               style={{
                 position: "absolute",
                 inset: 0,
