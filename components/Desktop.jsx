@@ -3,12 +3,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import {
+  memo,
   useCallback,
   useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
   useState,
+  startTransition,
 } from "react";
 import {
   AnimatePresence,
@@ -387,14 +389,16 @@ export default function Desktop() {
       const nx = Math.max(-1, Math.min(1, ((e.clientX - r.left) / r.width - 0.5) * 2));
       const ny = Math.max(-1, Math.min(1, ((e.clientY - r.top) / r.height - 0.5) * 2));
 
-      if (Math.abs(nx - lastX) < 0.012 && Math.abs(ny - lastY) < 0.012) return;
+      if (Math.abs(nx - lastX) < 0.028 && Math.abs(ny - lastY) < 0.028) return;
 
       if (raf) return;
       raf = requestAnimationFrame(() => {
         raf = 0;
         lastX = nx;
         lastY = ny;
-        setParallax({ x: nx, y: ny });
+        startTransition(() => {
+          setParallax({ x: nx, y: ny });
+        });
       });
     };
 
@@ -940,7 +944,6 @@ function ProjectFlipCard({
   aspectRatio,
   onRequestFocus,
 }) {
-  const reduceMotion = useReducedMotion();
   const innerW = frameWidth ?? 268;
   const cardH =
     frameHeight ??
@@ -968,7 +971,7 @@ function ProjectFlipCard({
         outline: "none",
       }}
     >
-      <motion.div
+      <div
         className="project-card-shell"
         style={{
           position: "relative",
@@ -979,9 +982,6 @@ function ProjectFlipCard({
           overflow: "hidden",
           boxShadow: "0 6px 20px rgba(0, 0, 0, 0.45)",
         }}
-        initial={false}
-        whileHover={reduceMotion ? undefined : { scale: 1.1, zIndex: 4 }}
-        transition={{ duration: 0.34, ease: EASE }}
       >
         <div
           style={{
@@ -1029,7 +1029,7 @@ function ProjectFlipCard({
           />
         </div>
 
-      </motion.div>
+      </div>
     </Link>
   );
 }
@@ -2660,6 +2660,35 @@ function MobileWelcomeBody({ skipTyping = false, onTypingComplete }) {
   );
 }
 
+function getCarouselMetrics(focusStrength) {
+  const focus = Math.min(1, Math.max(0, focusStrength));
+  return {
+    focus,
+    activeScale: 1 + 0.07 * focus,
+    inactiveScale: 0.86 - 0.04 * focus,
+    inactiveOpacity: 0.52 - 0.18 * focus,
+    yLift: 8 + 4 * focus,
+  };
+}
+
+function applyCarouselCardVisuals(cards, focuses, showCards, metrics) {
+  const { activeScale, inactiveScale, inactiveOpacity, yLift } = metrics;
+  cards.forEach((el, i) => {
+    if (!el) return;
+    if (!showCards) {
+      el.style.opacity = "0";
+      el.style.transform = "translate3d(0, 36px, 0) scale(0.88)";
+      return;
+    }
+    const f = focuses[i] ?? 0;
+    const scale = inactiveScale + (activeScale - inactiveScale) * f;
+    const opacity = inactiveOpacity + (1 - inactiveOpacity) * f;
+    const y = (1 - f) * yLift;
+    el.style.opacity = String(opacity);
+    el.style.transform = `translate3d(0, ${y}px, 0) scale(${scale})`;
+  });
+}
+
 function cardFocusFromScroll(carousel, cards) {
   if (!carousel) return { focuses: [], bestIdx: 0 };
   const centerX = carousel.scrollLeft + carousel.clientWidth / 2;
@@ -2688,13 +2717,11 @@ function MobileProjectsCarousel({
   focusStrength = 0,
 }) {
   const carouselRef = useRef(null);
-  const cardsRef = useRef([]);
+  const cardShellRefs = useRef([]);
   const dragRef = useRef(null);
+  const revealStartedRef = useRef(false);
   const [hasRevealed, setHasRevealed] = useState(false);
   const [internalIdx, setInternalIdx] = useState(0);
-  const [cardFocus, setCardFocus] = useState(() =>
-    projects.map((_, i) => (i === 0 ? 1 : 0))
-  );
   const activeIdx = controlledIdx ?? internalIdx;
   const setActiveIdx = onActiveChange ?? setInternalIdx;
   const reduceMotion = useReducedMotion();
@@ -2705,14 +2732,21 @@ function MobileProjectsCarousel({
     amount: 0.15,
   });
 
+  const showCards = reduceMotion || sectionInView;
+
   const syncActiveFromScroll = useCallback(() => {
-    const { focuses, bestIdx } = cardFocusFromScroll(
-      carouselRef.current,
-      cardsRef.current
+    const carousel = carouselRef.current;
+    const cards = cardShellRefs.current;
+    if (!carousel) return;
+    const { focuses, bestIdx } = cardFocusFromScroll(carousel, cards);
+    applyCarouselCardVisuals(
+      cards,
+      focuses,
+      showCards,
+      getCarouselMetrics(focusStrength)
     );
-    setCardFocus(focuses);
     setActiveIdx((prev) => (prev === bestIdx ? prev : bestIdx));
-  }, [setActiveIdx]);
+  }, [setActiveIdx, showCards, focusStrength]);
 
   useEffect(() => {
     const carousel = carouselRef.current;
@@ -2734,6 +2768,55 @@ function MobileProjectsCarousel({
       carousel.removeEventListener("scrollend", syncActiveFromScroll);
     };
   }, [syncActiveFromScroll]);
+
+  useEffect(() => {
+    if (!showCards) return;
+    syncActiveFromScroll();
+  }, [showCards, focusStrength, syncActiveFromScroll]);
+
+  useLayoutEffect(() => {
+    if (!showCards || revealStartedRef.current) return;
+    revealStartedRef.current = true;
+
+    const cards = cardShellRefs.current;
+    const finishReveal = () => {
+      cards.forEach((el) => {
+        if (el) el.classList.add("mobile-carousel-card--scroll");
+      });
+      setHasRevealed(true);
+      syncActiveFromScroll();
+    };
+
+    if (reduceMotion) {
+      finishReveal();
+      return;
+    }
+
+    cards.forEach((el) => {
+      if (!el) return;
+      el.style.transition = "none";
+      el.style.opacity = "0";
+      el.style.transform = "translate3d(0, 36px, 0) scale(0.88)";
+    });
+
+    requestAnimationFrame(() => {
+      const metrics = getCarouselMetrics(focusStrength);
+      const { focuses } = cardFocusFromScroll(
+        carouselRef.current,
+        cards
+      );
+      cards.forEach((el, i) => {
+        if (!el) return;
+        const delay = i * 90;
+        el.style.transition = `transform 480ms cubic-bezier(0.16, 1, 0.3, 1) ${delay}ms, opacity 480ms cubic-bezier(0.16, 1, 0.3, 1) ${delay}ms`;
+      });
+      applyCarouselCardVisuals(cards, focuses, true, metrics);
+      window.setTimeout(
+        finishReveal,
+        480 + (projects.length - 1) * 90 + 40
+      );
+    });
+  }, [showCards, reduceMotion, focusStrength, syncActiveFromScroll]);
 
   const onCarouselPointerDown = (e) => {
     const el = carouselRef.current;
@@ -2769,22 +2852,9 @@ function MobileProjectsCarousel({
     }
   };
 
-  const showCards = reduceMotion || sectionInView;
-
-  useEffect(() => {
-    if (showCards) setHasRevealed(true);
-  }, [showCards]);
-
-  const focus = Math.min(1, Math.max(0, focusStrength));
-  const activeScale = 1 + 0.07 * focus;
-  const inactiveScale = 0.86 - 0.04 * focus;
-  const inactiveOpacity = 0.52 - 0.18 * focus;
-  const scrollEase = { duration: 0.11, ease: "linear" };
-  const revealEase = { duration: 0.48, ease: EASE };
-
   return (
     <motion.div ref={sectionRef} style={{ marginBottom: 4 }}>
-      <motion.div
+      <div
         ref={carouselRef}
         className="project-carousel"
       role="region"
@@ -2810,57 +2880,29 @@ function MobileProjectsCarousel({
         minHeight: 0,
       }}
     >
-      {projects.map((p, i) => {
-        const f = cardFocus[i] ?? 0;
-        const scale =
-          inactiveScale + (activeScale - inactiveScale) * f;
-        const opacity =
-          (showCards ? inactiveOpacity : 0) +
-          (showCards ? 1 - inactiveOpacity : 0) * f;
-        const y = showCards ? (1 - f) * (8 + 4 * focus) : 36;
-
-        return (
-          <motion.div
-            key={p.id}
-            ref={(el) => (cardsRef.current[i] = el)}
-            data-idx={i}
-            style={{
-              flex: "0 0 52vw",
-              maxWidth: 260,
-              aspectRatio: "5 / 4",
-              scrollSnapAlign: "center",
-              willChange: "transform, opacity",
-            }}
-            initial={reduceMotion ? false : { opacity: 0, y: 36, scale: 0.88 }}
-            animate={{
-              opacity,
-              y,
-              scale: showCards ? scale : 0.88,
-            }}
-            transition={
-              hasRevealed
-                ? { opacity: scrollEase, y: scrollEase, scale: scrollEase }
-                : {
-                    opacity: {
-                      duration: 0.45,
-                      delay: showCards ? i * 0.09 : 0,
-                    },
-                    y: { ...revealEase, delay: showCards ? i * 0.09 : 0 },
-                    scale: { ...revealEase, delay: showCards ? i * 0.09 : 0 },
-                  }
-            }
-          >
-            <MobileProjectCard
-              project={p}
-              gradient={PROJECT_GRADIENTS[i % PROJECT_GRADIENTS.length]}
-              isActive={f > 0.55}
-              showOverlay={false}
-              imageLoading={f > 0.35 || i === 0 ? "eager" : "lazy"}
-            />
-          </motion.div>
-        );
-      })}
-      </motion.div>
+      {projects.map((p, i) => (
+        <div
+          key={p.id}
+          ref={(el) => {
+            cardShellRefs.current[i] = el;
+          }}
+          data-idx={i}
+          className={
+            hasRevealed
+              ? "mobile-carousel-card mobile-carousel-card--scroll"
+              : "mobile-carousel-card"
+          }
+        >
+          <MobileProjectCard
+            project={p}
+            gradient={PROJECT_GRADIENTS[i % PROJECT_GRADIENTS.length]}
+            isActive={i === activeIdx}
+            showOverlay={false}
+            imageLoading="eager"
+          />
+        </div>
+      ))}
+      </div>
       <div
         className="mobile-carousel-meta"
         aria-live="polite"
@@ -2942,7 +2984,7 @@ function MobileProjectsCarousel({
   );
 }
 
-function MobileProjectCard({
+const MobileProjectCard = memo(function MobileProjectCard({
   project,
   gradient,
   size = "card",
@@ -3031,7 +3073,7 @@ function MobileProjectCard({
       ) : null}
     </ProjectViewLink>
   );
-}
+});
 
 function MobileScrollTypedMailto({ scrollRoot, skipTyping = false }) {
   const ref = useRef(null);

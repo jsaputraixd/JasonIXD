@@ -172,13 +172,13 @@ export default function ProjectPreviewPane({
 
 export function MobileProjectPreviewPanel({ project }) {
   return (
-    <AnimatePresence mode="wait" initial={false}>
+    <AnimatePresence mode="sync" initial={false}>
       <motion.div
         key={project.slug}
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -6 }}
-        transition={{ duration: 0.28, ease: EASE }}
+        initial={{ opacity: 0.72 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0.72 }}
+        transition={{ duration: 0.14, ease: EASE }}
       >
         <ProjectPreviewPane project={project} variant="mobile" />
       </motion.div>

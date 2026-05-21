@@ -130,6 +130,7 @@ export default function Window({
               userSelect: "none",
               overflow: clipContent ? "hidden" : "visible",
               transform: `translate3d(${parallaxShift.x}px, ${parallaxShift.y}px, 0)`,
+              willChange: "transform",
             }}
           >
             {/* Title bar — only drag handle */}
