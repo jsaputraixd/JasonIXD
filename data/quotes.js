@@ -112,4 +112,12 @@ export const quotes = [
     text: "The best error message is no error message.",
     author: "Jason Saputra",
   },
+  {
+    text: "Icarus falling, laughing, knowing to have fallen is to have once soared.",
+    author: "Jack Gilbert",
+  },
+  {
+    text: "A person who works with their hands is a laborer. A person who works with their hands and their head is a craftsman. A person who works with their head, their hands, and their heart is an artist.",
+    author: "Marco Pierre White",
+  },
 ];

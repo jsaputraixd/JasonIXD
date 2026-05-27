@@ -26,7 +26,7 @@ export default function HiddenCoffeeIcon({
       aria-label={revealed ? "Open coffee snake game" : undefined}
       aria-hidden={!revealed}
       tabIndex={revealed ? 0 : -1}
-      title={revealed ? "COFFEE_SNAKE.EXE" : undefined}
+      title={revealed ? "coffee_snake.exe" : undefined}
       onClick={() => {
         if (!revealed) return;
         playClick();

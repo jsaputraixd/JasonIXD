@@ -5,7 +5,7 @@ import ProjectViewLink from "@/components/ProjectViewLink";
 import { projectTitleTransitionName } from "@/lib/viewTransition";
 
 const ACCENT = "#FF7A29";
-const ACCENT_DIM = "rgba(255, 180, 112, 0.7)";
+const ACCENT_DIM = "#FFB570";
 const EASE = [0.16, 1, 0.3, 1];
 
 /** Desktop cursor hover window or mobile selected-project description panel. */

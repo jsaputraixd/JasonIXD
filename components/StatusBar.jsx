@@ -10,6 +10,7 @@ import {
 } from "@/lib/crtBezel";
 
 const ACCENT = "#FF7A29";
+const FOOTER_MUTED = "#FFC896";
 const MOBILE_BREAK = 900;
 const BUILD_LABEL = "JS-OS · v1.1";
 
@@ -151,7 +152,7 @@ export default function StatusBar({
               fontSize: isMobile ? 10 : 11,
               letterSpacing: "0.2em",
               textTransform: "uppercase",
-              color: "rgba(255, 122, 41, 0.7)",
+              color: "#FF9F5A",
             }}
           >
             ▢ Minimized
@@ -203,7 +204,7 @@ export default function StatusBar({
               fontFamily: "'DM Sans', sans-serif",
               fontSize: 11,
               lineHeight: 1.45,
-              color: "rgba(255, 200, 160, 0.82)",
+              color: FOOTER_MUTED,
               fontStyle: "italic",
               textAlign: "center",
             }}
@@ -215,14 +216,14 @@ export default function StatusBar({
                 fontSize: 11,
                 letterSpacing: "0.14em",
                 textTransform: "uppercase",
-                color: "rgba(255, 122, 41, 0.85)",
+                color: ACCENT,
                 marginRight: "0.5em",
               }}
             >
               Quote ·
             </span>
             &ldquo;{quote.text}&rdquo;
-            <span style={{ opacity: 0.65 }}> — {quote.author}</span>
+            <span style={{ opacity: 0.72 }}> — {quote.author}</span>
           </p>
         </motion.div>
       ) : null}
@@ -241,7 +242,7 @@ export default function StatusBar({
             fontSize: 11,
             letterSpacing: "0.2em",
             textTransform: "uppercase",
-            color: "rgba(255, 180, 112, 0.75)",
+            color: FOOTER_MUTED,
           }}
         >
           <span
@@ -263,7 +264,7 @@ export default function StatusBar({
           >
             {time}
           </span>
-          <span style={{ flexShrink: 0, opacity: 0.82 }}>{BUILD_LABEL}</span>
+          <span style={{ flexShrink: 0, opacity: 0.92 }}>{BUILD_LABEL}</span>
         </motion.div>
       ) : (
         <motion.div
@@ -282,7 +283,7 @@ export default function StatusBar({
             fontSize: 13,
             letterSpacing: "0.32em",
             textTransform: "uppercase",
-            color: "rgba(255, 180, 112, 0.75)",
+            color: FOOTER_MUTED,
           }}
         >
           <span className="status-bar-bottom-row__side status-bar-bottom-row__side--left">

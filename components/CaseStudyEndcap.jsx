@@ -38,8 +38,8 @@ export default function CaseStudyEndcap({ nextProject, hasRichCaseStudy }) {
     <footer className="case-study-endcap">
       <div className="case-study-endcap__inner">
         <nav className="case-study-endcap__nav" aria-label="Case study navigation">
-          <Link href="/#sketchbook" data-cursor="hover" style={linkStyle}>
-            ← Back to home
+          <Link href="/" data-cursor="hover" style={linkStyle}>
+            ← Desktop
           </Link>
           {nextProject ? (
             <Link

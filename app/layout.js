@@ -1,7 +1,7 @@
 import "./globals.css";
 import Cursor from "@/components/Cursor";
 import GlobalBackground from "@/components/GlobalBackground";
-import CRTOverlay from "@/components/CRTOverlay";
+import CRTOverlayGate from "@/components/CRTOverlayGate";
 import LoadingOverlay from "@/components/LoadingOverlay";
 import TypingSoundInit from "@/components/TypingSoundInit";
 
@@ -54,7 +54,7 @@ export default function RootLayout({ children }) {
       <body className="text-text-primary font-body">
         <GlobalBackground />
         <div className="crt-stage">{children}</div>
-        <CRTOverlay />
+        <CRTOverlayGate />
         <Cursor />
         <TypingSoundInit />
         <LoadingOverlay />

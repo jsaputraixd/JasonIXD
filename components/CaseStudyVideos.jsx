@@ -163,7 +163,7 @@ export default function CaseStudyVideos({ videos, frameStyle }) {
                     ...frameStyle,
                     aspectRatio: "16 / 9",
                     position: "relative",
-                    maxWidth: 960,
+                    width: "100%",
                   }}
                 >
                   <iframe

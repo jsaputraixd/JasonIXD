@@ -60,7 +60,8 @@ import { incrementCoffeeCount } from "@/lib/coffeeCounter";
 import { readIconOffset } from "@/lib/desktopIconPositions";
 
 const ACCENT = "#FF7A29";
-const ACCENT_DIM = "rgba(255, 180, 112, 0.7)";
+/** Brighter orange for small text — ~4.5:1 on dark window chrome. */
+const ACCENT_DIM = "#FFB570";
 const EASE = [0.16, 1, 0.3, 1];
 
 const WELCOME_HEIGHT_GUESS = 380;
@@ -78,7 +79,7 @@ function getWindowTitle(id) {
     case "otherStuff":
       return otherStuff.windowTitle;
     case "coffee-snake":
-      return "COFFEE_SNAKE.EXE";
+      return "coffee_snake.exe";
     default: {
       const m = /^proj-(\d+)$/.exec(id);
       if (m) {
@@ -962,7 +963,7 @@ export default function Desktop() {
       {coffeeSnakeOpen && showOtherWindows ? (
         <Window
           id="coffee-snake"
-          title="COFFEE_SNAKE.EXE"
+          title="coffee_snake.exe"
           left={Math.max(12, Math.round(vw / 2 - 210))}
           top={Math.max(12, Math.round(vh / 2 - 230))}
           width={420}
@@ -1107,6 +1108,11 @@ function ProjectFlipCard({
           />
         </div>
 
+        <div className="project-card-caption" aria-hidden="true">
+          <p className="project-card-caption__title">{project.title}</p>
+          <p className="project-card-caption__tagline">{project.tagline}</p>
+          <span className="project-card-caption__cta">Case study →</span>
+        </div>
       </div>
     </Link>
   );
@@ -1246,7 +1252,7 @@ function MeTxtBody({ frameWidth, layoutScale = 1 }) {
             fontSize: Math.max(10, Math.round(13 * s)),
             letterSpacing: "0.32em",
             textTransform: "uppercase",
-            color: ACCENT_DIM,
+            color: ACCENT,
             textShadow: "0 0 8px rgba(255, 122, 41, 0.38)",
           }}
         >
@@ -1259,7 +1265,7 @@ function MeTxtBody({ frameWidth, layoutScale = 1 }) {
           fontFamily: "'DM Sans', sans-serif",
           fontSize: bioSize,
           lineHeight: 1.65,
-          color: "rgba(255, 255, 255, 0.82)",
+          color: "rgba(255, 255, 255, 0.92)",
           textAlign: "left",
         }}
       >
@@ -1664,6 +1670,8 @@ function NomineeTab() {
       target="_blank"
       rel="noopener noreferrer"
       data-cursor="hover"
+      title="Open for work — view LinkedIn profile"
+      aria-label="Open for work — view LinkedIn profile"
       style={{
         position: "absolute",
         right: 0,

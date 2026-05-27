@@ -737,6 +737,16 @@ export default function SkillsPlanet({
           fontSize={isMobile ? 22 : Math.max(18, Math.round(26 * inlineS))}
           margin="8px 6px 0"
         />
+
+        {!isMobile ? (
+          <div className="skills-tag-row" aria-label="Skills">
+            {skills.map((skill) => (
+              <span key={skill} className="skills-tag-row__chip">
+                {skill}
+              </span>
+            ))}
+          </div>
+        ) : null}
       </div>
 
       {typeof document !== "undefined" &&

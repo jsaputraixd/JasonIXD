@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { projects } from "@/data/projects";
 import {
@@ -8,6 +7,7 @@ import {
 import ProjectPageListen from "@/components/ProjectPageListen";
 import CaseStudyVideos from "@/components/CaseStudyVideos";
 import CaseStudyEndcap from "@/components/CaseStudyEndcap";
+import CaseStudyBrowserShell from "@/components/CaseStudyBrowserShell";
 import { projectCaseStudyHeroSrc } from "@/lib/projectMedia";
 
 const ACCENT = "#FF7A29";
@@ -76,7 +76,6 @@ function CaseStudyRichLayout({ project, frameStyle }) {
     fontSize: 18,
     color: "#bbb",
     lineHeight: 1.8,
-    maxWidth: 680,
   };
 
   const metaLabel = {
@@ -110,8 +109,7 @@ function CaseStudyRichLayout({ project, frameStyle }) {
       <div className="mt-12">
         <CaseStudySectionTitle>Project Overview</CaseStudySectionTitle>
         <div
-          className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-8"
-          style={{ maxWidth: 680 }}
+          className="case-study-prose grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-8"
         >
           {metaRows.map(([label, value]) => (
             <div key={label}>
@@ -124,7 +122,7 @@ function CaseStudyRichLayout({ project, frameStyle }) {
 
       <div className="mt-12 flex flex-col gap-8">
         {introParagraphs.map((text, i) => (
-          <p key={i} className="m-0" style={bodyStyle}>
+          <p key={i} className="m-0 case-study-prose" style={bodyStyle}>
             {text}
           </p>
         ))}
@@ -168,7 +166,7 @@ function CaseStudyRichLayout({ project, frameStyle }) {
             <div key={block.title}>
               <CaseStudySubTitle>{block.title}</CaseStudySubTitle>
               {(block.paragraphs ?? []).map((text, i) => (
-                <p key={i} className="m-0 mb-8 last:mb-0" style={bodyStyle}>
+                <p key={i} className="m-0 mb-8 last:mb-0 case-study-prose" style={bodyStyle}>
                   {text}
                 </p>
               ))}
@@ -232,13 +230,12 @@ function CaseStudyRichLayout({ project, frameStyle }) {
         <div className="mt-16">
           <CaseStudySectionTitle>Full deck · PDF</CaseStudySectionTitle>
           <p
-            className="m-0 mb-4"
+            className="m-0 mb-4 case-study-prose"
             style={{
               fontFamily: "'DM Sans', sans-serif",
               fontSize: 15,
               color: "#888",
               lineHeight: 1.6,
-              maxWidth: 680,
             }}
           >
             Complete presentation in one file — scroll or download below.
@@ -268,7 +265,6 @@ function CaseStudyRichLayout({ project, frameStyle }) {
             style={{
               ...frameStyle,
               width: "100%",
-              maxWidth: 960,
               aspectRatio: "16 / 10",
               position: "relative",
               background: "#0a0a0a",
@@ -293,10 +289,7 @@ function CaseStudyRichLayout({ project, frameStyle }) {
       {!project.caseStudyDeckPdf && project.caseStudyPdfs?.length > 0 ? (
         <div className="mt-16">
           <CaseStudySectionTitle>Downloads · PDF</CaseStudySectionTitle>
-          <ul
-            className="m-0 p-0 list-none flex flex-col gap-2"
-            style={{ maxWidth: 680 }}
-          >
+          <ul className="m-0 p-0 list-none flex flex-col gap-2 case-study-prose">
             {project.caseStudyPdfs.map((item) => (
               <li key={item.href}>
                 <a
@@ -324,7 +317,7 @@ function CaseStudyRichLayout({ project, frameStyle }) {
         <CaseStudySectionTitle>
           {conclusionTitle || "Conclusion"}
         </CaseStudySectionTitle>
-        <p className="m-0 mt-0" style={bodyStyle}>
+        <p className="m-0 mt-0 case-study-prose" style={bodyStyle}>
           {conclusion}
         </p>
       </div>
@@ -354,15 +347,6 @@ export default async function ProjectPage({ params }) {
   const idx = projects.findIndex((p) => p.slug === slug);
   const nextProject = projects[(idx + 1) % projects.length];
 
-  const linkStyle = {
-    fontFamily: "'VT323', monospace",
-    fontSize: 16,
-    color: "#FF7A29",
-    textTransform: "uppercase",
-    letterSpacing: "0.28em",
-    textShadow: "0 0 8px rgba(255,122,41,0.4)",
-  };
-
   const gallery = project.caseStudyGallery ?? [];
   const pdfs = project.caseStudyPdfs ?? [];
   const hero = project.caseStudyHero ?? null;
@@ -375,32 +359,25 @@ export default async function ProjectPage({ params }) {
     Boolean(rich);
 
   const frameStyle = {
-    borderRadius: 12,
-    border: "1px solid rgba(255,255,255,0.06)",
+    borderRadius: 3,
+    border: "1px solid rgba(255, 122, 41, 0.22)",
     overflow: "hidden",
-    background: "#1e1e1e",
+    background: "rgba(14, 10, 6, 0.92)",
   };
 
-  return (
-    <main
-      className="min-h-screen w-full"
-      style={{ background: "#171717", color: "#ffffff" }}
-    >
-      <div className="mx-auto px-6 md:px-12 py-24" style={{ maxWidth: 960 }}>
-        <Link
-          href="/#sketchbook"
-          data-cursor="hover"
-          style={linkStyle}
-        >
-          ← Back to home
-        </Link>
+  const endcap = (
+    <CaseStudyEndcap
+      nextProject={nextProject}
+      hasRichCaseStudy={hasRichCaseStudy}
+    />
+  );
 
+  return (
+    <CaseStudyBrowserShell project={project} endcap={endcap}>
+      <div className="case-study-browser__content">
         <h1
-          className="mt-8"
+          className="case-study-browser__heading"
           style={{
-            fontFamily: "'Bonbon', cursive",
-            fontSize: "clamp(48px, 8vw, 88px)",
-            lineHeight: 1.05,
             viewTransitionName: projectTitleTransitionName(project.slug),
           }}
         >
@@ -409,18 +386,7 @@ export default async function ProjectPage({ params }) {
 
         <ProjectPageListen project={project} />
 
-        <p
-          className="mt-10"
-          style={{
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: 18,
-            color: "#bbb",
-            lineHeight: 1.8,
-            maxWidth: 680,
-          }}
-        >
-          {project.description}
-        </p>
+        <p className="case-study-browser__lede">{project.description}</p>
 
         {rich ? (
           <CaseStudyRichLayout project={project} frameStyle={frameStyle} />
@@ -449,9 +415,9 @@ export default async function ProjectPage({ params }) {
             className="mt-16 w-full overflow-hidden"
             style={{
               aspectRatio: "16 / 9",
-              background: "#1e1e1e",
-              borderRadius: 12,
-              border: "1px solid rgba(255,255,255,0.06)",
+              background: "rgba(14, 10, 6, 0.92)",
+              borderRadius: 3,
+              border: "1px solid rgba(255, 122, 41, 0.22)",
               viewTransitionName: projectHeroTransitionName(project.slug),
             }}
           >
@@ -511,10 +477,7 @@ export default async function ProjectPage({ params }) {
             >
               Slides · PDF
             </p>
-            <ul
-              className="m-0 p-0 list-none flex flex-col gap-2"
-              style={{ maxWidth: 680 }}
-            >
+            <ul className="m-0 p-0 list-none flex flex-col gap-2 case-study-prose">
               {pdfs.map((item) => (
                 <li key={item.href}>
                   <a
@@ -538,11 +501,6 @@ export default async function ProjectPage({ params }) {
           </div>
         ) : null}
       </div>
-
-      <CaseStudyEndcap
-        nextProject={nextProject}
-        hasRichCaseStudy={hasRichCaseStudy}
-      />
-    </main>
+    </CaseStudyBrowserShell>
   );
 }
