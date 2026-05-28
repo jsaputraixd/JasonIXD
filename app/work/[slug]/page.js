@@ -51,9 +51,113 @@ function CaseStudySubTitle({ children }) {
   );
 }
 
+function sectionAnchor(title) {
+  return String(title)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
+function CaseStudyJumpNav({ sections, hasPrototype }) {
+  const links = [
+    ...sections.map((s) => ({ label: s.title, href: `#section-${sectionAnchor(s.title)}` })),
+    ...(hasPrototype ? [{ label: "Prototype", href: "#section-prototype" }] : []),
+    { label: "Reflection", href: "#section-reflection" },
+  ];
+
+  return (
+    <nav className="case-study-jump-nav" aria-label="Case study sections">
+      {links.map((link) => (
+        <a key={link.href} href={link.href} data-cursor="hover" className="case-study-jump-nav__link">
+          {link.label}
+        </a>
+      ))}
+    </nav>
+  );
+}
+
+function CaseStudyHighlights({ items }) {
+  if (!items?.length) return null;
+
+  return (
+    <div className="case-study-highlights">
+      {items.map((item) => (
+        <div key={item.label} className="case-study-highlights__item">
+          <p className="case-study-highlights__label">{item.label}</p>
+          <p className="case-study-highlights__value">{item.value}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function normalizeCaseStudyImage(entry) {
   if (typeof entry === "string") return { src: entry, alt: "" };
   return { src: entry.src, alt: entry.alt ?? "" };
+}
+
+function CaseStudyProcessBlock({ block, frameStyle, bodyStyle, imagesFirst = true }) {
+  const images = (block.images ?? []).length > 0 ? (
+    <div className={`flex flex-col gap-10 ${imagesFirst ? "mb-8" : "-mt-2 mb-4"}`}>
+      {(block.images ?? []).map((entry) => {
+        const { src, alt } = normalizeCaseStudyImage(entry);
+        return (
+          <div key={src} style={frameStyle}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={encodeURI(src)}
+              alt={alt}
+              style={{
+                width: "100%",
+                height: "auto",
+                display: "block",
+              }}
+            />
+          </div>
+        );
+      })}
+    </div>
+  ) : null;
+
+  const paragraphs = (block.paragraphs ?? []).map((text, i) => (
+    <p key={i} className="m-0 mb-8 last:mb-0 case-study-prose" style={bodyStyle}>
+      {text}
+    </p>
+  ));
+
+  return (
+    <div key={block.title}>
+      <CaseStudySubTitle>{block.title}</CaseStudySubTitle>
+      {imagesFirst ? (
+        <>
+          {images}
+          {paragraphs}
+        </>
+      ) : (
+        <>
+          {paragraphs}
+          {images}
+        </>
+      )}
+    </div>
+  );
+}
+
+function CaseStudyHeroFade({ hero, slug }) {
+  return (
+    <div
+      className="case-study-hero-fade"
+      style={{ viewTransitionName: projectHeroTransitionName(slug) }}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        className="case-study-hero-fade__img"
+        src={projectCaseStudyHeroSrc(hero)}
+        alt=""
+      />
+      <div className="case-study-hero-fade__overlay" aria-hidden />
+    </div>
+  );
 }
 
 function CaseStudyRichLayout({ project, frameStyle }) {
@@ -69,6 +173,15 @@ function CaseStudyRichLayout({ project, frameStyle }) {
     designSolution,
     conclusion,
     conclusionTitle,
+    videosPlacement = "afterIntro",
+    videosAfterSection,
+    videosTitle,
+    videosIntro,
+    videosLayout,
+    imagesBeforeText = true,
+    highlights,
+    showJumpNav = false,
+    showDeckEmbed = true,
   } = rich;
 
   const bodyStyle = {
@@ -104,9 +217,41 @@ function CaseStudyRichLayout({ project, frameStyle }) {
     ["My role", overview.role],
   ];
 
+  const processSections =
+    processWork?.sections?.length > 0
+      ? processWork.sections
+      : processWork?.blocks?.length > 0
+        ? [{ title: processWork.title || "Process Work", blocks: processWork.blocks }]
+        : [];
+
+  const videoSection =
+    videos && videos.length > 0 ? (
+      <div id="section-prototype" className="case-study-prototype-anchor">
+        <CaseStudyVideos
+          videos={videos}
+          frameStyle={frameStyle}
+          title={videosTitle}
+          intro={videosIntro}
+          layout={videosLayout}
+        />
+      </div>
+    ) : null;
+
+  const shouldShowJumpNav = showJumpNav && processSections.length > 1;
+
   return (
     <>
-      <div className="mt-12">
+      {(introParagraphs ?? []).length > 0 ? (
+      <div className="mt-10 flex flex-col gap-6">
+        {(introParagraphs ?? []).map((text, i) => (
+          <p key={i} className="m-0 case-study-prose case-study-summary" style={bodyStyle}>
+            {text}
+          </p>
+        ))}
+      </div>
+      ) : null}
+
+      <div className={(introParagraphs ?? []).length > 0 ? "mt-12" : "mt-12"}>
         <CaseStudySectionTitle>Project Overview</CaseStudySectionTitle>
         <div
           className="case-study-prose grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-8"
@@ -118,15 +263,15 @@ function CaseStudyRichLayout({ project, frameStyle }) {
             </div>
           ))}
         </div>
+        <CaseStudyHighlights items={highlights} />
       </div>
 
-      <div className="mt-12 flex flex-col gap-8">
-        {introParagraphs.map((text, i) => (
-          <p key={i} className="m-0 case-study-prose" style={bodyStyle}>
-            {text}
-          </p>
-        ))}
-      </div>
+      {shouldShowJumpNav ? (
+        <CaseStudyJumpNav
+          sections={processSections}
+          hasPrototype={Boolean(videos?.length) && videosPlacement === "afterSection"}
+        />
+      ) : null}
 
       {(finalDesign?.images ?? []).length > 0 ? (
       <div className="mt-16">
@@ -153,48 +298,36 @@ function CaseStudyRichLayout({ project, frameStyle }) {
       </div>
       ) : null}
 
-      {videos && videos.length > 0 ? (
-        <CaseStudyVideos videos={videos} frameStyle={frameStyle} />
-      ) : null}
+      {videosPlacement === "afterIntro" ? videoSection : null}
 
-      {processWork?.blocks?.length > 0 ? (
-        <div className="mt-16">
-          <CaseStudySectionTitle>
-            {processWork.title || "Process Work"}
-          </CaseStudySectionTitle>
-          {processWork.blocks.map((block) => (
-            <div key={block.title}>
-              <CaseStudySubTitle>{block.title}</CaseStudySubTitle>
-              {(block.paragraphs ?? []).map((text, i) => (
-                <p key={i} className="m-0 mb-8 last:mb-0 case-study-prose" style={bodyStyle}>
-                  {text}
-                </p>
+      {processSections.length > 0 ? (
+        <div className={processWork?.sections?.length > 0 ? "mt-16 flex flex-col gap-16" : "mt-16"}>
+          {processSections.map((section) => (
+            <div
+              key={section.title}
+              id={`section-${sectionAnchor(section.title)}`}
+              className="case-study-section-anchor"
+            >
+              <CaseStudySectionTitle>{section.title}</CaseStudySectionTitle>
+              {section.blocks.map((block) => (
+                <CaseStudyProcessBlock
+                  key={block.title}
+                  block={block}
+                  frameStyle={frameStyle}
+                  bodyStyle={bodyStyle}
+                  imagesFirst={imagesBeforeText}
+                />
               ))}
-              {(block.images ?? []).length > 0 ? (
-                <div className="flex flex-col gap-10 -mt-2 mb-4">
-                  {(block.images ?? []).map((entry) => {
-                    const { src, alt } = normalizeCaseStudyImage(entry);
-                    return (
-                      <div key={src} style={frameStyle}>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={encodeURI(src)}
-                          alt={alt}
-                          style={{
-                            width: "100%",
-                            height: "auto",
-                            display: "block",
-                          }}
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : null}
+              {videosPlacement === "afterSection" &&
+              videosAfterSection === section.title
+                ? videoSection
+                : null}
             </div>
           ))}
         </div>
       ) : null}
+
+      {videosPlacement === "afterProcess" ? videoSection : null}
 
       {designSolution?.length > 0 ? (
         <div className="mt-16">
@@ -238,7 +371,9 @@ function CaseStudyRichLayout({ project, frameStyle }) {
               lineHeight: 1.6,
             }}
           >
-            Complete presentation in one file — scroll or download below.
+            {showDeckEmbed
+              ? "Complete presentation in one file — scroll or download below."
+              : "Full slide deck — download for the complete presentation."}
           </p>
           <a
             href={encodeURI(project.caseStudyDeckPdf.href)}
@@ -247,7 +382,7 @@ function CaseStudyRichLayout({ project, frameStyle }) {
             data-cursor="hover"
             style={{
               display: "inline-block",
-              marginBottom: 16,
+              marginBottom: showDeckEmbed ? 16 : 0,
               fontFamily: "'VT323', monospace",
               fontSize: 14,
               letterSpacing: "0.22em",
@@ -261,6 +396,7 @@ function CaseStudyRichLayout({ project, frameStyle }) {
           >
             {project.caseStudyDeckPdf.label} ↗
           </a>
+          {showDeckEmbed ? (
           <div
             style={{
               ...frameStyle,
@@ -283,6 +419,7 @@ function CaseStudyRichLayout({ project, frameStyle }) {
               }}
             />
           </div>
+          ) : null}
         </div>
       ) : null}
 
@@ -313,7 +450,7 @@ function CaseStudyRichLayout({ project, frameStyle }) {
         </div>
       ) : null}
 
-      <div className="mt-16">
+      <div className="mt-16 case-study-section-anchor" id="section-reflection">
         <CaseStudySectionTitle>
           {conclusionTitle || "Conclusion"}
         </CaseStudySectionTitle>
@@ -375,6 +512,10 @@ export default async function ProjectPage({ params }) {
   return (
     <CaseStudyBrowserShell project={project} endcap={endcap}>
       <div className="case-study-browser__content">
+        {rich?.heroFirst && hero ? (
+          <CaseStudyHeroFade hero={hero} slug={project.slug} />
+        ) : null}
+
         <h1
           className="case-study-browser__heading"
           style={{
@@ -383,6 +524,10 @@ export default async function ProjectPage({ params }) {
         >
           {project.title}
         </h1>
+
+        {project.tagline ? (
+          <p className="case-study-browser__tagline">{project.tagline}</p>
+        ) : null}
 
         <ProjectPageListen project={project} />
 

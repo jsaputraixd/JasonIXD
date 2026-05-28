@@ -26,7 +26,13 @@ function youtubeVideoId(url) {
  * File videos: capped height, side-by-side from sm+, autoplay when block in view (muted).
  * YouTube: unchanged full-width embeds below file section.
  */
-export default function CaseStudyVideos({ videos, frameStyle }) {
+export default function CaseStudyVideos({
+  videos,
+  frameStyle,
+  title = "Interaction demos",
+  intro,
+  layout = "default",
+}) {
   const fileItems = (videos ?? []).filter((v) => v.kind === "file" && v.src);
   const youtubeItems = (videos ?? []).filter((v) => {
     if (v.kind !== "youtube" || !v.url) return false;
@@ -89,28 +95,46 @@ export default function CaseStudyVideos({ videos, frameStyle }) {
           marginBottom: 14,
         }}
       >
-        Interaction demos
+        {title}
       </h2>
+
+      {intro ? (
+        <p
+          className="m-0 mb-4 case-study-prose"
+          style={{
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: 18,
+            color: "#bbb",
+            lineHeight: 1.8,
+          }}
+        >
+          {intro}
+        </p>
+      ) : null}
 
       {fileItems.length > 0 ? (
         <>
-          <p
-            className="m-0 mb-3"
-            style={{
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: 13,
-              color: "#666",
-              lineHeight: 1.5,
-            }}
-          >
-            Autoplays muted when in view — use controls to unmute or scrub.
-          </p>
+          {!intro ? (
+            <p
+              className="m-0 mb-3"
+              style={{
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: 13,
+                color: "#666",
+                lineHeight: 1.5,
+              }}
+            >
+              Autoplays muted when in view — use controls to unmute or scrub.
+            </p>
+          ) : null}
           <div
             ref={scrollPlayRef}
             className={
               fileItems.length >= 2
                 ? "grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 w-full"
-                : "w-full max-w-2xl"
+                : layout === "full"
+                  ? "w-full"
+                  : "w-full max-w-2xl"
             }
           >
             {fileItems.map((item, i) => (
@@ -122,7 +146,8 @@ export default function CaseStudyVideos({ videos, frameStyle }) {
                   className="flex items-center justify-center"
                   style={{
                     background: "#0a0a0a",
-                    maxHeight: "min(38vh, 320px)",
+                    maxHeight:
+                      layout === "full" ? "none" : "min(38vh, 320px)",
                     minHeight: 0,
                   }}
                 >
@@ -134,7 +159,8 @@ export default function CaseStudyVideos({ videos, frameStyle }) {
                     style={{
                       width: "100%",
                       height: "auto",
-                      maxHeight: "min(38vh, 320px)",
+                      maxHeight:
+                        layout === "full" ? "none" : "min(38vh, 320px)",
                       objectFit: "contain",
                       display: "block",
                     }}
