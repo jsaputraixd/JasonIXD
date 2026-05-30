@@ -13,9 +13,9 @@
     "dev:clean": "rm -rf .next && next dev -H 127.0.0.1 -p 3000",
     "dev:turbo": "next dev --turbo -H 127.0.0.1 -p 3000",
     "merge-pdfs": "node scripts/merge-case-study-decks.mjs",
-    "prebuild": "npm run merge-pdfs",
-    "build": "next build",
-    "preview": "next build && next start -H 127.0.0.1 -p 3000",
+    "build": "next build --webpack",
+    "build:fast": "next build --webpack",
+    "preview": "next build --webpack && next start -H 127.0.0.1 -p 3000",
     "start": "next start",
     "lint": "eslint ."
   },

@@ -17,10 +17,6 @@ public/videos/Earth Ascii.webm
 # Over GitHub’s 100MB limit — keep local; compress or use Git LFS before committing.
 public/images/other-stuff/motion/JasonSaputra_TitleSeq3_fa25.mp4
 
-# Generated at npm run dev / build (scripts/merge-case-study-decks.mjs)
-public/images/projects/dream-detective/Dream-Detective-full-deck.pdf
-public/images/projects/eleara/Eleara-full-deck.pdf
-
 # Local source exports — use compressed mp4 on site
 public/images/projects/dream-detective/Dream Detective App Flow.mov
 public/images/projects/dream-detective/Dream Detective.pdf

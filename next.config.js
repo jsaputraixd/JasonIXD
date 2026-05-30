@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Next 16 defaults to Turbopack; empty config silences the webpack/turbopack mismatch warning.
+  turbopack: {},
   webpack: (config, { dev }) => {
     if (dev) {
       const prev = config.watchOptions?.ignored;
