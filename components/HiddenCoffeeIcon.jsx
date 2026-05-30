@@ -5,13 +5,15 @@ import { playClick } from "@/lib/typingSound";
 
 const ACCENT = "#FF7A29";
 
-/** Pop-out arc: starts inside bin → up & sideways → bouncy landing nearby. */
-function popKeyframes(scale) {
+/** Pop-out arc: starts inside bin → up & left → lands beside the bin (not on top). */
+function popKeyframes(scale, iconWidth = 76) {
   const s = scale;
+  const w = iconWidth;
+  const beside = Math.round((w + 24) * s);
   return {
-    start: { x: Math.round(20 * s), y: Math.round(18 * s) },
-    apex: { x: Math.round(38 * s), y: Math.round(-44 * s) },
-    land: { x: Math.round(-14 * s), y: Math.round(30 * s) },
+    start: { x: Math.round(w * 0.32), y: Math.round(w * 0.22) },
+    apex: { x: Math.round(-w * 0.08), y: Math.round(-w * 0.62) },
+    land: { x: -beside, y: Math.round(2 * s) },
   };
 }
 
@@ -20,12 +22,12 @@ export default function HiddenCoffeeIcon({
   anchorLeft,
   anchorTop,
   width = 76,
-  zIndex = 15,
+  zIndex = 18,
   layoutScale = 1,
   selected = false,
   onOpen,
 }) {
-  const k = popKeyframes(layoutScale);
+  const k = popKeyframes(layoutScale, width);
 
   return (
     <motion.button
@@ -63,6 +65,7 @@ export default function HiddenCoffeeIcon({
         left: anchorLeft,
         top: anchorTop,
         width,
+        height: Math.round(width * 1.26),
         zIndex,
         margin: 0,
         padding: "4px 2px 6px",

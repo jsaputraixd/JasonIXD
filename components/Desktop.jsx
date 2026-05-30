@@ -491,6 +491,7 @@ export default function Desktop() {
     if (clickCount === 5) {
       setCoffeeRevealed(true);
       setTrashPop(true);
+      bringToFront("coffeeIcon");
       window.setTimeout(() => setTrashPop(false), 520);
     }
 
@@ -498,7 +499,7 @@ export default function Desktop() {
     trashMessageTimerRef.current = setTimeout(() => {
       setTrashMessage(null);
     }, 5000);
-  }, []);
+  }, [bringToFront]);
 
   useEffect(
     () => () => {
@@ -722,6 +723,8 @@ export default function Desktop() {
           iconSrc={otherStuff.icon}
           left={pos.otherStuffIcon.left}
           top={pos.otherStuffIcon.top}
+          width={pos.otherStuffIcon.width}
+          height={pos.otherStuffIcon.height}
           delay={cascadeDelay(2.05)}
           zIndex={zOf("otherStuffIcon", 15)}
           stageRef={stageRef}
@@ -743,6 +746,8 @@ export default function Desktop() {
           iconId="otherProjectsIcon"
           left={pos.otherProjectsIcon.left}
           top={pos.otherProjectsIcon.top}
+          width={pos.otherProjectsIcon.width}
+          height={pos.otherProjectsIcon.height}
           delay={cascadeDelay(2.12)}
           zIndex={zOf("otherProjectsIcon", 15)}
           stageRef={stageRef}
@@ -779,7 +784,8 @@ export default function Desktop() {
             anchorLeft={trashIconLeft + pShift.trashIcon.x}
             anchorTop={trashIconTop + pShift.trashIcon.y}
             layoutScale={layoutScale}
-            zIndex={zOf("coffeeIcon", 15)}
+            width={76}
+            zIndex={zOf("coffeeIcon", 18)}
             selected={coffeeSnakeOpen}
             onOpen={openCoffeeSnake}
           />

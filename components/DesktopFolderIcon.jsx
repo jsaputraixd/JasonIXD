@@ -78,6 +78,7 @@ export default function DesktopFolderIcon({
         left: drag.left,
         top: drag.top,
         width,
+        height,
         zIndex: drag.isDragging ? zIndex + 20 : zIndex,
         margin: 0,
         padding: "4px 2px 6px",
@@ -128,8 +129,9 @@ export default function DesktopFolderIcon({
           textShadow: selected
             ? "0 0 8px rgba(255, 122, 41, 0.55)"
             : "0 0 6px rgba(255, 122, 41, 0.35)",
-          maxWidth: width + 12,
-          wordBreak: "break-word",
+          width: "100%",
+          minHeight: 28,
+          display: "block",
         }}
       >
         {label}
