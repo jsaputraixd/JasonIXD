@@ -109,6 +109,11 @@ body {
   .crt-stage > .crt-tilt {
     transform: none;
   }
+
+  .portfolio-main {
+    min-height: 100dvh;
+    overflow: visible;
+  }
 }
 
 /* Mobile project strip — let horizontal swipes hit the carousel, not the page */
