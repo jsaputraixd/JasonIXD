@@ -7,10 +7,16 @@ const nextConfig = {
     if (dev) {
       const prev = config.watchOptions?.ignored;
       const prevList = Array.isArray(prev)
-        ? prev.filter(Boolean)
-        : prev
-          ? [prev].filter(Boolean)
-          : [];
+        ? prev.filter(
+            (item) =>
+              (typeof item === "string" && item.length > 0) ||
+              item instanceof RegExp
+          )
+        : typeof prev === "string" && prev.length > 0
+          ? [prev]
+          : prev instanceof RegExp
+            ? [prev]
+            : [];
       config.watchOptions = {
         ...config.watchOptions,
         ignored: [
