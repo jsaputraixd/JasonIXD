@@ -6,6 +6,7 @@ import {
   useLayoutEffect,
   useRef,
   useState,
+  memo,
 } from "react";
 import {
   AnimatePresence,
@@ -20,6 +21,10 @@ import OtherStuffFolder from "@/components/OtherStuffFolder";
 import OtherProjectsFolder from "@/components/OtherProjectsFolder";
 import { MobileProjectPreviewPanel } from "@/components/ProjectPreviewPane";
 import ProjectViewLink from "@/components/ProjectViewLink";
+import {
+  PROJECT_CARD_GRADIENTS as PROJECT_GRADIENTS,
+  ProjectCardHeroImage,
+} from "@/components/ProjectFlipCard";
 import WelcomeAsciiPortrait from "@/components/WelcomeAsciiPortrait";
 import {
   TypedLine,
@@ -1529,7 +1534,7 @@ function MobileProjectsCarousel({
               className="mobile-carousel-dot"
               aria-label={`Go to ${p.title}`}
               onClick={() => {
-                const el = cardsRef.current[i];
+                const el = cardShellRefs.current[i];
                 const carousel = carouselRef.current;
                 if (!el || !carousel) return;
                 playClick();

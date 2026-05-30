@@ -14,7 +14,7 @@ export const PROJECT_CARD_GRADIENTS = [
   "linear-gradient(135deg, #1a3040 0%, #0a1520 60%, #0a0505 100%)",
 ];
 
-function ProjectCardHeroImage({ src, style, loading = "lazy" }) {
+export function ProjectCardHeroImage({ src, style, loading = "lazy" }) {
   const [displaySrc, setDisplaySrc] = useState(() => projectCardThumbSrc(src));
 
   useEffect(() => {
