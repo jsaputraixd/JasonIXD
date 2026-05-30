@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" width="390" height="844">
+  <rect width="390" height="844" fill="#0a0a0a"/>
+  <rect x="20" y="20" width="350" height="804" rx="44" fill="none" stroke="#b8b8b8" stroke-width="2.5"/>
+  <rect x="130" y="40" width="130" height="32" rx="16" fill="none" stroke="#6a6a6a" stroke-width="1.5"/>
+  <line x1="20" y1="700" x2="370" y2="700" stroke="#2a2a2a" stroke-width="1"/>
+  <line x1="40" y1="100" x2="120" y2="100" stroke="#2a2a2a" stroke-width="0.5"/>
+  <line x1="40" y1="120" x2="80" y2="118" stroke="#2a2a2a" stroke-width="0.4"/>
+  <line x1="40" y1="200" x2="350" y2="200" stroke="#1a1a1a" stroke-width="0.3"/>
+  <line x1="40" y1="220" x2="300" y2="220" stroke="#1a1a1a" stroke-width="0.3"/>
+  <line x1="40" y1="240" x2="250" y2="238" stroke="#1a1a1a" stroke-width="0.3"/>
+  <text x="40" y="400" fill="#2a2a2a" font-family="system-ui, Inter, sans-serif" font-size="12">(blank artboard - matches PDF empty frame)</text>
+  <text x="40" y="800" text-anchor="start" fill="#2a2a2a" font-family="system-ui, Inter, sans-serif" font-size="10">[ header ]    [ content ]    [ simple footer ]</text>
+</svg>

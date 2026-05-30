@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" width="390" height="844">
+  <rect width="390" height="844" fill="#0a0a0a"/>
+  <rect x="20" y="20" width="350" height="804" rx="44" fill="none" stroke="#e8e8e8" stroke-width="2.5"/>
+  <rect x="130" y="40" width="130" height="32" rx="16" fill="none" stroke="#b0b0b0" stroke-width="2"/>
+  <!-- simple header -->
+  <text x="40" y="100" fill="#e8e8e8" font-family="system-ui, Inter, sans-serif" font-size="19" font-weight="600">The Vault</text>
+  <text x="40" y="128" fill="#5a5a5a" font-family="system-ui, Inter, sans-serif" font-size="12">[ gear ]</text>
+  <text x="330" y="100" text-anchor="end" fill="#6a6a6a" font-family="system-ui, Inter, sans-serif" font-size="12">ï</text>
+  <!-- lock banner -->
+  <rect x="32" y="150" width="326" height="64" rx="12" fill="none" stroke="#7a7a7a" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <rect x="52" y="170" width="20" height="24" rx="2" fill="none" stroke="#9a9a9a" stroke-width="1.2"/>
+  <path d="M 58 170 V 160 Q 58 150 64 150 H 64" fill="none" stroke="#9a9a9a" stroke-width="1.2"/>
+  <line x1="100" y1="170" x2="200" y2="172" stroke="#888" stroke-width="1" stroke-linecap="round"/>
+  <line x1="100" y1="182" x2="280" y2="180" stroke="#888" stroke-width="1" stroke-linecap="round"/>
+  <line x1="100" y1="192" x2="240" y2="194" stroke="#888" stroke-width="1" stroke-linecap="round"/>
+  <!-- list -->
+  <text x="40" y="250" fill="#7a7a7a" font-family="system-ui, Inter, sans-serif" font-size="12">Entries (sealed until morning review)</text>
+  <rect x="32" y="262" width="326" height="72" rx="10" fill="none" stroke="#5a5a5a" stroke-width="1.2"/>
+  <line x1="50" y1="282" x2="120" y2="284" stroke="#666" stroke-width="0.9" stroke-linecap="round"/>
+  <line x1="50" y1="294" x2="280" y2="292" stroke="#666" stroke-width="0.9" stroke-linecap="round"/>
+  <line x1="50" y1="304" x2="200" y2="308" stroke="#666" stroke-width="0.9" stroke-linecap="round"/>
+  <line x1="50" y1="316" x2="90" y2="316" stroke="#666" stroke-width="0.9" stroke-linecap="round"/>
+  <text x="300" y="300" fill="#4a4a4a" font-family="system-ui, Inter, sans-serif" font-size="10">[ lock ]</text>
+  <rect x="32" y="345" width="326" height="72" rx="10" fill="none" stroke="#5a5a5a" stroke-width="1.2"/>
+  <line x1="50" y1="365" x2="100" y2="368" stroke="#666" stroke-width="0.9" stroke-linecap="round"/>
+  <line x1="50" y1="378" x2="260" y2="376" stroke="#666" stroke-width="0.9" stroke-linecap="round"/>
+  <line x1="50" y1="390" x2="180" y2="392" stroke="#666" stroke-width="0.9" stroke-linecap="round"/>
+  <text x="300" y="383" fill="#4a4a4a" font-family="system-ui, Inter, sans-serif" font-size="10">[ lock ]</text>
+  <rect x="32" y="428" width="326" height="72" rx="10" fill="none" stroke="#5a5a5a" stroke-width="1.2"/>
+  <line x1="50" y1="448" x2="140" y2="450" stroke="#666" stroke-width="0.9" stroke-linecap="round"/>
+  <line x1="50" y1="460" x2="300" y2="458" stroke="#666" stroke-width="0.9" stroke-linecap="round"/>
+  <line x1="50" y1="472" x2="220" y2="474" stroke="#666" stroke-width="0.9" stroke-linecap="round"/>
+  <text x="300" y="466" fill="#4a4a4a" font-family="system-ui, Inter, sans-serif" font-size="10">[ lock ]</text>
+  <!-- quick capture (disabled primary) -->
+  <rect x="32" y="520" width="326" height="100" rx="10" fill="none" stroke="#3a3a3a" stroke-width="1.2"/>
+  <line x1="50" y1="545" x2="200" y2="547" stroke="#444" stroke-width="0.8" stroke-linecap="round"/>
+  <line x1="50" y1="558" x2="280" y2="560" stroke="#444" stroke-width="0.8" stroke-linecap="round"/>
+  <text x="50" y="600" fill="#3a3a3a" font-family="system-ui, Inter, sans-serif" font-size="11">+ Dump thought (unlocks in quick-capture or next day)</text>
+  <rect x="40" y="750" width="310" height="48" rx="12" fill="none" stroke="#3a3a3a" stroke-width="1.2"/>
+  <text x="195" y="778" text-anchor="middle" fill="#4a4a4a" font-family="system-ui, Inter, sans-serif" font-size="15">[ Quick capture: dim ]</text>
+  <!-- simple footer tab -->
+  <line x1="20" y1="718" x2="370" y2="718" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="70" y="820" text-anchor="middle" fill="#5a5a5a" font-family="system-ui, Inter, sans-serif" font-size="10">Home</text>
+  <text x="195" y="820" text-anchor="middle" fill="#b0b0b0" font-family="system-ui, Inter, sans-serif" font-size="10">Vault</text>
+  <text x="320" y="820" text-anchor="middle" fill="#5a5a5a" font-family="system-ui, Inter, sans-serif" font-size="10">Ritual</text>
+</svg>

@@ -28,12 +28,15 @@ import { projectHeroTransitionName } from "@/lib/viewTransition";
 import DesktopIdleLayer from "./DesktopIdleLayer";
 import RecycleBinIcon from "./RecycleBinIcon";
 import SkillsPlanet from "./SkillsPlanet";
-import { projects } from "@/data/projects";
+import { featuredProjects } from "@/data/projects";
 import { about } from "@/data/about";
 import WelcomeReadAloud from "@/components/WelcomeReadAloud";
 import DesktopFolderIcon from "@/components/DesktopFolderIcon";
 import OtherStuffFolder from "@/components/OtherStuffFolder";
+import OtherProjectsFolder from "@/components/OtherProjectsFolder";
+import ProjectFlipCard, { PROJECT_CARD_GRADIENTS } from "@/components/ProjectFlipCard";
 import { otherStuff } from "@/data/otherStuff";
+import { otherProjects } from "@/data/otherProjects";
 import {
   DESKTOP_FOLDER_ICON_W,
   getDeterministicDesktopPositions,
@@ -78,13 +81,15 @@ function getWindowTitle(id) {
       return "contact.msg";
     case "otherStuff":
       return otherStuff.windowTitle;
+    case "otherProjects":
+      return otherProjects.windowTitle;
     case "coffee-snake":
       return "coffee_snake.exe";
     default: {
       const m = /^proj-(\d+)$/.exec(id);
       if (m) {
         const idx = Number(m[1]) - 1;
-        return projects[idx]?.title ?? id;
+        return featuredProjects[idx]?.title ?? id;
       }
       return id;
     }
@@ -108,7 +113,7 @@ const SKILLS_WINDOW_BODY_SCALE = 0.5;
 
 /** Viewport-aware sizes; positions are fixed zones (center welcome, grouped project row). */
 function getDesktopLayout(vw, vh) {
-  const nProj = projects.length;
+  const nProj = featuredProjects.length;
   const edge = 12;
   const g = 10;
   const layoutScale = Math.min(1, vw / LAYOUT_REF_W);
@@ -119,6 +124,7 @@ function getDesktopLayout(vw, vh) {
     me: Math.round(clamp(208, 288, 218 + 70 * u)),
     skills: Math.round(clamp(300, 440, 330 + 100 * u)),
     otherStuff: Math.round(clamp(340, 520, 420 + 32 * u)),
+    otherProjects: Math.round(clamp(460, 620, 520 + 40 * u)),
     contact: Math.round(clamp(248, 298, 260 + 28 * u)),
   };
 
@@ -130,6 +136,7 @@ function getDesktopLayout(vw, vh) {
       Math.round(W0.skills * layoutScale * SKILLS_WINDOW_BODY_SCALE)
     ),
     otherStuff: Math.round(W0.otherStuff * layoutScale),
+    otherProjects: Math.round(W0.otherProjects * layoutScale),
     contact: Math.round(W0.contact * layoutScale),
   };
 
@@ -153,7 +160,7 @@ function getDesktopLayout(vw, vh) {
   }
 
   const projectGap = Math.max(14, Math.round(PROJECT_WINDOW_GAP * layoutScale));
-  let projectCards = getProjectDesktopCards(projects, layoutScale);
+  let projectCards = getProjectDesktopCards(featuredProjects, layoutScale);
 
   const maxGridW = Math.max(0, vw - 2 * edge - RIGHT_RESERVE);
   const bandInner = Math.max(0, skillsLeft - edge - g);
@@ -198,19 +205,14 @@ function getDesktopLayout(vw, vh) {
   return { W, pos, projectCards, layoutScale };
 }
 
-const DESKTOP_PROJECT_SLOTS = projects.map((_, projectIndex) => ({
+const DESKTOP_PROJECT_SLOTS = featuredProjects.map((_, projectIndex) => ({
   slot: `projSlot${projectIndex}`,
   projectIndex,
   delay: 0.4 + projectIndex * 0.15,
   zBase: 14 + projectIndex,
 }));
 
-const PROJECT_GRADIENTS = [
-  "linear-gradient(135deg, #4a1f0a 0%, #1a0a05 60%, #0a0505 100%)",
-  "linear-gradient(135deg, #4a2818 0%, #1f0e08 60%, #0a0505 100%)",
-  "linear-gradient(135deg, #4a3010 0%, #221305 60%, #0a0505 100%)",
-  "linear-gradient(135deg, #3a3518 0%, #181505 60%, #0a0505 100%)",
-];
+const PROJECT_GRADIENTS = PROJECT_CARD_GRADIENTS;
 
 export default function Desktop() {
   const stageRef = useRef(null);
@@ -235,7 +237,10 @@ export default function Desktop() {
   const [welcomeTyped, setWelcomeTyped] = useState("");
   const [otherStuffOpen, setOtherStuffOpen] = useState(false);
   const [otherStuffBrowsing, setOtherStuffBrowsing] = useState(false);
+  const [otherProjectsOpen, setOtherProjectsOpen] = useState(false);
   const [coffeeSnakeOpen, setCoffeeSnakeOpen] = useState(false);
+  const [coffeeRevealed, setCoffeeRevealed] = useState(false);
+  const [trashPop, setTrashPop] = useState(false);
   const [minimizedIds, setMinimizedIds] = useState([]);
   const [trashMessage, setTrashMessage] = useState(null);
   const trashMessageTimerRef = useRef(null);
@@ -462,6 +467,16 @@ export default function Desktop() {
     Math.round((vwSafe - otherStuffWindowWidth) / 2)
   );
 
+  const otherProjectsWindowLeft = Math.max(
+    12,
+    Math.round((vwSafe - W.otherProjects) / 2)
+  );
+  const otherProjectsWindowTop = Math.max(
+    12,
+    pos.otherProjects?.top ??
+      Math.round((vhSafe - Math.round(420 * layoutScale)) / 2)
+  );
+
   useEffect(() => {
     if (!otherStuffOpen) setOtherStuffBrowsing(false);
   }, [otherStuffOpen]);
@@ -471,9 +486,15 @@ export default function Desktop() {
       clearTimeout(trashMessageTimerRef.current);
     }
     trashClickCountRef.current += 1;
-    setTrashMessage(
-      pickTrashMessageForClick(trashClickCountRef.current)
-    );
+    const clickCount = trashClickCountRef.current;
+
+    if (clickCount === 5) {
+      setCoffeeRevealed(true);
+      setTrashPop(true);
+      window.setTimeout(() => setTrashPop(false), 520);
+    }
+
+    setTrashMessage(pickTrashMessageForClick(clickCount));
     trashMessageTimerRef.current = setTimeout(() => {
       setTrashMessage(null);
     }, 5000);
@@ -511,8 +532,10 @@ export default function Desktop() {
     skills: 10,
     otherStuff: 9,
     otherStuffIcon: 7,
+    otherProjects: 9,
+    otherProjectsIcon: 7,
     trashIcon: 7,
-    coffeeIcon: 6,
+    coffeeIcon: 7,
     contact: 9,
   };
   const pShift = {
@@ -524,6 +547,11 @@ export default function Desktop() {
     otherStuffIcon: {
       x: -px * depth.otherStuffIcon,
       y: -py * depth.otherStuffIcon * yz,
+    },
+    otherProjects: { x: -px * depth.otherProjects, y: -py * depth.otherProjects * yz },
+    otherProjectsIcon: {
+      x: -px * depth.otherProjectsIcon,
+      y: -py * depth.otherProjectsIcon * yz,
     },
     trashIcon: {
       x: -px * depth.trashIcon,
@@ -538,8 +566,6 @@ export default function Desktop() {
 
   const trashIconLeft = pos.trashIcon.left + iconOffsets.trashIcon.dx;
   const trashIconTop = pos.trashIcon.top + iconOffsets.trashIcon.dy;
-  const snakeRevealed =
-    Math.hypot(iconOffsets.trashIcon.dx, iconOffsets.trashIcon.dy) > 36;
 
   const showIntroCard =
     phase === "intro-typing" ||
@@ -653,7 +679,7 @@ export default function Desktop() {
 
       {showOtherWindows &&
         DESKTOP_PROJECT_SLOTS.map(({ slot, projectIndex, zBase }) => {
-          const p = projects[projectIndex];
+          const p = featuredProjects[projectIndex];
           const card = projectCards[projectIndex];
           const id = `proj-${projectIndex + 1}`;
           return (
@@ -711,15 +737,23 @@ export default function Desktop() {
       )}
 
       {showOtherWindows && (
-        <HiddenCoffeeIcon
-          left={pos.coffeeIcon.left}
-          top={pos.coffeeIcon.top}
-          delay={cascadeDelay(2.08)}
-          zIndex={zOf("coffeeIcon", 13)}
-          parallaxShift={pShift.coffeeIcon}
-          revealed={snakeRevealed}
-          selected={coffeeSnakeOpen}
-          onOpen={openCoffeeSnake}
+        <DesktopFolderIcon
+          label={otherProjects.label}
+          iconSrc={otherProjects.icon}
+          iconId="otherProjectsIcon"
+          left={pos.otherProjectsIcon.left}
+          top={pos.otherProjectsIcon.top}
+          delay={cascadeDelay(2.12)}
+          zIndex={zOf("otherProjectsIcon", 15)}
+          stageRef={stageRef}
+          onFocus={() => bringToFront("otherProjectsIcon")}
+          onOffsetChange={(offset) => handleIconOffset("otherProjectsIcon", offset)}
+          onOpen={() => {
+            bringToFront("otherProjects");
+            setOtherProjectsOpen(true);
+          }}
+          parallaxShift={pShift.otherProjectsIcon}
+          selected={otherProjectsOpen}
         />
       )}
 
@@ -730,12 +764,27 @@ export default function Desktop() {
           delay={cascadeDelay(2.18)}
           zIndex={zOf("trashIcon", 16)}
           stageRef={stageRef}
+          pop={trashPop}
           onFocus={() => bringToFront("trashIcon")}
           onOffsetChange={(offset) => handleIconOffset("trashIcon", offset)}
           onActivate={showTrashBubble}
           parallaxShift={pShift.trashIcon}
         />
       )}
+
+      <AnimatePresence>
+        {showOtherWindows && coffeeRevealed ? (
+          <HiddenCoffeeIcon
+            key="coffee-reveal"
+            anchorLeft={trashIconLeft + pShift.trashIcon.x}
+            anchorTop={trashIconTop + pShift.trashIcon.y}
+            layoutScale={layoutScale}
+            zIndex={zOf("coffeeIcon", 15)}
+            selected={coffeeSnakeOpen}
+            onOpen={openCoffeeSnake}
+          />
+        ) : null}
+      </AnimatePresence>
 
       <AnimatePresence>
         {trashMessage && showOtherWindows ? (
@@ -816,6 +865,27 @@ export default function Desktop() {
             layoutScale={layoutScale}
             onBrowseChange={setOtherStuffBrowsing}
           />
+        </Window>
+      )}
+
+      {showOtherWindows && otherProjectsOpen && (
+        <Window
+          id="otherProjects"
+          title={otherProjects.windowTitle}
+          titleUppercase={false}
+          left={otherProjectsWindowLeft}
+          top={otherProjectsWindowTop}
+          width={W.otherProjects}
+          delay={0}
+          zIndex={zOf("otherProjects", 22)}
+          onFocus={bringToFront}
+          minimized={isMinimized("otherProjects")}
+          onMinimize={() => minimizeWindow("otherProjects")}
+          dragConstraints={stageRef}
+          parallaxShift={pShift.otherProjects}
+          uiScale={layoutScale}
+        >
+          <OtherProjectsFolder variant="desktop" layoutScale={layoutScale} />
         </Window>
       )}
 
@@ -990,134 +1060,6 @@ export default function Desktop() {
   );
 }
 
-function ProjectCardHeroImage({ src, style, loading = "lazy" }) {
-  const [displaySrc, setDisplaySrc] = useState(() => projectCardThumbSrc(src));
-
-  useEffect(() => {
-    setDisplaySrc(projectCardThumbSrc(src));
-  }, [src]);
-
-  return (
-    /* eslint-disable-next-line @next/next/no-img-element */
-    <img
-      src={displaySrc}
-      alt=""
-      aria-hidden
-      loading={loading}
-      decoding="async"
-      style={style}
-      onError={() => {
-        const fallback = encodeURI(src);
-        if (displaySrc !== fallback) setDisplaySrc(fallback);
-      }}
-    />
-  );
-}
-
-function ProjectFlipCard({
-  project,
-  gradient,
-  layoutScale = 1,
-  frameWidth,
-  frameHeight,
-  aspectRatio,
-  onRequestFocus,
-}) {
-  const innerW = frameWidth ?? 268;
-  const cardH =
-    frameHeight ??
-    Math.round(innerW / (aspectRatio ?? 4 / 5));
-
-  const heroSrc = project.thumb ?? project.caseStudyHero ?? null;
-
-  return (
-    <Link
-      href={`/work/${project.slug}`}
-      data-cursor="project"
-      data-project-slug={project.slug}
-      aria-label={`Open ${project.title} case study`}
-      onMouseEnter={() => onRequestFocus?.()}
-      onFocus={() => onRequestFocus?.()}
-      style={{
-        display: "block",
-        position: "relative",
-        width: "100%",
-        height: cardH,
-        overflow: "hidden",
-        cursor: "pointer",
-        textDecoration: "none",
-        color: "inherit",
-        outline: "none",
-      }}
-    >
-      <div
-        className="project-card-shell"
-        style={{
-          position: "relative",
-          height: "100%",
-          transformOrigin: "center center",
-          borderRadius: 3,
-          border: "1px solid rgba(255, 122, 41, 0.4)",
-          overflow: "hidden",
-          boxShadow: "0 6px 20px rgba(0, 0, 0, 0.45)",
-        }}
-      >
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background: gradient,
-          }}
-        >
-          {heroSrc ? (
-            <>
-              <ProjectCardHeroImage
-                src={heroSrc}
-                loading="eager"
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  objectPosition: "center",
-                }}
-              />
-              <div
-                aria-hidden="true"
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  background:
-                    "linear-gradient(180deg, rgba(12, 8, 6, 0.08) 0%, rgba(8, 5, 4, 0.35) 100%)",
-                  pointerEvents: "none",
-                }}
-              />
-            </>
-          ) : null}
-          <div
-            aria-hidden="true"
-            style={{
-              position: "absolute",
-              inset: 0,
-              backgroundImage:
-                "repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.04) 0px, rgba(255, 255, 255, 0.04) 1px, transparent 2px, transparent 4px)",
-              pointerEvents: "none",
-              zIndex: 1,
-            }}
-          />
-        </div>
-
-        <div className="project-card-caption" aria-hidden="true">
-          <p className="project-card-caption__title">{project.title}</p>
-          <p className="project-card-caption__tagline">{project.tagline}</p>
-          <span className="project-card-caption__cta">Case study →</span>
-        </div>
-      </div>
-    </Link>
-  );
-}
-
 function WelcomeIntroMorph({ phase, typed, targetOffset }) {
   // Single element that lives through all three intro phases. Always rendered
   // via a flex-centered wrapper so it starts at viewport center, and animates
@@ -1219,7 +1161,7 @@ function MeTxtBody({ frameWidth, layoutScale = 1 }) {
     inner != null
       ? { width: `${inner}px`, height: `${inner}px` }
       : { width: "min(220px, 72vw)", height: "min(220px, 72vw)" };
-  const bioSize = isDesktop ? Math.max(10, Math.round(11.5 * s)) : 14;
+  const bioSize = isDesktop ? Math.max(12, Math.round(13.5 * s)) : 14;
   const bioPad = isDesktop ? Math.round(8 * s) : 12;
 
   return (
@@ -1282,7 +1224,7 @@ function WelcomeBody({
 }) {
   const s = layoutScale;
   const px = Math.round;
-  const mono = px(14 * s);
+  const mono = px(16 * s);
   const [typingDone, setTypingDone] = useState(skipTyping);
 
   useEffect(() => {
@@ -1511,7 +1453,7 @@ function MobileWorkSection({ scrollRoot }) {
   const [activeIdx, setActiveIdx] = useState(0);
   const [focusStrength, setFocusStrength] = useState(0);
   const sectionRef = useRef(null);
-  const project = projects[activeIdx] ?? projects[0];
+  const project = featuredProjects[activeIdx] ?? featuredProjects[0];
 
   useEffect(() => {
     const root = scrollRoot?.current;
@@ -2437,6 +2379,18 @@ function MobileDesktop() {
             <MobileSectionRule />
 
             <MobileJourneyChapter scrollRoot={scrollRef}>
+              <MobileSectionAnchor id="mobile-more-projects" />
+              <MobileJourneySectionLabel scrollRoot={scrollRef} skipTyping={skipWelcomeTyping}>
+                ▢ Other projects
+              </MobileJourneySectionLabel>
+              <MobileCard title="Other projects" titleUppercase={false} compactBody>
+                <OtherProjectsFolder variant="mobile" />
+              </MobileCard>
+            </MobileJourneyChapter>
+
+            <MobileSectionRule />
+
+            <MobileJourneyChapter scrollRoot={scrollRef}>
               <MobileSectionAnchor id="mobile-more" />
               <MobileJourneySectionLabel scrollRoot={scrollRef} skipTyping={skipWelcomeTyping}>
                 ▢ Other stuff
@@ -2899,7 +2853,7 @@ function MobileProjectsCarousel({
       applyCarouselCardVisuals(cards, focuses, true, metrics);
       window.setTimeout(
         finishReveal,
-        480 + (projects.length - 1) * 90 + 40
+        480 + (featuredProjects.length - 1) * 90 + 40
       );
     });
   }, [showCards, reduceMotion, focusStrength, syncActiveFromScroll]);
@@ -2966,7 +2920,7 @@ function MobileProjectsCarousel({
         minHeight: 0,
       }}
     >
-      {projects.map((p, i) => (
+      {featuredProjects.map((p, i) => (
         <div
           key={p.id}
           ref={(el) => {
@@ -3010,13 +2964,13 @@ function MobileProjectsCarousel({
             textShadow: "0 0 6px rgba(255, 122, 41, 0.4)",
           }}
         >
-          {String(activeIdx + 1).padStart(2, "0")} / {String(projects.length).padStart(2, "0")}
+          {String(activeIdx + 1).padStart(2, "0")} / {String(featuredProjects.length).padStart(2, "0")}
         </span>
         <motion.div
           style={{ display: "flex", gap: 6, alignItems: "center" }}
           aria-hidden
         >
-          {projects.map((p, i) => (
+          {featuredProjects.map((p, i) => (
             <button
               key={p.id}
               type="button"

@@ -25,10 +25,10 @@ const BOOT_LINES = [
 
 const CHAR_MS = 42;
 const LINE_GAP_MS = 300;
-const POST_BOOT_PAUSE = 780;
-const WORD_DURATION_S = 1.55;
-const WORD_STAGGER_S = 0.78;
-const TAGLINE_HOLD_MS = 5400;
+const POST_BOOT_PAUSE = 580;
+const WORD_DURATION_S = 1.2;
+const WORD_STAGGER_S = 0.58;
+const TAGLINE_HOLD_MS = 4400;
 const EXIT_FADE_MS = 950;
 
 const TAGLINE_WORDS = ["Dream.", "Think.", "Build."];

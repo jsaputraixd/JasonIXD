@@ -12,7 +12,7 @@ import {
 const ACCENT = "#FF7A29";
 const FOOTER_MUTED = "#FFC896";
 const MOBILE_BREAK = 900;
-const BUILD_LABEL = "JS-OS · v1.1";
+const BUILD_LABEL = "JS-OS · v1.2";
 
 const MARQUEE_ITEMS = [
   "Dream",
@@ -149,7 +149,7 @@ export default function StatusBar({
             style={{
               flexShrink: 0,
               fontFamily: "'VT323', monospace",
-              fontSize: isMobile ? 10 : 11,
+              fontSize: isMobile ? 11 : 13,
               letterSpacing: "0.2em",
               textTransform: "uppercase",
               color: "#FF9F5A",
@@ -171,7 +171,7 @@ export default function StatusBar({
                 borderRadius: 2,
                 background: "rgba(255, 122, 41, 0.12)",
                 fontFamily: "'VT323', monospace",
-                fontSize: isMobile ? 11 : 12,
+                fontSize: isMobile ? 12 : 13,
                 letterSpacing: "0.1em",
                 textTransform: "uppercase",
                 color: ACCENT,
@@ -202,8 +202,8 @@ export default function StatusBar({
             style={{
               margin: 0,
               fontFamily: "'DM Sans', sans-serif",
-              fontSize: 11,
-              lineHeight: 1.45,
+              fontSize: 13,
+              lineHeight: 1.5,
               color: FOOTER_MUTED,
               fontStyle: "italic",
               textAlign: "center",
@@ -213,7 +213,7 @@ export default function StatusBar({
               style={{
                 fontFamily: "'VT323', monospace",
                 fontStyle: "normal",
-                fontSize: 11,
+                fontSize: 13,
                 letterSpacing: "0.14em",
                 textTransform: "uppercase",
                 color: ACCENT,
@@ -280,7 +280,7 @@ export default function StatusBar({
             paddingBottom: CRT_FOOTER_BOTTOM_PAD,
             pointerEvents: "none",
             fontFamily: "'VT323', monospace",
-            fontSize: 13,
+            fontSize: 14,
             letterSpacing: "0.32em",
             textTransform: "uppercase",
             color: FOOTER_MUTED,

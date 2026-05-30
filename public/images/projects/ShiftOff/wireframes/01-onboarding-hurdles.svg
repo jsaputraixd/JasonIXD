@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" width="390" height="844">
+  <rect width="390" height="844" fill="#0a0a0a"/>
+  <!-- phone -->
+  <rect x="20" y="20" width="350" height="804" rx="44" fill="none" stroke="#e8e8e8" stroke-width="2.5"/>
+  <rect x="130" y="40" width="130" height="32" rx="16" fill="none" stroke="#b0b0b0" stroke-width="2"/>
+  <!-- progress: step 2 of 3 -->
+  <circle cx="150" cy="100" r="5" fill="#3a3a3a" stroke="#888"/>
+  <circle cx="195" cy="100" r="5" fill="#e8e8e8" stroke="#e8e8e8"/>
+  <circle cx="240" cy="100" r="5" fill="#3a3a3a" stroke="#888"/>
+  <text x="48" y="150" fill="#e8e8e8" font-family="system-ui, Inter, sans-serif" font-size="20" font-weight="600">Whats hardest to leave behind?</text>
+  <text x="48" y="180" fill="#7a7a7a" font-family="system-ui, Inter, sans-serif" font-size="13">Pick all that apply  well tune your handoff.</text>
+  <!-- options -->
+  <rect x="40" y="210" width="310" height="56" rx="12" fill="none" stroke="#b8b8b8" stroke-width="1.8"/>
+  <rect x="56" y="230" width="16" height="16" rx="3" fill="none" stroke="#c8c8c8" stroke-width="1.5"/>
+  <line x1="90" y1="236" x2="120" y2="236" stroke="#888" stroke-width="1" stroke-linecap="round"/>
+  <line x1="90" y1="244" x2="200" y2="244" stroke="#888" stroke-width="1" stroke-linecap="round"/>
+  <text x="90" y="240" fill="#a8a8a8" font-family="system-ui, Inter, sans-serif" font-size="12">Anxiety / worry loops</text>
+  <rect x="40" y="280" width="310" height="56" rx="12" fill="none" stroke="#b8b8b8" stroke-width="1.8"/>
+  <rect x="56" y="300" width="16" height="16" rx="3" fill="none" stroke="#c8c8c8" stroke-width="1.5"/>
+  <line x1="90" y1="306" x2="130" y2="306" stroke="#888" stroke-width="1" stroke-linecap="round"/>
+  <line x1="90" y1="314" x2="220" y2="314" stroke="#888" stroke-width="1" stroke-linecap="round"/>
+  <text x="90" y="310" fill="#a8a8a8" font-family="system-ui, Inter, sans-serif" font-size="12">Problem-solving (open bugs)</text>
+  <rect x="40" y="350" width="310" height="56" rx="12" fill="none" stroke="#b8b8b8" stroke-width="1.8"/>
+  <rect x="56" y="370" width="16" height="16" rx="3" fill="none" stroke="#c8c8c8" stroke-width="1.5"/>
+  <line x1="90" y1="376" x2="100" y2="376" stroke="#888" stroke-width="1" stroke-linecap="round"/>
+  <line x1="90" y1="384" x2="180" y2="384" stroke="#888" stroke-width="1" stroke-linecap="round"/>
+  <text x="90" y="380" fill="#a8a8a8" font-family="system-ui, Inter, sans-serif" font-size="12">FOMO / just one more check</text>
+  <text x="48" y="450" fill="#6a6a6a" font-family="system-ui, Inter, sans-serif" font-size="12">Gentle interrupt tone (preview)</text>
+  <line x1="40" y1="465" x2="350" y2="465" stroke="#555" stroke-width="1.2" stroke-linecap="round"/>
+  <circle cx="120" cy="465" r="7" fill="#e8e8e8" stroke="none"/>
+  <!-- footer CTA -->
+  <rect x="40" y="720" width="310" height="52" rx="14" fill="none" stroke="#d8d8d8" stroke-width="2"/>
+  <text x="195" y="752" fill="#c8c8c8" text-anchor="middle" font-family="system-ui, Inter, sans-serif" font-size="16" font-weight="500">Continue</text>
+  <text x="195" y="800" fill="#4a4a4a" text-anchor="middle" font-family="system-ui, Inter, sans-serif" font-size="11">[ Header ] ê back</text>
+</svg>

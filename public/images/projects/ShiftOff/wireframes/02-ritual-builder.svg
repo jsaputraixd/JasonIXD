@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" width="390" height="844">
+  <rect width="390" height="844" fill="#0a0a0a"/>
+  <rect x="20" y="20" width="350" height="804" rx="44" fill="none" stroke="#e8e8e8" stroke-width="2.5"/>
+  <rect x="130" y="40" width="130" height="32" rx="16" fill="none" stroke="#b0b0b0" stroke-width="2"/>
+  <text x="40" y="100" fill="#6a6a6a" font-family="system-ui, Inter, sans-serif" font-size="12">9 Back</text>
+  <text x="48" y="140" fill="#e8e8e8" font-family="system-ui, Inter, sans-serif" font-size="20" font-weight="600">Handoff ritual</text>
+  <line x1="48" y1="152" x2="120" y2="150" stroke="#888" stroke-width="0.8"/>
+  <text x="48" y="180" fill="#7a7a7a" font-family="system-ui, Inter, sans-serif" font-size="13">Fake-commute building blocks / order</text>
+  <!-- time vs action -->
+  <text x="48" y="220" fill="#9a9a9a" font-family="system-ui, Inter, sans-serif" font-size="12">End with</text>
+  <rect x="48" y="230" width="120" height="36" rx="8" fill="none" stroke="#c8c8c8" stroke-width="1.5"/>
+  <text x="108" y="253" fill="#c0c0c0" text-anchor="middle" font-family="system-ui, Inter, sans-serif" font-size="12">Timer</text>
+  <rect x="180" y="230" width="150" height="36" rx="8" fill="none" stroke="#5a5a5a" stroke-width="1.2"/>
+  <text x="255" y="253" fill="#6a6a6a" text-anchor="middle" font-family="system-ui, Inter, sans-serif" font-size="12">Action done</text>
+  <text x="48" y="300" fill="#9a9a9a" font-family="system-ui, Inter, sans-serif" font-size="12">Duration (if timer)</text>
+  <line x1="48" y1="330" x2="342" y2="330" stroke="#4a4a4a" stroke-width="1.2"/>
+  <circle cx="200" cy="330" r="8" fill="#e0e0e0"/>
+  <text x="48" y="360" fill="#9a9a9a" font-family="system-ui, Inter, sans-serif" font-size="12">Steps (reorder · îî)</text>
+  <!-- draggable rows -->
+  <rect x="40" y="375" width="310" height="48" rx="10" fill="none" stroke="#a8a8a8" stroke-width="1.5"/>
+  <line x1="60" y1="392" x2="60" y2="406" stroke="#888" stroke-width="1.2"/>
+  <line x1="55" y1="399" x2="65" y2="399" stroke="#888" stroke-width="1.2"/>
+  <line x1="80" y1="391" x2="120" y2="393" stroke="#777" stroke-width="1" stroke-linecap="round"/>
+  <line x1="80" y1="401" x2="200" y2="400" stroke="#777" stroke-width="1" stroke-linecap="round"/>
+  <line x1="80" y1="409" x2="160" y2="410" stroke="#777" stroke-width="1" stroke-linecap="round"/>
+  <rect x="40" y="430" width="310" height="48" rx="10" fill="none" stroke="#a8a8a8" stroke-width="1.5"/>
+  <line x1="60" y1="447" x2="60" y2="461" stroke="#888" stroke-width="1.2"/>
+  <line x1="80" y1="447" x2="140" y2="449" stroke="#777" stroke-width="1" stroke-linecap="round"/>
+  <line x1="80" y1="457" x2="220" y2="456" stroke="#777" stroke-width="1" stroke-linecap="round"/>
+  <rect x="40" y="485" width="310" height="48" rx="10" fill="none" stroke="#a8a8a8" stroke-width="1.5"/>
+  <line x1="60" y1="502" x2="60" y2="516" stroke="#888" stroke-width="1.2"/>
+  <line x1="80" y1="501" x2="100" y2="505" stroke="#777" stroke-width="1" stroke-linecap="round"/>
+  <line x1="80" y1="511" x2="180" y2="509" stroke="#777" stroke-width="1" stroke-linecap="round"/>
+  <line x1="80" y1="519" x2="150" y2="521" stroke="#777" stroke-width="1" stroke-linecap="round"/>
+  <text x="48" y="560" fill="#6a6a6a" font-family="system-ui, Inter, sans-serif" font-size="12">+ Add step (walk · music · stretch · custom)</text>
+  <!-- footer -->
+  <rect x="40" y="700" width="150" height="48" rx="12" fill="none" stroke="#6a6a6a" stroke-width="1.3"/>
+  <text x="115" y="730" fill="#888" text-anchor="middle" font-family="system-ui, Inter, sans-serif" font-size="15">Preview</text>
+  <rect x="200" y="700" width="150" height="48" rx="12" fill="none" stroke="#d0d0d0" stroke-width="2"/>
+  <text x="275" y="730" fill="#c8c8c8" text-anchor="middle" font-family="system-ui, Inter, sans-serif" font-size="15" font-weight="500">Save</text>
+  <text x="48" y="800" fill="#4a4a4a" font-family="system-ui, Inter, sans-serif" font-size="11">[ simple footer: Home · Vault · You ]</text>
+</svg>

@@ -4,41 +4,64 @@ import { motion } from "framer-motion";
 import { playClick } from "@/lib/typingSound";
 
 const ACCENT = "#FF7A29";
-const EASE = [0.16, 1, 0.3, 1];
 
-/** Hidden coffee launcher — fixed under the recycle bin until the bin is moved. */
+/** Pop-out arc: starts inside bin → up & sideways → bouncy landing nearby. */
+function popKeyframes(scale) {
+  const s = scale;
+  return {
+    start: { x: Math.round(20 * s), y: Math.round(18 * s) },
+    apex: { x: Math.round(38 * s), y: Math.round(-44 * s) },
+    land: { x: Math.round(-14 * s), y: Math.round(30 * s) },
+  };
+}
+
+/** Only mounted after the 5th recycle-bin click. */
 export default function HiddenCoffeeIcon({
-  left,
-  top,
+  anchorLeft,
+  anchorTop,
   width = 76,
-  zIndex = 13,
-  parallaxShift = { x: 0, y: 0 },
-  delay = 0,
-  revealed = false,
+  zIndex = 15,
+  layoutScale = 1,
   selected = false,
   onOpen,
 }) {
+  const k = popKeyframes(layoutScale);
+
   return (
     <motion.button
       type="button"
-      data-cursor={revealed ? "hover" : undefined}
-      className={`desktop-coffee-icon${revealed ? " desktop-coffee-icon--revealed" : ""}`}
-      aria-label={revealed ? "Open coffee snake game" : undefined}
-      aria-hidden={!revealed}
-      tabIndex={revealed ? 0 : -1}
-      title={revealed ? "coffee_snake.exe" : undefined}
+      data-cursor="hover"
+      className="desktop-coffee-icon desktop-coffee-icon--revealed"
+      aria-label="Open coffee snake game"
+      title="coffee_snake.exe"
       onClick={() => {
-        if (!revealed) return;
         playClick();
         onOpen?.();
       }}
-      initial={{ opacity: 0, scale: 0.92 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.32, delay, ease: EASE }}
+      initial={{
+        opacity: 0,
+        scale: 0.1,
+        x: k.start.x,
+        y: k.start.y,
+      }}
+      animate={{
+        opacity: [0, 1, 1],
+        scale: [0.1, 1.14, 1],
+        x: [k.start.x, k.apex.x, k.land.x],
+        y: [k.start.y, k.apex.y, k.land.y],
+      }}
+      transition={{
+        duration: 0.92,
+        times: [0, 0.4, 1],
+        ease: [
+          [0.22, 1, 0.36, 1],
+          [0.34, 1.55, 0.48, 1],
+        ],
+      }}
       style={{
         position: "absolute",
-        left,
-        top,
+        left: anchorLeft,
+        top: anchorTop,
         width,
         zIndex,
         margin: 0,
@@ -46,15 +69,14 @@ export default function HiddenCoffeeIcon({
         border: "none",
         background: selected
           ? "rgba(255, 122, 41, 0.14)"
-          : "transparent",
+          : "rgba(255, 122, 41, 0.1)",
         borderRadius: 2,
-        cursor: revealed ? "pointer" : "default",
+        cursor: "pointer",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         gap: 3,
-        transform: `translate3d(${parallaxShift.x}px, ${parallaxShift.y}px, 0)`,
-        pointerEvents: revealed ? "auto" : "none",
+        transformOrigin: "center center",
         transition: "background 140ms ease",
       }}
     >

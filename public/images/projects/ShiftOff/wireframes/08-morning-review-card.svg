@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" width="390" height="844">
+  <rect width="390" height="844" fill="#0a0a0a"/>
+  <rect x="20" y="20" width="350" height="804" rx="44" fill="none" stroke="#e8e8e8" stroke-width="2.5"/>
+  <rect x="130" y="40" width="130" height="32" rx="16" fill="none" stroke="#b0b0b0" stroke-width="2"/>
+  <text x="40" y="100" fill="#9a9a9a" font-family="system-ui, Inter, sans-serif" font-size="14">Good morning, [name]</text>
+  <line x1="40" y1="115" x2="100" y2="116" stroke="#555" stroke-width="0.4"/>
+  <line x1="40" y1="125" x2="80" y2="124" stroke="#555" stroke-width="0.4"/>
+  <text x="40" y="160" fill="#b8b8b8" font-family="system-ui, Inter, sans-serif" font-size="17" font-weight="600">Yesterdays open loops</text>
+  <text x="40" y="188" fill="#4a4a4a" font-family="system-ui, Inter, sans-serif" font-size="11">Swipe to triage / pin / snooze to vault</text>
+  <!-- big card (detail) -->
+  <rect x="32" y="220" width="326" height="360" rx="12" fill="none" stroke="#7a7a7a" stroke-width="1.4"/>
+  <line x1="50" y1="250" x2="90" y2="252" stroke="#666" stroke-width="0.5"/>
+  <line x1="100" y1="250" x2="180" y2="250" stroke="#666" stroke-width="0.5"/>
+  <line x1="50" y1="268" x2="300" y2="270" stroke="#666" stroke-width="0.5" stroke-linecap="round"/>
+  <line x1="50" y1="286" x2="280" y2="284" stroke="#666" stroke-width="0.5" stroke-linecap="round"/>
+  <line x1="50" y1="304" x2="220" y2="306" stroke="#666" stroke-width="0.5" stroke-linecap="round"/>
+  <line x1="50" y1="322" x2="260" y2="320" stroke="#666" stroke-width="0.5" stroke-linecap="round"/>
+  <line x1="50" y1="340" x2="200" y2="342" stroke="#666" stroke-width="0.5" stroke-linecap="round"/>
+  <line x1="50" y1="358" x2="310" y2="356" stroke="#666" stroke-width="0.5" stroke-linecap="round"/>
+  <line x1="50" y1="376" x2="170" y2="378" stroke="#666" stroke-width="0.5" stroke-linecap="round"/>
+  <line x1="50" y1="394" x2="240" y2="392" stroke="#666" stroke-width="0.5" stroke-linecap="round"/>
+  <line x1="50" y1="412" x2="290" y2="414" stroke="#666" stroke-width="0.5" stroke-linecap="round"/>
+  <line x1="50" y1="430" x2="150" y2="428" stroke="#666" stroke-width="0.5" stroke-linecap="round"/>
+  <line x1="50" y1="448" x2="280" y2="450" stroke="#666" stroke-width="0.5" stroke-linecap="round"/>
+  <line x1="50" y1="466" x2="200" y2="464" stroke="#666" stroke-width="0.5" stroke-linecap="round"/>
+  <line x1="50" y1="484" x2="250" y2="486" stroke="#666" stroke-width="0.5" stroke-linecap="round"/>
+  <line x1="50" y1="502" x2="180" y2="500" stroke="#666" stroke-width="0.5" stroke-linecap="round"/>
+  <line x1="50" y1="520" x2="220" y2="522" stroke="#666" stroke-width="0.5" stroke-linecap="round"/>
+  <line x1="50" y1="538" x2="140" y2="536" stroke="#666" stroke-width="0.5" stroke-linecap="round"/>
+  <!-- stack hint -->
+  <rect x="48" y="600" width="100" height="6" rx="2" fill="#3a3a3a" stroke="none"/>
+  <rect x="58" y="615" width="100" height="6" rx="2" fill="#2a2a2a" stroke="none"/>
+  <line x1="200" y1="615" x2="320" y2="600" stroke="#555" stroke-width="0.4"/>
+  <line x1="200" y1="625" x2="320" y2="635" stroke="#555" stroke-width="0.4"/>
+  <text x="40" y="660" fill="#3a3a3a" font-family="system-ui, Inter, sans-serif" font-size="10">A11y: heading order · list semantics</text>
+  <rect x="40" y="690" width="150" height="48" rx="10" fill="none" stroke="#5a5a5a" stroke-width="1.2"/>
+  <text x="115" y="720" text-anchor="middle" fill="#5a5a5a" font-family="system-ui, Inter, sans-serif" font-size="14">Snooze 1h</text>
+  <rect x="200" y="690" width="150" height="48" rx="10" fill="none" stroke="#b8b8b8" stroke-width="1.6"/>
+  <text x="275" y="720" text-anchor="middle" fill="#a8a8a8" font-family="system-ui, Inter, sans-serif" font-size="14" font-weight="500">Add to today</text>
+  <line x1="20" y1="760" x2="370" y2="760" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="195" y="800" text-anchor="middle" fill="#4a4a4a" font-family="system-ui, Inter, sans-serif" font-size="10">[ footer ]</text>
+</svg>

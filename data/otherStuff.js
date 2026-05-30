@@ -1,5 +1,5 @@
 /**
- * "Other stuff" — misc work outside case studies.
+ * "Other stuff" — personal art & misc work (not case studies).
  * Files live in public/images/other-stuff/<category-id>/
  */
 

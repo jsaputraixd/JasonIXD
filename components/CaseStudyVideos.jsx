@@ -23,15 +23,14 @@ function youtubeVideoId(url) {
 }
 
 /**
- * File videos: capped height, side-by-side from sm+, autoplay when block in view (muted).
- * YouTube: unchanged full-width embeds below file section.
+ * File videos: viewport-capped so a clip fits one screen; side-by-side from sm+.
+ * YouTube embeds capped and centered below file section.
  */
 export default function CaseStudyVideos({
   videos,
   frameStyle,
   title = "Interaction demos",
   intro,
-  layout = "default",
 }) {
   const fileItems = (videos ?? []).filter((v) => v.kind === "file" && v.src);
   const youtubeItems = (videos ?? []).filter((v) => {
@@ -80,6 +79,13 @@ export default function CaseStudyVideos({
     display: "flex",
     flexDirection: "column",
   };
+
+  const isMulti = fileItems.length >= 2;
+  /** Portrait app demos — wide enough to read UI, height capped to one viewport. */
+  const fileMaxWidth = isMulti ? "min(100%, 380px)" : "min(100%, 400px)";
+  const fileMaxHeight = isMulti
+    ? "min(48vh, 500px)"
+    : "min(calc(100dvh - 240px), 640px)";
 
   return (
     <div className="mt-16">
@@ -132,23 +138,28 @@ export default function CaseStudyVideos({
             className={
               fileItems.length >= 2
                 ? "grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 w-full"
-                : layout === "full"
-                  ? "w-full"
-                  : "w-full max-w-2xl"
+                : "w-full flex justify-center"
             }
           >
             {fileItems.map((item, i) => (
-              <div key={`${item.src}-${i}`} style={cellFrame}>
+              <div
+                key={`${item.src}-${i}`}
+                style={{
+                  ...cellFrame,
+                  width: "100%",
+                  maxWidth: fileMaxWidth,
+                  margin: isMulti ? "0 auto" : undefined,
+                }}
+              >
                 <p style={{ ...labelStyle, padding: "10px 12px 0" }}>
                   {item.label || `Clip ${i + 1}`}
                 </p>
                 <div
-                  className="flex items-center justify-center"
+                  className="case-study-video-stage flex items-center justify-center"
                   style={{
                     background: "#0a0a0a",
-                    maxHeight:
-                      layout === "full" ? "none" : "min(38vh, 320px)",
-                    minHeight: 0,
+                    maxHeight: fileMaxHeight,
+                    minHeight: isMulti ? "min(36vh, 320px)" : "min(52vh, 420px)",
                   }}
                 >
                   <video
@@ -156,11 +167,11 @@ export default function CaseStudyVideos({
                     muted
                     playsInline
                     preload="metadata"
+                    className="case-study-video"
                     style={{
                       width: "100%",
                       height: "auto",
-                      maxHeight:
-                        layout === "full" ? "none" : "min(38vh, 320px)",
+                      maxHeight: fileMaxHeight,
                       objectFit: "contain",
                       display: "block",
                     }}
@@ -182,30 +193,32 @@ export default function CaseStudyVideos({
             const id = youtubeVideoId(item.url);
             const label = item.label || `Video ${i + 1}`;
             return (
-              <div key={`${item.url}-${i}`}>
-                <p style={labelStyle}>{label}</p>
-                <div
-                  style={{
-                    ...frameStyle,
-                    aspectRatio: "16 / 9",
-                    position: "relative",
-                    width: "100%",
-                  }}
-                >
-                  <iframe
-                    title={label}
-                    src={`https://www.youtube.com/embed/${id}`}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    allowFullScreen
+              <div key={`${item.url}-${i}`} className="w-full flex justify-center">
+                <div style={{ width: "100%", maxWidth: "min(100%, 840px)" }}>
+                  <p style={labelStyle}>{label}</p>
+                  <div
                     style={{
-                      position: "absolute",
-                      inset: 0,
+                      ...frameStyle,
+                      aspectRatio: "16 / 9",
+                      position: "relative",
                       width: "100%",
-                      height: "100%",
-                      border: "none",
-                      display: "block",
                     }}
-                  />
+                  >
+                    <iframe
+                      title={label}
+                      src={`https://www.youtube.com/embed/${id}`}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        width: "100%",
+                        height: "100%",
+                        border: "none",
+                        display: "block",
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
             );

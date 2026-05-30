@@ -1,5 +1,49 @@
 const P = "/images/projects";
 
+function projectImages(base, filenames) {
+  return filenames.map((name) => ({
+    src: `${base}/${name}`,
+    alt: "",
+  }));
+}
+
+function simpleGalleryCaseStudy({
+  overview,
+  introParagraphs,
+  highlights,
+  base,
+  imageFiles,
+  blockParagraphs,
+  conclusion,
+}) {
+  return {
+    overview,
+    introParagraphs,
+    highlights: highlights ?? [],
+    heroFirst: true,
+    imagesBeforeText: true,
+    showJumpNav: false,
+    showDeckEmbed: false,
+    videos: [],
+    processWork: {
+      sections: [
+        {
+          title: "Work",
+          blocks: [
+            {
+              title: "Visual overview",
+              paragraphs: blockParagraphs,
+              images: projectImages(base, imageFiles),
+            },
+          ],
+        },
+      ],
+    },
+    conclusionTitle: "Reflection",
+    conclusion,
+  };
+}
+
 /** Dream Detective */
 const DD = `${P}/dream-detective`;
 const DD_PDF = `${DD}/PDF Slides`;
@@ -71,7 +115,6 @@ const dreamDetectiveCaseStudyRich = {
   videosTitle: "Interactive prototype",
   videosIntro:
     "Two-minute walkthrough of the core loop: alarm → mini-game → Evidence Board update, plus the locked-out path when you sleep in.",
-  videosLayout: "full",
   processWork: {
     sections: [
       {
@@ -484,42 +527,53 @@ const elearaCaseStudyRich = {
 
 /** Kits! */
 const KT = `${P}/kits`;
-const KT_PAPER = `${KT}/Kits! – Paper Prototypes`;
 
 const kitsHero = `${KT}/Kits Cover Image.jpg`;
-
-const kitsPaperPdfs = Array.from({ length: 21 }, (_, idx) => {
-  const n = idx + 2;
-  return {
-    label: `Paper prototype · page ${n}`,
-    href: `${KT_PAPER}/Hobby Hole Kiosk Compressed.pdf - Page ${n} of 23.pdf`,
-  };
-});
+const kitsPaperPrototypes = `${KT}/Paper Prototypes.png`;
+const kitsLowFi = `${KT}/LowFidelityWireframes.png`;
+const kitsMedFi = `${KT}/MediumFidelityWIreframes.png`;
+const kitsStyleGuide = `${KT}/Style Guide.png`;
+const kitsHighFidelity = `${KT}/HighFidelity.png`;
 
 const kitsPdfs = [
   { label: "High-fidelity deck · PDF", href: `${KT}/HighFidelity.pdf` },
   { label: "User flow · PDF", href: `${KT}/Kits! UserFlow.pdf` },
-  { label: "Process notes · PDF", href: `${KT}/ProcessNotes.pdf` },
-  { label: "Style guide · PDF", href: `${KT}/StyleGuide.pdf` },
-  ...kitsPaperPdfs,
 ];
 
-/** Rich layout: overview, narrative sections, embeds (used by work/[slug] when present). */
+/** Rich layout — same section treatment as Dream Detective / Eleara / Pulse. */
 const kitsCaseStudyRich = {
   overview: {
     client: "Academic UX Project (Concept Service)",
-    industry: "Community Sharing / Service Design / UX",
-    timeline: "3 Weeks",
-    role: "UX / Product Designer",
+    industry: "Community Sharing · Service Design · UX",
+    timeline: "3 weeks · Solo",
+    role: "UX / product design — research through high-fidelity",
   },
   introParagraphs: [
-    "The Hobby Sharing Kiosk – Kits! project explores a community-driven system that allows people to borrow and lend hobby kits through a public kiosk and companion digital interface. Many hobbies require expensive equipment, which creates a barrier for people who want to try new activities without committing to a purchase. The project proposes a shared access model where users can temporarily borrow curated hobby kits or contribute their own kits to the community.",
-    "The system was designed around two primary user archetypes: borrowers, who want quick access to new activities, and lenders, who contribute kits for others to use. The design process focused on mapping the journeys of both roles, identifying friction points such as approval flows, kit processing, and motivation to participate. Research, journey mapping, paper prototyping, and wireframing were used to structure the interaction flows and optimize usability.",
+    "Kits! is a community-driven hobby sharing system — borrow curated kits from a public kiosk, or lend your own equipment for others to try. The goal is lowering the cost of entry for new hobbies without asking anyone to buy gear upfront.",
+    "The design problem was service design at scale: two distinct roles, one physical touchpoint, one digital companion, and friction points like approval flows, kit processing, and motivation to participate on both sides.",
   ],
-  finalDesign: {
-    images: [`${KT}/Kits Cover Image.jpg`, `${KT}/HighFidelity.png`],
-  },
-  /** YouTube watch/share URLs, or local files under /public (see Borrower/Lender .mov). */
+  highlights: [
+    {
+      label: "The barrier",
+      value: "Hobbies require expensive equipment — casual experimentation dies at the checkout line.",
+    },
+    {
+      label: "Two roles",
+      value: "Borrowers want quick access; lenders need a reason to contribute kits back to the community.",
+    },
+    {
+      label: "System scope",
+      value: "Public kiosk plus mobile interface — shared access model across physical and digital.",
+    },
+    {
+      label: "What paper saved",
+      value: "Testing dual-role flows early before high-fidelity rework on approval and handoff states.",
+    },
+  ],
+  heroFirst: true,
+  imagesBeforeText: true,
+  showJumpNav: true,
+  showDeckEmbed: false,
   videos: [
     {
       kind: "file",
@@ -532,20 +586,105 @@ const kitsCaseStudyRich = {
       label: "Lender flow",
     },
   ],
-  designSolution: [
-    {
-      title: "Paper Prototypes",
-      images: [`${KT}/Paper Prototypes.png`],
-    },
-    {
-      title: "Wireframing",
-      images: [`${KT}/LowFidelityWireframes.png`, `${KT}/MediumFidelityWIreframes.png`],
-    },
-    {
-      title: "Style Guide",
-      images: [`${KT}/Style Guide.png`],
-    },
-  ],
+  videosPlacement: "afterSection",
+  videosAfterSection: "Design",
+  videosTitle: "Prototype walkthrough",
+  videosIntro:
+    "Borrower and lender flows through the kiosk and companion app — from kit discovery to return and contribution.",
+  processWork: {
+    sections: [
+      {
+        title: "Overview",
+        blocks: [
+          {
+            title: "The problem",
+            paragraphs: [
+              "Many hobbies require expensive equipment, which creates a barrier for people who want to try new activities without committing to a purchase. Existing entry points assume you buy tools first — Kits! proposes shared access instead: temporarily borrow curated hobby kits, or contribute your own for others to use.",
+              "Research and journey mapping framed the problem around two primary user archetypes before any screens were drawn.",
+            ],
+            images: [
+              {
+                src: kitsHero,
+                alt: "Kits! — hobby sharing kiosk concept cover.",
+              },
+            ],
+          },
+          {
+            title: "Borrowers & lenders",
+            paragraphs: [
+              "Borrowers want quick access to new activities — browse, reserve, pick up, try, return. Lenders contribute kits to the community and need clear incentives, approval paths, and processing steps that don't feel like unpaid labor.",
+              "Mapping both journeys surfaced friction early: how kits get approved, how handoffs work at the kiosk, and what keeps lenders participating after the first drop-off.",
+            ],
+          },
+        ],
+      },
+      {
+        title: "Process",
+        blocks: [
+          {
+            title: "Paper prototypes",
+            paragraphs: [
+              "Paper prototyping came before pixel polish. I walked through borrower and lender tasks on physical screens — reservation, pickup, kit intake, and return — to stress-test the flows without high-fidelity distraction.",
+              "That pass clarified where the kiosk needed to lead vs. where the app should carry continuity, and which states needed explicit confirmation before moving on.",
+            ],
+            images: [
+              {
+                src: kitsPaperPrototypes,
+                alt: "Paper prototypes — borrower and lender flow explorations.",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        title: "Design",
+        blocks: [
+          {
+            title: "Wireframing",
+            paragraphs: [
+              "Low-fidelity wireframes established screen hierarchy and navigation — structure before visual style. Medium-fidelity passes added layout density, component placement, and clearer content blocks for both kiosk and mobile contexts.",
+              "Separating borrower and lender paths in wireframes kept permissions and mental models honest — no shared screen pretending two roles see the same thing.",
+            ],
+            images: [
+              {
+                src: kitsLowFi,
+                alt: "Low-fidelity wireframes — core screens and navigation.",
+              },
+              {
+                src: kitsMedFi,
+                alt: "Medium-fidelity wireframes — layout and component structure.",
+              },
+            ],
+          },
+          {
+            title: "Style guide",
+            paragraphs: [
+              "The visual system needed to feel approachable and community-forward — bright enough for a public kiosk, legible at arm's length, consistent across touch and mobile. Typography, color, and component rules kept the two interfaces reading as one product.",
+            ],
+            images: [
+              {
+                src: kitsStyleGuide,
+                alt: "Style guide — color, typography, and UI components.",
+              },
+            ],
+          },
+          {
+            title: "Final screens",
+            paragraphs: [
+              "High-fidelity screens bring the full system together: kiosk discovery and handoff states alongside the companion app for reservations, kit management, and role-specific tasks. The final deliverable is one voice across physical and digital touchpoints.",
+            ],
+            images: [
+              {
+                src: kitsHighFidelity,
+                alt: "High-fidelity screens — kiosk and mobile app final designs.",
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  conclusionTitle: "Reflection",
   conclusion:
     "Kits! reinforced how service design scales through clarity — two roles, one kiosk, one app. Testing with paper prototypes early saved high-fidelity rework later, and separating borrower vs. lender flows kept permissions and mental models honest.",
 };
@@ -553,111 +692,544 @@ const kitsCaseStudyRich = {
 /** Dairy Delight */
 const DA = `${P}/dairy-delight`;
 const dairyHero = `${DA}/Hero_Image.png`;
+const dairyAudience = `${DA}/Audience.png`;
+const dairyVibe = `${DA}/The vibe.png`;
+const dairyMoodBoards = `${DA}/Slide 25.png`;
+const dairyLogoRefinement = `${DA}/Logo Itteratons.png`;
+const dairyStyleguide = `${DA}/Styleguide final.png`;
+const dairyTouchpoints = `${DA}/the touch points checklist.png`;
+const dairyPosterPrinciples = `${DA}/poster sketches.png`;
+const dairyPosterFinals = `${DA}/poster design iterations.png`;
+const dairyPosterFull = `${DA}/Dairy & Delight Poster 1.jpg`;
+const dairyPosterMockup = `${DA}/Gemini_Generated_Image_m0ocmkm0ocmkm0oc 2.png`;
+const dairyLanding = `${DA}/poster design used to refrence dashboard design.png`;
+const dairyMobileScreens = `${DA}/mobile designs final.png`;
+const dairyMobileDevices = `${DA}/Frame 7.png`;
+const dairyMobileDevice1 = `${DA}/iPhone 11 Render.png`;
+const dairyMobileDevice2 = `${DA}/iPhone 11 Render-1.png`;
+const dairyAllTouchpoints = `${DA}/all designs touch point final.png`;
 
 const dairyCaseStudyRich = {
   overview: {
-    client: "Academic UX Project (Brand Experience)",
-    industry: "Organic Food / Direct-to-Consumer Dairy",
-    timeline: "3 Weeks",
-    role: "Brand & UX Designer",
+    client: "Project 02 · Visual Interaction Design (Academic)",
+    industry: "Organic Food · Brand & Multi-Touchpoint",
+    timeline: "3 weeks · Solo",
+    role: "Brand identity, illustration, poster, web & app",
   },
   introParagraphs: [
-    "Dairy & Delight is an organic dairy farm brand focused on delivering fresh milk, cheese, yogurt, and ice cream directly to consumers. The challenge was to create a brand identity and digital ecosystem that communicates the farm’s values — natural food, community, and connection to the land — while appealing to food-focused consumers who enjoy outdoor lifestyles and farm-to-table culture.",
-    "The project involved designing a cohesive brand system and experience across multiple touchpoints, including marketing posters, a landing page, and a mobile app. The goal was to create an uplifting, communal, and all-natural brand presence that strengthens the relationship between the farm and its customers while encouraging engagement with products, recipes, and farm experiences.",
+    "Dairy & Delight is an organic farm brand built around what they call the simple joys of nourishing living — milk, cheese, yogurt, and ice cream delivered direct to customers' homes.",
+    "I chose this client over two alternatives because the brief wasn't just 'look fresh and clean.' It was a lifestyle proposition: what you eat and where it comes from matters, and pleasure and integrity belong in the same brand.",
   ],
-  finalDesign: {
-    images: [
+  highlights: [
+    {
+      label: "Brand filter",
+      value: "All-Natural, Uplifting, Communal — three words that gated every design decision.",
+    },
+    {
+      label: "Logo process",
+      value: "100+ sketch iterations before vector — two directions alive, one sun mark chosen.",
+    },
+    {
+      label: "System scope",
+      value: "Poster, landing page, and mobile app — one voice across print, web, and product.",
+    },
+    {
+      label: "What I'd extend",
+      value: "Packaging system and a fuller Recipes section where the Communal quality comes alive.",
+    },
+  ],
+  heroFirst: true,
+  imagesBeforeText: true,
+  showJumpNav: true,
+  showDeckEmbed: false,
+  videos: [],
+  processWork: {
+    sections: [
       {
-        src: dairyHero,
-        alt: "Poster design for Dairy & Delight featuring ice cream and playful brand graphics.",
+        title: "The client",
+        blocks: [
+          {
+            title: "Getting to know Dairy & Delight",
+            paragraphs: [
+              "Before opening Figma, I studied who buys from a farm like this — what they already believe, what it feels like to open their fridge in the morning. Foodies who love the outdoors: people who care about what they eat, feel drawn to the natural world, and treat food as communal, not just functional.",
+              "The mission is rooted in real, all-natural food connecting people to the earth and to each other. That richness — lifestyle, not just category — is what made this a design problem worth choosing.",
+            ],
+          },
+          {
+            title: "Audience",
+            paragraphs: [
+              "The audience I designed for values transparency, sustainability, and quality — farm-to-table culture without the pretension. They want a brand that feels like an invitation to the table, not a lecture from a shelf.",
+            ],
+            images: [
+              {
+                src: dairyAudience,
+                alt: "Audience — foodies who love the outdoors.",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        title: "Brand",
+        blocks: [
+          {
+            title: "Defining the vibe",
+            paragraphs: [
+              "Three words became the filter: All-Natural, Uplifting, and Communal.",
+              "All-Natural is a visual language — organic textures, earth-born color, forms that aren't perfectly geometric. Uplifting means the brand should make you feel something — actually joyful, not just trustworthy. Communal means inviting you in: a family table, not a store shelf.",
+              "If it felt cold or corporate, it failed. If it felt generic-natural, it wasn't uplifting enough. Everything had to land in the overlap of all three.",
+            ],
+            images: [
+              {
+                src: dairyVibe,
+                alt: "The vibe — All-Natural, Uplifting, and Communal.",
+              },
+            ],
+          },
+          {
+            title: "Mood boards",
+            paragraphs: [
+              "I built three boards — one per vibe word — pulling from folk art, community poster design, eco-design, botanical illustration, and bold joyful graphic work. Communal drew from people eating together outdoors. All-Natural from organic typography and botanical reference. Uplifting from the kind of design that makes you smile before you read it.",
+              "Where the three boards overlapped was where Dairy & Delight lived — and that territory informed every color, typeface, and illustration choice from here on.",
+            ],
+            images: [
+              {
+                src: dairyMoodBoards,
+                alt: "Mood boards — Communal, All-Natural, and Uplifting references.",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        title: "Logo",
+        blocks: [
+          {
+            title: "100 sketches to one mark",
+            paragraphs: [
+              "I don't start in software — I start in a sketchbook and don't stop until I've explored enough angles to know which direction is right. For Dairy & Delight, that meant over 100 iterations before a single vector: logotypes, icons, literal and abstract marks, dairy and natural imagery, combinations I knew wouldn't work — because exhausting the obvious is how the interesting stuff shows up.",
+              "Two directions felt alive. A circular badge with a hand-drawn cow — warm, vintage, inviting. And a sun mark from alternating yellow and magenta rays, reading as both sun and the top of a dairy product. The sun won: bold at any scale, directly Uplifting, joyful without being precious.",
+            ],
+          },
+          {
+            title: "Refinement & lockups",
+            paragraphs: [
+              "Multiple refinement rounds on ray count, proportions, yellow-magenta balance, and wordmark integration. The final system includes the core mark plus five lockups for different contexts.",
+              "The wordmark uses a rounded, slightly bouncy serif — warmth without childishness. The ampersand in 'Dairy & Delight' gets hand-lettered treatment. Every round was tested on a milk bottle, app icon, poster, and web header.",
+            ],
+            images: [
+              {
+                src: dairyLogoRefinement,
+                alt: "Logo refinement tree — mark variants and final lockups.",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        title: "Brand system",
+        blocks: [
+          {
+            title: "Color, type & illustration",
+            paragraphs: [
+              "Five colors, each doing specific work: Navy (#06327D) anchors legibility. Cyan (#74DEE6) is air, outdoors, morning light. Magenta (#E01C6F) carries energy and personality. Yellow (#FFD545) is warmth, sunlight, butter, cheese. Milk White (#FFF9EF) is the canvas — warm, never sterile.",
+              "Headlines: Sausage Semibold — chunky, friendly, retro joy. Secondary: Poppins Regular. Body: Quicksand Light — airy and legible.",
+              "The illustration system — rotary phone, cheese wedge, sunrise, heart — uses Yellow and Magenta two-color pairings so assets read instantly as Dairy & Delight. Playful without cartoonish; built for a kitchen wall or picnic blanket.",
+            ],
+            images: [
+              {
+                src: dairyStyleguide,
+                alt: "Brand system — logo, color, typography, icons, and illustration.",
+              },
+            ],
+          },
+          {
+            title: "Three touchpoints, one voice",
+            paragraphs: [
+              "With the system set, I designed three touchpoints: a print poster, a mobile app, and a landing page. Each serves a different format and purpose — but everything had to feel unmistakably like the same brand across contexts. That consistency across wildly different media is one of the harder problems in brand design.",
+            ],
+            images: [
+              {
+                src: dairyTouchpoints,
+                alt: "Touchpoints — poster, landing page, and mobile app.",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        title: "Design",
+        blocks: [
+          {
+            title: "The poster",
+            paragraphs: [
+              "The poster went through the most exploration. In class I applied ten visual principles to the same brief — Focus the Eye, Overwhelm, Simplify, Overlap, Assault the Surface, Activate the Diagonal, Manipulate Scale, Text as Image, Amplify, Tell a Story — two iterations each, twenty concepts by hand.",
+              "The principle I kept returning to was Text as Image: words becoming the visual — 'Taste Delight' as 3D Swiss cheese, or wrapping a spiraling ice cream cone. The final poster I'm most proud of: a waffle cone with a cherry on top, 'TASTE DELIGHT' in Magenta following the spiral. Typography animates the object. Joy before you've read a word.",
+            ],
+            images: [
+              {
+                src: dairyPosterPrinciples,
+                alt: "Poster explorations — ten design principles exercise grid.",
+              },
+              {
+                src: dairyPosterFinals,
+                alt: "Three final poster designs — cheese text, ice cream cone, and diagonal type.",
+              },
+              {
+                src: dairyPosterFull,
+                alt: "Final poster — ice cream cone with spiral typography.",
+              },
+              {
+                src: dairyPosterMockup,
+                alt: "Poster in context — framed print in a cafe setting.",
+              },
+            ],
+          },
+          {
+            title: "Landing page",
+            paragraphs: [
+              "Translating brand energy to the web without flattening it. I sketched three layout directions before committing. The final blends doodle warmth with a cards layout: clean grid, wavy brand border, illustrations anchoring each feature section.",
+              "Hero leads with the ice cream cone poster — double duty as brand hero. Three pillars below: Fresh Dairy Delivered, Visit Our Farm, Recipes for Simple Joy. Testimonial on yellow wave. Footer grounded in Navy.",
+            ],
+            images: [
+              {
+                src: dairyLanding,
+                alt: "Landing page — layout sketches, poster reference, and full scroll mockup.",
+              },
+            ],
+          },
+          {
+            title: "Mobile app",
+            paragraphs: [
+              "Three core sections: Discover (products and farm process), Create (recipes and guides using Dairy & Delight products), and Access (member privileges — early releases, farm tours, seasonal boxes).",
+              "Natural progression: discover the brand, engage through cooking, deepen through membership. Sky-blue home with cloud quality, large pill CTAs, full-bleed illustrations per section, wavy header border tying app to web and poster.",
+            ],
+            images: [
+              {
+                src: dairyMobileScreens,
+                alt: "Mobile app — Home, Discover, Create, and Access screens.",
+              },
+              {
+                src: dairyMobileDevices,
+                alt: "Mobile app — home and Access screens on device.",
+              },
+              {
+                src: dairyMobileDevice1,
+                alt: "Mobile app — home screen on iPhone.",
+              },
+              {
+                src: dairyMobileDevice2,
+                alt: "Mobile app — Discover and Create on iPhone.",
+              },
+            ],
+          },
+          {
+            title: "Final deliverable",
+            paragraphs: [
+              "Poster, landing page, and app together — one visual voice from print to pocket. The system holds because the emotional filter was set before the first pixel: all-natural, uplifting, communal.",
+            ],
+            images: [
+              {
+                src: dairyAllTouchpoints,
+                alt: "Final deliverable — poster, landing page, and mobile app together.",
+              },
+            ],
+          },
+        ],
       },
     ],
+  },
+  conclusionTitle: "Reflection",
+  conclusion:
+    "This was my first serious brand design project — and where my fine arts training showed up in practice. Color theory isn't palette picking; it's emotional weight, relationships between hues, harmony and tension as tools. The poster is what I'm most proud of: not because it's the most structurally complex piece, but because you look at it and feel the joy of ice cream. That's the goal — not to describe the product, but to make you feel it. Next I'd design the packaging system — milk bottle, cheese wrapper, ice cream pint — the illustration system is already built for it.",
+};
+/** Project Pulse */
+const PL = `${P}/Pulse`;
+const pulseScreen = (time) => `Screenshot 2026-05-10 at ${time}\u202fPM.png`;
+const pulseHero = `${PL}/${pulseScreen("4.28.02")}`;
+const pulseScreen2 = `${PL}/${pulseScreen("4.29.59")}`;
+const pulseScreen3 = `${PL}/${pulseScreen("4.30.11")}`;
+
+const pulseDeckPdf = {
+  label: "Full slide deck · PDF",
+  href: `${PL}/Pulse Slide Deck.pdf`,
+};
+
+const pulseCaseStudyRich = {
+  overview: {
+    client: "Concept · Smart Mirror Fitness (Academic)",
+    industry: "Health / Fitness · Gesture UX · Habit Formation",
+    timeline: "Multi-week · Solo",
+    role: "UX research, interaction design, prototyping",
+  },
+  introParagraphs: [
+    "Pulse is a smart-mirror fitness companion for student athletes — personalized workout plans, calendar-aware scheduling, and distance-friendly gesture controls so you can start a session without touching a screen.",
+    "The project spans research, habit-formation framing, usability testing, and a fully interactive prototype exploring pinch-to-select, dwell interactions, and Google Calendar integration for finding real workout windows between classes.",
+  ],
+  highlights: [
+    {
+      label: "Core idea",
+      value: "A mirror that coaches you — not another phone app fighting for attention between lectures.",
+    },
+    {
+      label: "Key interaction",
+      value: "AirTap gestures — point, pinch, and dwell so sweaty hands never need the glass.",
+    },
+    {
+      label: "Smart scheduling",
+      value: "Google Calendar sync to surface open slots for workouts in a packed student week.",
+    },
+    {
+      label: "Shipped artifact",
+      value: "Live interactive prototype — onboarding through workout completion, in the browser.",
+    },
+  ],
+  heroFirst: true,
+  imagesBeforeText: true,
+  showJumpNav: true,
+  showDeckEmbed: false,
+  videos: [],
+  livePrototype: {
+    href: "https://jsaputraixd.github.io/Pulse/",
+    label: "Open Pulse prototype",
+    intro:
+      "Hi, welcome to Pulse — your smart mirror workout buddy! Fully interactive concept: onboarding, personalized plans, calendar sync, gesture tutorials, and a complete workout loop.",
   },
   processWork: {
-    title: "Process Work",
-    blocks: [
+    sections: [
       {
-        title: "Audience",
-        paragraphs: [
-          "The primary audience consists of food-focused consumers who value fresh ingredients, outdoor lifestyles, and farm-to-table culture. These users are interested in knowing where their food comes from and prefer products that emphasize transparency, sustainability, and quality.",
+        title: "Overview",
+        blocks: [
+          {
+            title: "Problem & opportunity",
+            paragraphs: [
+              "Student athletes know consistency matters — but motivation drops when workouts feel bolted onto an already overloaded schedule. Most fitness tools assume you'll open a phone app, log in, and manually plan around classes and meetings.",
+              "Pulse reframes fitness as ambient coaching on a shared dorm mirror: quick sessions, calendar-aware suggestions, and interactions designed for distance — not touch.",
+            ],
+          },
+          {
+            title: "Research & testing",
+            paragraphs: [
+              "Research covered fitness-tech habit formation, prototyping plans, and moderated usability sessions. Testing surfaced where gesture tutorials needed to be clearer, how users interpreted plan recommendations, and what 'good enough' scheduling felt like when calendar data was sparse.",
+              "Full research artifacts live in the project deck — this page is a visual snapshot while the written case study is still in progress.",
+            ],
+          },
         ],
       },
       {
-        title: "Visual & emotional direction",
-        paragraphs: [
-          "The visual and emotional direction of the brand was defined through three core attributes: all-natural, uplifting, and communal. The brand experience is intended to feel welcoming and energetic while reinforcing the authenticity of organic farming.",
-        ],
-      },
-      {
-        title: "Mood boards",
-        paragraphs: [
-          "Mood boards were developed to explore visual inspiration tied to nature, community, and organic agriculture. These references helped establish the tone of the brand and informed decisions around color, typography, and imagery.",
-        ],
-        images: [`${DA}/Gemini_Generated_Image_m0ocmkm0ocmkm0oc 2.png`],
-      },
-      {
-        title: "Color palette",
-        paragraphs: [
-          "The color palette uses warm yellow and milk white as primary colors to evoke freshness, sunlight, and dairy products. Cyan, magenta, and navy are used as accent tones to introduce visual contrast and energy across digital and print materials.",
-        ],
-      },
-      {
-        title: "Touchpoints",
-        paragraphs: [
-          "The brand experience extends across multiple platforms including posters, a marketing landing page, and a mobile app. Each touchpoint reinforces the same visual identity while serving different functions — promotion, product discovery, and community engagement.",
-        ],
-      },
-      {
-        title: "Initial sketches",
-        paragraphs: [
-          "Initial sketches explored layout structures and communication strategies for both print and digital interfaces. These rough concepts allowed rapid iteration before moving into refined digital designs.",
-        ],
-        images: [`${DA}/Frame 7.png`],
-      },
-      {
-        title: "Landing page",
-        paragraphs: [
-          "The landing page introduces the brand and communicates the core offerings of Dairy & Delight. Key sections highlight product delivery, recipes, and farm visits, guiding users through the brand story while encouraging deeper engagement.",
-        ],
-        images: [
-          `${DA}/Slide 23.png`,
-          `${DA}/Slide 24.png`,
-          `${DA}/Slide 25.png`,
-          `${DA}/Slide 28.png`,
-        ],
-      },
-      {
-        title: "Mobile interface",
-        paragraphs: [
-          "The mobile interface extends the brand ecosystem by allowing users to browse products, access recipes, and unlock member benefits directly from their phones. The design prioritizes clarity and ease of navigation while maintaining the brand’s playful, uplifting tone.",
-        ],
-        images: [
-          `${DA}/Mobile Screens.png`,
-          `${DA}/iPhone 11 Render.png`,
-          `${DA}/iPhone 11 Render-1.png`,
-        ],
-      },
-      {
-        title: "Further screen explorations",
-        paragraphs: [
-          "Additional iterations refined typography, layout, and campaign compositions across devices.",
-        ],
-        images: [
-          `${DA}/Slide 29.png`,
-          `${DA}/Slide 30.png`,
-          `${DA}/Slide 31.png`,
-          `${DA}/Slide 32.png`,
-          `${DA}/Slide 33.png`,
-          `${DA}/Slide 34.png`,
-          `${DA}/Slide 35.png`,
+        title: "Design",
+        blocks: [
+          {
+            title: "Mirror experience",
+            paragraphs: [
+              "The UI system balances glanceability at mirror distance with playful energy — sky gradients, bold plan cards, and a workout loop that keeps form feedback and rest timers legible from across the room.",
+              "Selected screens below; the live prototype is the best way to feel the gesture layer and end-to-end flow.",
+            ],
+            images: [
+              {
+                src: pulseHero,
+                alt: "Pulse — smart mirror home and personalized plans.",
+              },
+              {
+                src: pulseScreen2,
+                alt: "Pulse — onboarding and calendar connection.",
+              },
+              {
+                src: pulseScreen3,
+                alt: "Pulse — workout session and gesture controls.",
+              },
+            ],
+          },
         ],
       },
     ],
   },
-  conclusionTitle: "Thank You",
+  conclusionTitle: "Reflection",
   conclusion:
-    "Thanks for taking the time to explore Dairy & Delight — a project about building a warm, transparent farm story across poster, web, and mobile. I’m always open to conversations about brand systems and multi-touchpoint experiences.",
+    "Pulse is the project closest to where I want my career to go — product UX that meets people in physical space, not just on a phone. The live prototype is early and imperfect, but it proves the loop: onboard, connect your calendar, pick a plan, and work out with gestures that actually make sense at arm's length. Next I'd validate whether calendar-suggested slots change real adherence in a dorm setting.",
 };
+
+/** Pawfect Match */
+const PF = `${P}/Pawfect`;
+const pawfectHero = `${PF}/Pawfect Match.png`;
+const pawfectImages = [
+  "Pawfect Match.png",
+  "Pawfect Match-01.png",
+  "Pawfect Match-01.jpg",
+  "Pawfect Match MockUps-01.jpg",
+  "PawfectMatch Mockup 2.5.jpeg",
+  "Modern App Portfolio Mockup Presentation.png",
+  "mockuuups-free-iphone-15-pro-hand-mockup.png",
+  "Screenshot 2024-12-18 at 2.01.16\u202fPM.png",
+  "Screenshot 2025-01-14 at 1.03.51\u202fPM.png",
+  "Screenshot 2025-01-14 at 1.05.28\u202fPM.png",
+];
+
+const pawfectCaseStudyRich = simpleGalleryCaseStudy({
+  overview: {
+    client: "Concept · Mobile App (Academic)",
+    industry: "Social · Pets · Community",
+    timeline: "Sprint · Solo",
+    role: "UX / UI design",
+  },
+  introParagraphs: [
+    "Pawfect Match is a playful dating-style app for pet owners — swipe, match, and meet up for park hangs based on compatible pets and personalities.",
+    "Early exploration focused on making pet profiles feel warm and trustworthy without turning into a generic social clone. Case study copy coming soon — for now, the visuals tell most of the story.",
+  ],
+  highlights: [
+    {
+      label: "Hook",
+      value: "Match on pets first — owners second.",
+    },
+    {
+      label: "Tone",
+      value: "Friendly, bright, and approachable — built for dog-park energy.",
+    },
+  ],
+  base: PF,
+  imageFiles: pawfectImages,
+  blockParagraphs: [
+    "Screen explorations, mockups, and presentation boards from the Pawfect Match concept. Full narrative write-up on the way.",
+  ],
+  conclusion:
+    "Placeholder reflection — I'll expand this once the case study script is written. The visual direction holds up; next step is validating whether matching on pet temperament actually changes meetup quality.",
+});
+
+/** Safe Space */
+const SS = `${P}/Safe Space`;
+const safeSpaceHero = `${SS}/SafeSpace.png`;
+const safeSpaceImages = [
+  "SafeSpace.png",
+  "SafeSpace - V1thingydadaa.jpg",
+  "SafeSpace Wireframes.png",
+  "SafeSpace UserFlow.png",
+  "Screenshot 2025-01-17 at 3.44.37\u202fPM.png",
+  "mockuuups-female-hand-holding-iphone-14-pro-mockup.png",
+  "1_JasonSaputra.jpg",
+];
+
+const safeSpaceCaseStudyRich = simpleGalleryCaseStudy({
+  overview: {
+    client: "Concept · Note-taking / Wellness (Academic)",
+    industry: "Mental Health · Productivity",
+    timeline: "Sprint · Solo",
+    role: "UX / UI design",
+  },
+  introParagraphs: [
+    "Safe Space is a note-taking and reflection app concept — a calmer place to capture thoughts, track emotional check-ins, and revisit patterns without the noise of a general-purpose notes tool.",
+    "Wireframes and user flows explore how little friction you can keep between 'I need to write this down' and actually doing it. Detailed case study text is still in progress.",
+  ],
+  highlights: [
+    {
+      label: "North star",
+      value: "Private, gentle, and fast — journaling without performance.",
+    },
+    {
+      label: "Process",
+      value: "User flow → wireframes → high-fidelity explorations.",
+    },
+  ],
+  base: SS,
+  imageFiles: safeSpaceImages,
+  blockParagraphs: [
+    "Wireframes, flows, and visual explorations from the Safe Space concept. More context coming in a future pass.",
+  ],
+  conclusion:
+    "Early work — placeholder reflection until the full write-up lands. The interaction model prioritizes speed and emotional safety over feature breadth.",
+});
+
+/** ShiftOff */
+const SO = `${P}/ShiftOff`;
+const shiftOffHero = `${SO}/iPhone 16 Pro.png`;
+const shiftOffImages = [
+  "1.png",
+  "1.5.png",
+  "2.png",
+  "3.png",
+  "4.png",
+  "6.png",
+  "7.png",
+  "8.png",
+  "9.png",
+  "10.png",
+  "11.png",
+  "12.png",
+  "13.png",
+  "14.png",
+  "15.png",
+  "16.png",
+  "17.png",
+  "18.png",
+  "19.png",
+  "20.png",
+  "21.png",
+  "iPhone 16 Pro.png",
+];
+
+const shiftOffCaseStudyRich = simpleGalleryCaseStudy({
+  overview: {
+    client: "Concept · Work-life Boundaries (Academic)",
+    industry: "Wellness · Productivity · Service Design",
+    timeline: "Multi-week · Solo",
+    role: "UX / product design",
+  },
+  introParagraphs: [
+    "ShiftOff helps knowledge workers actually disconnect — ritual builders, rumination redirects, and a morning review that closes the loop on what you carried home from work.",
+    "The concept treats 'logging off' as a designed behavior, not a willpower test. Slide deck and narrative still in progress; images below are the current artifact set.",
+  ],
+  highlights: [
+    {
+      label: "Problem",
+      value: "Work follows you home — notifications, open loops, and Sunday scaries.",
+    },
+    {
+      label: "Mechanic",
+      value: "End-of-day rituals + vault-locked work apps until morning review.",
+    },
+  ],
+  base: SO,
+  imageFiles: shiftOffImages,
+  blockParagraphs: [
+    "High-fidelity screens and device mockups from the ShiftOff concept — onboarding hurdles through dashboard, settings, and handoff flows.",
+  ],
+  conclusion:
+    "Placeholder reflection — ShiftOff is about making boundaries feel supportive instead of punitive. I'd next test whether ritual prompts change after-hours Slack checking in a real cohort.",
+});
+
+/** CCA Pathfinding */
+const CCA = `${P}/CCA Pathfinding`;
+const ccaHero = `${CCA}/30.jpg`;
+const ccaImages = Array.from({ length: 29 }, (_, i) => `${30 + i}.jpg`);
+
+const ccaPathfindingCaseStudyRich = simpleGalleryCaseStudy({
+  overview: {
+    client: "CCA · Pathfinding Design Program",
+    industry: "Education · Career Design · Service Design",
+    timeline: "Program project · Team",
+    role: "Visual / interaction design",
+  },
+  introParagraphs: [
+    "CCA Pathfinding is a program-scale exploration of how art and design students navigate career uncertainty — mapping services, touchpoints, and interventions across the Pathfinding curriculum.",
+    "This gallery collects presentation slides from the project. Written case study context is coming later; treat this as a visual archive for now.",
+  ],
+  highlights: [
+    {
+      label: "Scope",
+      value: "Program-level service design — not a single app screen.",
+    },
+    {
+      label: "Audience",
+      value: "CCA students finding their creative path without a linear roadmap.",
+    },
+  ],
+  base: CCA,
+  imageFiles: ccaImages,
+  blockParagraphs: [
+    "Full slide sequence from the CCA Pathfinding presentation — research synthesis through proposed interventions.",
+  ],
+  conclusion:
+    "Placeholder reflection — Pathfinding work sits at the intersection of education design and career anxiety. I'll add the full narrative when the layout doc is ready.",
+});
 
 export const projects = [
   {
@@ -700,7 +1272,7 @@ export const projects = [
     tags: ["Product Design", "UX Design"],
     slug: "kits",
     thumb: kitsHero,
-    caseStudyHero: null,
+    caseStudyHero: kitsHero,
     caseStudyGallery: [],
     caseStudyPdfs: kitsPdfs,
     caseStudyRich: kitsCaseStudyRich,
@@ -708,11 +1280,11 @@ export const projects = [
   {
     id: 4,
     title: "Dairy Delight",
-    category: "Brand / Product",
-    tagline: "Organic farm-to-table brand across poster, web, and mobile.",
+    category: "Brand / UX",
+    tagline: "Simple joys of nourishing living.",
     description:
-      "Dairy & Delight is a brand and digital experience designed for an organic dairy farm that delivers fresh milk, cheese, yogurt, and ice cream directly to consumers. The project focused on building a cohesive brand identity and multi-platform experience that communicates the farm’s values of natural food, community, and transparency.",
-    tags: ["Brand", "Product Design"],
+      "Organic farm brand identity across poster, web, and app — all-natural, uplifting, communal, from 100+ logo sketches to final touchpoints.",
+    tags: ["Brand Design", "Visual Design", "UX Design"],
     slug: "dairy-delight",
     thumb: dairyHero,
     caseStudyHero: dairyHero,
@@ -720,4 +1292,118 @@ export const projects = [
     caseStudyPdfs: [],
     caseStudyRich: dairyCaseStudyRich,
   },
+  {
+    id: 5,
+    title: "Pulse",
+    category: "Smart Mirror UX",
+    tagline: "Your smart mirror workout buddy.",
+    description:
+      "Gesture-driven fitness coaching for student athletes — personalized plans, Google Calendar-aware scheduling, and a live interactive prototype built for the mirror, not the phone.",
+    tags: ["UX Design", "Product Design", "Prototyping", "Research"],
+    slug: "pulse",
+    thumb: pulseHero,
+    caseStudyHero: pulseHero,
+    caseStudyGallery: [],
+    caseStudyDeckPdf: pulseDeckPdf,
+    caseStudyRich: pulseCaseStudyRich,
+  },
+  {
+    id: 6,
+    title: "Pawfect Match",
+    category: "Mobile App",
+    tagline: "Swipe right for your pet's new best friend.",
+    description:
+      "A playful pet-matching app concept — connect owners and pets for park meetups through warm profiles and swipe-first discovery.",
+    tags: ["UX Design", "UI Design", "Mobile"],
+    slug: "pawfect",
+    thumb: pawfectHero,
+    caseStudyHero: pawfectHero,
+    caseStudyGallery: [],
+    caseStudyRich: pawfectCaseStudyRich,
+  },
+  {
+    id: 7,
+    title: "Safe Space",
+    category: "Wellness UX",
+    tagline: "Notes that feel like a deep breath.",
+    description:
+      "A reflection and note-taking concept — private, gentle capture for thoughts and emotional check-ins without productivity-app noise.",
+    tags: ["UX Design", "UI Design", "Wellness"],
+    slug: "safe-space",
+    thumb: safeSpaceHero,
+    caseStudyHero: safeSpaceHero,
+    caseStudyGallery: [],
+    caseStudyRich: safeSpaceCaseStudyRich,
+  },
+  {
+    id: 8,
+    title: "ShiftOff",
+    category: "Product Design",
+    tagline: "Log off for real.",
+    description:
+      "A work-life boundary app concept — end-of-day rituals, rumination redirects, and morning review to help knowledge workers disconnect.",
+    tags: ["UX Design", "Product Design", "Wellness"],
+    slug: "shift-off",
+    thumb: shiftOffHero,
+    caseStudyHero: shiftOffHero,
+    caseStudyGallery: [],
+    caseStudyRich: shiftOffCaseStudyRich,
+  },
+  {
+    id: 9,
+    title: "CCA Pathfinding",
+    category: "Service Design",
+    tagline: "Designing the path through pathfinding.",
+    description:
+      "Program-scale service design for CCA Pathfinding — helping art and design students navigate career uncertainty with clearer touchpoints and support.",
+    tags: ["Service Design", "Visual Design", "Education"],
+    slug: "cca-pathfinding",
+    thumb: ccaHero,
+    caseStudyHero: ccaHero,
+    caseStudyGallery: [],
+    caseStudyRich: ccaPathfindingCaseStudyRich,
+  },
 ];
+
+const FEATURED_SLUGS = ["eleara", "kits", "dairy-delight", "dream-detective"];
+
+export const featuredProjects = FEATURED_SLUGS.map((slug) =>
+  projects.find((p) => p.slug === slug)
+).filter(Boolean);
+
+export const archiveProjects = projects.filter(
+  (p) => !FEATURED_SLUGS.includes(p.slug)
+);
+
+/** All image paths for a project — used by Other stuff archive folders. */
+export function projectGallerySources(project) {
+  const seen = new Set();
+  const out = [];
+
+  const add = (src) => {
+    if (src && !seen.has(src)) {
+      seen.add(src);
+      out.push(src);
+    }
+  };
+
+  add(project.thumb);
+  add(project.caseStudyHero);
+
+  const rich = project.caseStudyRich;
+  if (rich?.processWork?.sections) {
+    for (const section of rich.processWork.sections) {
+      for (const block of section.blocks ?? []) {
+        for (const entry of block.images ?? []) {
+          add(typeof entry === "string" ? entry : entry.src);
+        }
+      }
+    }
+  }
+
+  for (const src of project.caseStudyGallery ?? []) {
+    add(src);
+  }
+
+  return out;
+}

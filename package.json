@@ -6,13 +6,14 @@
     "node": ">=20.9.0"
   },
   "scripts": {
-    "dev": "next dev -H 127.0.0.1 -p 3000",
-    "dev:fast": "next dev -H 127.0.0.1 -p 3000",
+    "dev": "next dev --webpack -H 127.0.0.1 -p 3000",
+    "dev:fast": "next dev --webpack -H 127.0.0.1 -p 3000",
+    "dev:webpack": "next dev --webpack -H 127.0.0.1 -p 3000",
+    "serve:prod": "next start -H 127.0.0.1 -p 3000",
     "dev:clean": "rm -rf .next && next dev -H 127.0.0.1 -p 3000",
     "dev:turbo": "next dev --turbo -H 127.0.0.1 -p 3000",
     "merge-pdfs": "node scripts/merge-case-study-decks.mjs",
     "prebuild": "npm run merge-pdfs",
-    "predev": "npm run merge-pdfs",
     "build": "next build",
     "preview": "next build && next start -H 127.0.0.1 -p 3000",
     "start": "next start",

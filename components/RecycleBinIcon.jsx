@@ -22,6 +22,7 @@ export default function RecycleBinIcon({
   zIndex = 14,
   parallaxShift = { x: 0, y: 0 },
   delay = 0,
+  pop = false,
 }) {
   const iconH = Math.round(width * 0.82);
 
@@ -56,9 +57,14 @@ export default function RecycleBinIcon({
       initial={{ opacity: 0, scale: 0.92 }}
       animate={{
         opacity: 1,
-        scale: drag.isDragging ? 1.05 : 1,
+        scale: drag.isDragging ? 1.05 : pop ? [1, 1.1, 0.97, 1.03, 1] : 1,
+        rotate: pop ? [0, -3, 3, -1, 0] : 0,
       }}
-      transition={{ duration: drag.isDragging ? 0.08 : 0.32, delay, ease: EASE }}
+      transition={{
+        duration: drag.isDragging ? 0.08 : pop ? 0.48 : 0.32,
+        delay: pop ? 0 : delay,
+        ease: pop ? [0.34, 1.45, 0.64, 1] : EASE,
+      }}
       style={{
         position: "absolute",
         left: drag.left,

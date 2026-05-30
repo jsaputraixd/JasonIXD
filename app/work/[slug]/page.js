@@ -61,7 +61,7 @@ function sectionAnchor(title) {
 function CaseStudyJumpNav({ sections, hasPrototype }) {
   const links = [
     ...sections.map((s) => ({ label: s.title, href: `#section-${sectionAnchor(s.title)}` })),
-    ...(hasPrototype ? [{ label: "Prototype", href: "#section-prototype" }] : []),
+    ...(hasPrototype ? [{ label: "Prototype", href: "#section-live-prototype" }] : []),
     { label: "Reflection", href: "#section-reflection" },
   ];
 
@@ -96,7 +96,7 @@ function normalizeCaseStudyImage(entry) {
   return { src: entry.src, alt: entry.alt ?? "" };
 }
 
-function CaseStudyProcessBlock({ block, frameStyle, bodyStyle, imagesFirst = true }) {
+function CaseStudyProcessBlock({ block, frameStyle, imagesFirst = true }) {
   const images = (block.images ?? []).length > 0 ? (
     <div className={`flex flex-col gap-10 ${imagesFirst ? "mb-8" : "-mt-2 mb-4"}`}>
       {(block.images ?? []).map((entry) => {
@@ -120,7 +120,7 @@ function CaseStudyProcessBlock({ block, frameStyle, bodyStyle, imagesFirst = tru
   ) : null;
 
   const paragraphs = (block.paragraphs ?? []).map((text, i) => (
-    <p key={i} className="m-0 mb-8 last:mb-0 case-study-prose" style={bodyStyle}>
+    <p key={i} className="m-0 mb-8 last:mb-0 case-study-prose">
       {text}
     </p>
   ));
@@ -177,23 +177,16 @@ function CaseStudyRichLayout({ project, frameStyle }) {
     videosAfterSection,
     videosTitle,
     videosIntro,
-    videosLayout,
     imagesBeforeText = true,
     highlights,
     showJumpNav = false,
     showDeckEmbed = true,
+    livePrototype,
   } = rich;
-
-  const bodyStyle = {
-    fontFamily: "'DM Sans', sans-serif",
-    fontSize: 18,
-    color: "#bbb",
-    lineHeight: 1.8,
-  };
-
+  const bodyStyle = {};
   const metaLabel = {
     fontFamily: "'VT323', monospace",
-    fontSize: 12,
+    fontSize: 13,
     letterSpacing: "0.24em",
     textTransform: "uppercase",
     color: ACCENT,
@@ -204,7 +197,7 @@ function CaseStudyRichLayout({ project, frameStyle }) {
 
   const metaValue = {
     fontFamily: "'DM Sans', sans-serif",
-    fontSize: 16,
+    fontSize: 17,
     color: "#d0d0d0",
     lineHeight: 1.55,
     margin: 0,
@@ -231,20 +224,53 @@ function CaseStudyRichLayout({ project, frameStyle }) {
           videos={videos}
           frameStyle={frameStyle}
           title={videosTitle}
-          intro={videosIntro}
-          layout={videosLayout}
-        />
+        intro={videosIntro}
+      />
       </div>
     ) : null;
 
+  const livePrototypeSection = livePrototype ? (
+    <div id="section-live-prototype" className="mt-16 case-study-section-anchor case-study-prototype-anchor">
+      <CaseStudySectionTitle>Live prototype</CaseStudySectionTitle>
+      {livePrototype.intro ? (
+        <p className="m-0 mb-6 case-study-prose" style={{ color: "#aaa" }}>
+          {livePrototype.intro}
+        </p>
+      ) : null}
+      <a
+        href={livePrototype.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        data-cursor="hover"
+        style={{
+          display: "inline-block",
+          fontFamily: "'VT323', monospace",
+          fontSize: 14,
+          letterSpacing: "0.22em",
+          textTransform: "uppercase",
+          color: "#FF7A29",
+          textDecoration: "none",
+          border: "1px solid rgba(255, 122, 41, 0.45)",
+          padding: "10px 16px",
+          borderRadius: 2,
+        }}
+      >
+        {livePrototype.label || "Open live prototype"} ↗
+      </a>
+    </div>
+  ) : null;
+
   const shouldShowJumpNav = showJumpNav && processSections.length > 1;
+  const hasPrototypeNav =
+    Boolean(livePrototype) ||
+    (Boolean(videos?.length) && videosPlacement === "afterSection");
 
   return (
     <>
       {(introParagraphs ?? []).length > 0 ? (
       <div className="mt-10 flex flex-col gap-6">
         {(introParagraphs ?? []).map((text, i) => (
-          <p key={i} className="m-0 case-study-prose case-study-summary" style={bodyStyle}>
+          <p key={i} className="m-0 case-study-prose case-study-summary">
             {text}
           </p>
         ))}
@@ -269,7 +295,7 @@ function CaseStudyRichLayout({ project, frameStyle }) {
       {shouldShowJumpNav ? (
         <CaseStudyJumpNav
           sections={processSections}
-          hasPrototype={Boolean(videos?.length) && videosPlacement === "afterSection"}
+          hasPrototype={hasPrototypeNav}
         />
       ) : null}
 
@@ -314,7 +340,6 @@ function CaseStudyRichLayout({ project, frameStyle }) {
                   key={block.title}
                   block={block}
                   frameStyle={frameStyle}
-                  bodyStyle={bodyStyle}
                   imagesFirst={imagesBeforeText}
                 />
               ))}
@@ -328,6 +353,8 @@ function CaseStudyRichLayout({ project, frameStyle }) {
       ) : null}
 
       {videosPlacement === "afterProcess" ? videoSection : null}
+
+      {livePrototypeSection}
 
       {designSolution?.length > 0 ? (
         <div className="mt-16">
@@ -454,7 +481,7 @@ function CaseStudyRichLayout({ project, frameStyle }) {
         <CaseStudySectionTitle>
           {conclusionTitle || "Conclusion"}
         </CaseStudySectionTitle>
-        <p className="m-0 mt-0 case-study-prose" style={bodyStyle}>
+        <p className="m-0 mt-0 case-study-prose">
           {conclusion}
         </p>
       </div>
@@ -607,7 +634,7 @@ export default async function ProjectPage({ params }) {
           </div>
         ) : null}
 
-        {pdfs.length > 0 ? (
+        {!rich && pdfs.length > 0 ? (
           <div className="mt-16">
             <p
               style={{
