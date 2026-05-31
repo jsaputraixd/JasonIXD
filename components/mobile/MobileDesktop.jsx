@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   useCallback,
   useEffect,
@@ -44,10 +45,21 @@ import {
 } from "@/lib/introSession";
 import { playClick, playTypingClick } from "@/lib/typingSound";
 import { pickTrashMessage } from "@/lib/trashMessage";
-import { projectCardThumbSrc } from "@/lib/projectMedia";
 import { projectHeroTransitionName } from "@/lib/viewTransition";
 
 const ACCENT_DIM = "#FFB570";
+
+const MOBILE_BLOCK_GAP = 40;
+const MOBILE_CARD_INSET = 16;
+const MOBILE_DOCK_HEIGHT = 44;
+
+const MOBILE_NAV_SECTIONS = [
+  { id: "mobile-about", label: "About" },
+  { id: "mobile-work", label: "Work" },
+  { id: "mobile-skills", label: "Skills" },
+  { id: "mobile-more", label: "More" },
+  { id: "mobile-contact", label: "Contact" },
+];
 
 function MobileJourneyChapter({ children, scrollRoot, variant = "up" }) {
   return (
@@ -196,18 +208,6 @@ function MobileMeTxtJourney({ scrollRoot, skipTyping = false }) {
     </div>
   );
 }
-
-const MOBILE_BLOCK_GAP = 40;
-const MOBILE_CARD_INSET = 16;
-const MOBILE_DOCK_HEIGHT = 44;
-
-const MOBILE_NAV_SECTIONS = [
-  { id: "mobile-about", label: "About" },
-  { id: "mobile-work", label: "Work" },
-  { id: "mobile-skills", label: "Skills" },
-  { id: "mobile-more", label: "More" },
-  { id: "mobile-contact", label: "Contact" },
-];
 
 /** Scroll-triggered entrance — uses the mobile column as intersection root. */
 function MobileScrollReveal({

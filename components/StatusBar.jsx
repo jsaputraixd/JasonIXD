@@ -12,7 +12,7 @@ import {
 const ACCENT = "#FF7A29";
 const FOOTER_MUTED = "#FFC896";
 const MOBILE_BREAK = 900;
-const BUILD_LABEL = "JS-OS · v1.2";
+const BUILD_LABEL = "JS-OS · v1.3";
 
 const MARQUEE_ITEMS = [
   "Dream",
