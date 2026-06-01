@@ -57,13 +57,19 @@ const MOBILE_NAV_SECTIONS = [
   { id: "mobile-about", label: "About" },
   { id: "mobile-work", label: "Work" },
   { id: "mobile-skills", label: "Skills" },
-  { id: "mobile-more", label: "More" },
+  { id: "mobile-more-projects", label: "Archive" },
+  { id: "mobile-more", label: "Art" },
   { id: "mobile-contact", label: "Contact" },
 ];
 
-function MobileJourneyChapter({ children, scrollRoot, variant = "up" }) {
+function MobileJourneyChapter({
+  children,
+  scrollRoot,
+  variant = "up",
+  sectionId,
+}) {
   return (
-    <div className="mobile-journey-chapter">
+    <div className="mobile-journey-chapter" id={sectionId}>
       <MobileScrollReveal scrollRoot={scrollRoot} variant={variant} delay={0.02}>
         {children}
       </MobileScrollReveal>
@@ -73,44 +79,18 @@ function MobileJourneyChapter({ children, scrollRoot, variant = "up" }) {
 
 function MobileWorkSection({ scrollRoot }) {
   const [activeIdx, setActiveIdx] = useState(0);
-  const [focusStrength, setFocusStrength] = useState(0);
-  const sectionRef = useRef(null);
   const project = featuredProjects[activeIdx] ?? featuredProjects[0];
 
-  useEffect(() => {
-    const root = scrollRoot?.current;
-    const el = sectionRef.current;
-    if (!root || !el) return;
-
-    const obs = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-        if (!entry) return;
-        const ratio = entry.intersectionRatio;
-        const strength = entry.isIntersecting
-          ? Math.min(1, Math.max(0, (ratio - 0.02) / 0.28))
-          : 0;
-        setFocusStrength(strength);
-      },
-      { root, threshold: [0, 0.05, 0.1, 0.2, 0.35, 0.5, 0.65, 0.8, 1] }
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, [scrollRoot]);
-
   return (
-    <motion.div ref={sectionRef} className="mobile-work-section" style={{ position: "relative" }}>
-      <MobileSectionAnchor id="mobile-work" />
+    <div className="mobile-work-section" style={{ position: "relative" }}>
       <MobileScrollReveal scrollRoot={scrollRoot} variant="up" delay={0.04}>
         <MobileProjectsCarousel
-          scrollRoot={scrollRoot}
           activeIdx={activeIdx}
           onActiveChange={setActiveIdx}
-          focusStrength={focusStrength}
         />
       </MobileScrollReveal>
       <MobileScrollReveal scrollRoot={scrollRoot} variant="fade" delay={0.06}>
-        <motion.div
+        <div
           style={{
             margin: `8px ${MOBILE_CARD_INSET}px 0`,
             position: "relative",
@@ -120,9 +100,9 @@ function MobileWorkSection({ scrollRoot }) {
           aria-atomic="true"
         >
           <MobileProjectPreviewPanel project={project} />
-        </motion.div>
+        </div>
       </MobileScrollReveal>
-    </motion.div>
+    </div>
   );
 }
 
@@ -229,19 +209,19 @@ function MobileScrollReveal({
 
   const variants = {
     up: {
-      hidden: { opacity: 0, y: 36, scale: 0.94, filter: "blur(8px)" },
-      visible: { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" },
+      hidden: { opacity: 0, y: 20 },
+      visible: { opacity: 1, y: 0 },
     },
     left: {
-      hidden: { opacity: 0, x: -28, y: 16, scale: 0.97 },
-      visible: { opacity: 1, x: 0, y: 0, scale: 1 },
+      hidden: { opacity: 0, x: -16, y: 8 },
+      visible: { opacity: 1, x: 0, y: 0 },
     },
     right: {
-      hidden: { opacity: 0, x: 28, y: 16, scale: 0.97 },
-      visible: { opacity: 1, x: 0, y: 0, scale: 1 },
+      hidden: { opacity: 0, x: 16, y: 8 },
+      visible: { opacity: 1, x: 0, y: 0 },
     },
     fade: {
-      hidden: { opacity: 0, y: 10 },
+      hidden: { opacity: 0, y: 8 },
       visible: { opacity: 1, y: 0 },
     },
   };
@@ -257,7 +237,7 @@ function MobileScrollReveal({
       initial={reduceMotion ? false : "hidden"}
       animate={show ? "visible" : "hidden"}
       variants={v}
-      transition={{ duration: 0.72, ease: EASE, delay }}
+      transition={{ duration: 0.45, ease: EASE, delay }}
     >
       {children}
     </motion.div>
@@ -266,17 +246,12 @@ function MobileScrollReveal({
 
 function MobileSectionRule() {
   return (
-    <motion.div
+    <div
       aria-hidden
       className="mobile-section-rule"
-      initial={{ scaleX: 0, opacity: 0 }}
-      whileInView={{ scaleX: 1, opacity: 1 }}
-      viewport={{ once: true, amount: 0.5 }}
-      transition={{ duration: 0.85, ease: EASE }}
       style={{
         margin: `${MOBILE_BLOCK_GAP - 12}px ${MOBILE_CARD_INSET + 4}px 0`,
         height: 1,
-        transformOrigin: "left center",
         background:
           "linear-gradient(90deg, rgba(255,122,41,0.55), rgba(255,122,41,0.12) 55%, transparent)",
         boxShadow: "0 0 12px rgba(255, 122, 41, 0.25)",
@@ -330,17 +305,6 @@ function MobileOpenForWorkStrip() {
   );
 }
 
-function MobileSectionAnchor({ id }) {
-  return (
-    <motion.div
-      id={id}
-      aria-hidden
-      className="mobile-section-anchor"
-      style={{ height: 0, scrollMarginTop: MOBILE_DOCK_HEIGHT + 28 }}
-    />
-  );
-}
-
 function useMobileScrollProgress(scrollRoot, enabled) {
   const [progress, setProgress] = useState(0);
 
@@ -349,18 +313,23 @@ function useMobileScrollProgress(scrollRoot, enabled) {
     const root = scrollRoot?.current;
     if (!root) return;
 
+    let raf = 0;
     const update = () => {
+      raf = 0;
       const max = root.scrollHeight - root.clientHeight;
       setProgress(max <= 4 ? 0 : Math.min(1, root.scrollTop / max));
     };
 
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(update);
+    };
+
     update();
-    root.addEventListener("scroll", update, { passive: true });
-    const ro = new ResizeObserver(update);
-    ro.observe(root);
+    root.addEventListener("scroll", onScroll, { passive: true });
     return () => {
-      root.removeEventListener("scroll", update);
-      ro.disconnect();
+      root.removeEventListener("scroll", onScroll);
+      if (raf) cancelAnimationFrame(raf);
     };
   }, [scrollRoot, enabled]);
 
@@ -500,35 +469,54 @@ function useMobileSectionSpy(scrollRoot, enabled) {
     const root = scrollRoot?.current;
     if (!root) return;
 
-    const targets = MOBILE_NAV_SECTIONS.map(({ id }) =>
-      document.getElementById(id)
-    ).filter(Boolean);
-    if (targets.length === 0) return;
+    let raf = 0;
+    const markerOffset = MOBILE_DOCK_HEIGHT + 36;
 
-    const ratios = new Map();
-    const obs = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          ratios.set(entry.target.id, entry.intersectionRatio);
-        });
-        let bestId = MOBILE_NAV_SECTIONS[0].id;
-        let bestRatio = 0;
-        MOBILE_NAV_SECTIONS.forEach(({ id }) => {
-          const ratio = ratios.get(id) ?? 0;
-          if (ratio > bestRatio) {
-            bestRatio = ratio;
+    const update = () => {
+      raf = 0;
+      const rootTop = root.getBoundingClientRect().top;
+      const markerY = rootTop + markerOffset;
+
+      let bestId = MOBILE_NAV_SECTIONS[0].id;
+      let bestTop = -Infinity;
+
+      for (const { id } of MOBILE_NAV_SECTIONS) {
+        const el = document.getElementById(id);
+        if (!el) continue;
+        const top = el.getBoundingClientRect().top;
+        if (top <= markerY + 8 && top > bestTop) {
+          bestTop = top;
+          bestId = id;
+        }
+      }
+
+      if (bestTop === -Infinity) {
+        let nearest = Infinity;
+        for (const { id } of MOBILE_NAV_SECTIONS) {
+          const el = document.getElementById(id);
+          if (!el) continue;
+          const dist = Math.abs(el.getBoundingClientRect().top - markerY);
+          if (dist < nearest) {
+            nearest = dist;
             bestId = id;
           }
-        });
-        if (bestRatio > 0.08) {
-          setActiveId((prev) => (prev === bestId ? prev : bestId));
         }
-      },
-      { root, threshold: [0, 0.12, 0.25, 0.4, 0.55] }
-    );
+      }
 
-    targets.forEach((el) => obs.observe(el));
-    return () => obs.disconnect();
+      setActiveId((prev) => (prev === bestId ? prev : bestId));
+    };
+
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(update);
+    };
+
+    update();
+    root.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      root.removeEventListener("scroll", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
   }, [scrollRoot, enabled]);
 
   return activeId;
@@ -838,35 +826,11 @@ function MobileDesktop() {
 
   const showMobileRest = phase === "dashboard";
   const skipWelcomeTyping = phase === "dashboard";
-  const [belowFoldReady, setBelowFoldReady] = useState(false);
   const scrollRef = useRef(null);
   const activeSection = useMobileSectionSpy(scrollRef, showMobileRest);
 
-  useEffect(() => {
-    if (!showMobileRest) {
-      setBelowFoldReady(false);
-      return;
-    }
-    let cancelled = false;
-    const mount = () => {
-      if (!cancelled) setBelowFoldReady(true);
-    };
-    if (typeof requestIdleCallback !== "undefined") {
-      const id = requestIdleCallback(mount, { timeout: 500 });
-      return () => {
-        cancelled = true;
-        cancelIdleCallback(id);
-      };
-    }
-    const t = window.setTimeout(mount, 48);
-    return () => {
-      cancelled = true;
-      clearTimeout(t);
-    };
-  }, [showMobileRest]);
-
   return (
-    <motion.div className="mobile-os">
+    <div className="mobile-os">
       <MobileDockNav
         scrollRoot={scrollRef}
         activeId={activeSection}
@@ -874,12 +838,12 @@ function MobileDesktop() {
       />
       <MobileBootReady show={showMobileRest} />
 
-      <motion.div
+      <div
         ref={scrollRef}
         data-mobile-scroll
         className="mobile-os-scroll"
         style={{
-          paddingTop: showMobileRest ? MOBILE_DOCK_HEIGHT + 24 : 20,
+          paddingTop: MOBILE_DOCK_HEIGHT + 24,
         }}
       >
         <MobileJourneyChapter scrollRoot={scrollRef} variant="fade">
@@ -895,8 +859,7 @@ function MobileDesktop() {
 
         {showMobileRest ? (
           <>
-            <MobileJourneyChapter scrollRoot={scrollRef}>
-              <MobileSectionAnchor id="mobile-about" />
+            <MobileJourneyChapter scrollRoot={scrollRef} sectionId="mobile-about">
               <MobileJourneySectionLabel scrollRoot={scrollRef} skipTyping={skipWelcomeTyping}>
                 ▢ About
               </MobileJourneySectionLabel>
@@ -913,16 +876,21 @@ function MobileDesktop() {
 
             <MobileSectionRule />
 
-            <MobileJourneyChapter scrollRoot={scrollRef} variant="right">
+            <MobileJourneyChapter
+              scrollRoot={scrollRef}
+              variant="right"
+              sectionId="mobile-work"
+            >
               <MobileWorkSection scrollRoot={scrollRef} />
             </MobileJourneyChapter>
 
             <MobileSectionRule />
 
-            {belowFoldReady ? (
-              <>
-            <MobileJourneyChapter scrollRoot={scrollRef} variant="left">
-              <MobileSectionAnchor id="mobile-skills" />
+            <MobileJourneyChapter
+              scrollRoot={scrollRef}
+              variant="left"
+              sectionId="mobile-skills"
+            >
               <MobileJourneySectionLabel scrollRoot={scrollRef} skipTyping={skipWelcomeTyping}>
                 ▢ Skills · tap a node
               </MobileJourneySectionLabel>
@@ -933,8 +901,7 @@ function MobileDesktop() {
 
             <MobileSectionRule />
 
-            <MobileJourneyChapter scrollRoot={scrollRef}>
-              <MobileSectionAnchor id="mobile-more-projects" />
+            <MobileJourneyChapter scrollRoot={scrollRef} sectionId="mobile-more-projects">
               <MobileJourneySectionLabel scrollRoot={scrollRef} skipTyping={skipWelcomeTyping}>
                 ▢ Other projects
               </MobileJourneySectionLabel>
@@ -945,8 +912,7 @@ function MobileDesktop() {
 
             <MobileSectionRule />
 
-            <MobileJourneyChapter scrollRoot={scrollRef}>
-              <MobileSectionAnchor id="mobile-more" />
+            <MobileJourneyChapter scrollRoot={scrollRef} sectionId="mobile-more">
               <MobileJourneySectionLabel scrollRoot={scrollRef} skipTyping={skipWelcomeTyping}>
                 ▢ Other stuff
               </MobileJourneySectionLabel>
@@ -957,8 +923,7 @@ function MobileDesktop() {
 
             <MobileSectionRule />
 
-            <MobileJourneyChapter scrollRoot={scrollRef}>
-              <MobileSectionAnchor id="mobile-contact" />
+            <MobileJourneyChapter scrollRoot={scrollRef} sectionId="mobile-contact">
               <MobileJourneySectionLabel scrollRoot={scrollRef} skipTyping={skipWelcomeTyping}>
                 ▢ Contact
               </MobileJourneySectionLabel>
@@ -969,15 +934,13 @@ function MobileDesktop() {
                 />
               </MobileCard>
             </MobileJourneyChapter>
-              </>
-            ) : null}
           </>
         ) : null}
-      </motion.div>
+      </div>
 
       {showMobileRest ? <MobileRecycleDock /> : null}
       <StatusBar />
-    </motion.div>
+    </div>
   );
 }
 
@@ -1257,226 +1220,97 @@ function MobileWelcomeBody({ skipTyping = false, onTypingComplete }) {
   );
 }
 
-function getCarouselMetrics(focusStrength) {
-  const focus = Math.min(1, Math.max(0, focusStrength));
-  return {
-    focus,
-    activeScale: 1 + 0.07 * focus,
-    inactiveScale: 0.86 - 0.04 * focus,
-    inactiveOpacity: 0.52 - 0.18 * focus,
-    yLift: 8 + 4 * focus,
-  };
-}
-
-function applyCarouselCardVisuals(cards, focuses, showCards, metrics) {
-  const { activeScale, inactiveScale, inactiveOpacity, yLift } = metrics;
+function carouselIndexFromScroll(carousel, cards) {
+  if (!carousel || cards.length === 0) return 0;
+  const centerX = carousel.scrollLeft + carousel.clientWidth / 2;
+  let bestIdx = 0;
+  let bestDist = Infinity;
   cards.forEach((el, i) => {
     if (!el) return;
-    if (!showCards) {
-      el.style.opacity = "0";
-      el.style.transform = "translate3d(0, 36px, 0) scale(0.88)";
-      return;
-    }
-    const f = focuses[i] ?? 0;
-    const scale = inactiveScale + (activeScale - inactiveScale) * f;
-    const opacity = inactiveOpacity + (1 - inactiveOpacity) * f;
-    const y = (1 - f) * yLift;
-    el.style.opacity = String(opacity);
-    el.style.transform = `translate3d(0, ${y}px, 0) scale(${scale})`;
-  });
-}
-
-function cardFocusFromScroll(carousel, cards) {
-  if (!carousel) return { focuses: [], bestIdx: 0 };
-  const centerX = carousel.scrollLeft + carousel.clientWidth / 2;
-  const focuses = cards.map((el) => {
-    if (!el) return 0;
     const cardCenter = el.offsetLeft + el.offsetWidth / 2;
     const dist = Math.abs(cardCenter - centerX);
-    const falloff = el.offsetWidth * 1.05;
-    return Math.max(0, Math.min(1, 1 - dist / falloff));
-  });
-  let bestIdx = 0;
-  let best = -1;
-  focuses.forEach((f, i) => {
-    if (f > best) {
-      best = f;
+    if (dist < bestDist) {
+      bestDist = dist;
       bestIdx = i;
     }
   });
-  return { focuses, bestIdx };
+  return bestIdx;
 }
 
-function MobileProjectsCarousel({
-  scrollRoot,
-  activeIdx: controlledIdx,
-  onActiveChange,
-  focusStrength = 0,
-}) {
+function scrollCarouselToIndex(carousel, cards, idx, smooth = true) {
+  const el = cards[idx];
+  if (!carousel || !el) return;
+  const target = el.offsetLeft - (carousel.clientWidth - el.offsetWidth) / 2;
+  carousel.scrollTo({
+    left: Math.max(0, target),
+    behavior: smooth ? "smooth" : "auto",
+  });
+}
+
+function MobileProjectsCarousel({ activeIdx: controlledIdx, onActiveChange }) {
   const carouselRef = useRef(null);
   const cardShellRefs = useRef([]);
-  const dragRef = useRef(null);
-  const revealStartedRef = useRef(false);
-  const [hasRevealed, setHasRevealed] = useState(false);
   const [internalIdx, setInternalIdx] = useState(0);
   const activeIdx = controlledIdx ?? internalIdx;
-  const setActiveIdx = onActiveChange ?? setInternalIdx;
-  const reduceMotion = useReducedMotion();
-  const sectionRef = useRef(null);
-  const sectionInView = useInView(sectionRef, {
-    root: scrollRoot ?? undefined,
-    once: true,
-    amount: 0.15,
-  });
 
-  const showCards = reduceMotion || sectionInView;
-
-  const syncActiveFromScroll = useCallback(() => {
+  const syncFromScroll = useCallback(() => {
     const carousel = carouselRef.current;
     const cards = cardShellRefs.current;
     if (!carousel) return;
-    const { focuses, bestIdx } = cardFocusFromScroll(carousel, cards);
-    applyCarouselCardVisuals(
-      cards,
-      focuses,
-      showCards,
-      getCarouselMetrics(focusStrength)
-    );
-    setActiveIdx((prev) => (prev === bestIdx ? prev : bestIdx));
-  }, [setActiveIdx, showCards, focusStrength]);
+    const bestIdx = carouselIndexFromScroll(carousel, cards);
+    if (onActiveChange) onActiveChange(bestIdx);
+    else setInternalIdx((prev) => (prev === bestIdx ? prev : bestIdx));
+  }, [onActiveChange]);
+
+  useLayoutEffect(() => {
+    const carousel = carouselRef.current;
+    const cards = cardShellRefs.current;
+    if (!carousel || !cards[0]) return;
+    scrollCarouselToIndex(carousel, cards, 0, false);
+    syncFromScroll();
+  }, [syncFromScroll]);
 
   useEffect(() => {
     const carousel = carouselRef.current;
     if (!carousel) return;
 
-    let raf = 0;
+    let scrollEndTimer = 0;
+    const onScrollEnd = () => syncFromScroll();
+
     const onScroll = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(syncActiveFromScroll);
+      window.clearTimeout(scrollEndTimer);
+      scrollEndTimer = window.setTimeout(onScrollEnd, 100);
     };
 
     carousel.addEventListener("scroll", onScroll, { passive: true });
-    carousel.addEventListener("scrollend", syncActiveFromScroll);
-    syncActiveFromScroll();
-
+    carousel.addEventListener("scrollend", onScrollEnd);
     return () => {
-      cancelAnimationFrame(raf);
       carousel.removeEventListener("scroll", onScroll);
-      carousel.removeEventListener("scrollend", syncActiveFromScroll);
+      carousel.removeEventListener("scrollend", onScrollEnd);
+      window.clearTimeout(scrollEndTimer);
     };
-  }, [syncActiveFromScroll]);
-
-  useEffect(() => {
-    if (!showCards) return;
-    syncActiveFromScroll();
-  }, [showCards, focusStrength, syncActiveFromScroll]);
-
-  useLayoutEffect(() => {
-    if (!showCards || revealStartedRef.current) return;
-    revealStartedRef.current = true;
-
-    const cards = cardShellRefs.current;
-    const finishReveal = () => {
-      cards.forEach((el) => {
-        if (el) el.classList.add("mobile-carousel-card--scroll");
-      });
-      setHasRevealed(true);
-      syncActiveFromScroll();
-    };
-
-    if (reduceMotion) {
-      finishReveal();
-      return;
-    }
-
-    cards.forEach((el) => {
-      if (!el) return;
-      el.style.transition = "none";
-      el.style.opacity = "0";
-      el.style.transform = "translate3d(0, 36px, 0) scale(0.88)";
-    });
-
-    requestAnimationFrame(() => {
-      const metrics = getCarouselMetrics(focusStrength);
-      const { focuses } = cardFocusFromScroll(
-        carouselRef.current,
-        cards
-      );
-      cards.forEach((el, i) => {
-        if (!el) return;
-        const delay = i * 90;
-        el.style.transition = `transform 480ms cubic-bezier(0.16, 1, 0.3, 1) ${delay}ms, opacity 480ms cubic-bezier(0.16, 1, 0.3, 1) ${delay}ms`;
-      });
-      applyCarouselCardVisuals(cards, focuses, true, metrics);
-      window.setTimeout(
-        finishReveal,
-        480 + (featuredProjects.length - 1) * 90 + 40
-      );
-    });
-  }, [showCards, reduceMotion, focusStrength, syncActiveFromScroll]);
-
-  const onCarouselPointerDown = (e) => {
-    const el = carouselRef.current;
-    if (!el || e.pointerType !== "mouse" || e.button !== 0) return;
-    dragRef.current = {
-      pointerId: e.pointerId,
-      startX: e.clientX,
-      startScroll: el.scrollLeft,
-    };
-    try {
-      el.setPointerCapture(e.pointerId);
-    } catch {
-      /* ignore */
-    }
-  };
-
-  const onCarouselPointerMove = (e) => {
-    const el = carouselRef.current;
-    const d = dragRef.current;
-    if (!el || !d || e.pointerId !== d.pointerId) return;
-    el.scrollLeft = d.startScroll - (e.clientX - d.startX);
-  };
-
-  const endCarouselDrag = (e) => {
-    const el = carouselRef.current;
-    const d = dragRef.current;
-    if (!d || e.pointerId !== d.pointerId) return;
-    dragRef.current = null;
-    try {
-      el?.releasePointerCapture(e.pointerId);
-    } catch {
-      /* ignore */
-    }
-  };
+  }, [syncFromScroll]);
 
   return (
-    <motion.div ref={sectionRef} style={{ marginBottom: 4 }}>
+    <div style={{ marginBottom: 4 }}>
       <div
         ref={carouselRef}
-        className="project-carousel"
-      role="region"
-      aria-roledescription="carousel"
-      aria-label="Selected projects — swipe horizontally"
-      onPointerDown={onCarouselPointerDown}
-      onPointerMove={onCarouselPointerMove}
-      onPointerUp={endCarouselDrag}
-      onPointerCancel={endCarouselDrag}
-      style={{
-        overflowX: "auto",
-        overflowY: "hidden",
-        scrollSnapType: "x mandatory",
-        scrollPaddingInline: "14vw",
-        display: "flex",
-        gap: "7vw",
-        padding: "12px 12vw 20px",
-        WebkitOverflowScrolling: "touch",
-        touchAction: "pan-x",
-        overscrollBehaviorX: "contain",
-        width: "100%",
-        maxWidth: "100%",
-        minHeight: 0,
-      }}
-    >
+        className="project-carousel mobile-carousel"
+        role="region"
+        aria-roledescription="carousel"
+        aria-label="Selected projects — swipe horizontally"
+        style={{
+          display: "flex",
+          gap: 16,
+          overflowX: "auto",
+          overflowY: "hidden",
+          width: "100%",
+          maxWidth: "100%",
+          paddingBlock: "12px 20px",
+          paddingInline: "max(16px, calc((100% - min(84vw, 320px)) / 2))",
+          scrollPaddingInline: "max(16px, calc((100% - min(84vw, 320px)) / 2))",
+        }}
+      >
       {featuredProjects.map((p, i) => (
         <div
           key={p.id}
@@ -1485,8 +1319,8 @@ function MobileProjectsCarousel({
           }}
           data-idx={i}
           className={
-            hasRevealed
-              ? "mobile-carousel-card mobile-carousel-card--scroll"
+            i === activeIdx
+              ? "mobile-carousel-card mobile-carousel-card--active"
               : "mobile-carousel-card"
           }
         >
@@ -1534,13 +1368,17 @@ function MobileProjectsCarousel({
               className="mobile-carousel-dot"
               aria-label={`Go to ${p.title}`}
               onClick={() => {
-                const el = cardShellRefs.current[i];
                 const carousel = carouselRef.current;
-                if (!el || !carousel) return;
+                if (!carousel) return;
                 playClick();
-                const target =
-                  el.offsetLeft - (carousel.clientWidth - el.offsetWidth) / 2;
-                carousel.scrollTo({ left: target, behavior: "smooth" });
+                scrollCarouselToIndex(
+                  carousel,
+                  cardShellRefs.current,
+                  i,
+                  true
+                );
+                if (onActiveChange) onActiveChange(i);
+                else setInternalIdx(i);
               }}
               style={{
                 width: i === activeIdx ? 18 : 7,
@@ -1577,7 +1415,7 @@ function MobileProjectsCarousel({
       >
         Swipe for more →
       </p>
-    </motion.div>
+    </div>
   );
 }
 

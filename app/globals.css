@@ -140,6 +140,12 @@ body {
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   touch-action: pan-y;
+  overscroll-behavior-y: contain;
+  scroll-behavior: auto;
+}
+
+.mobile-journey-chapter {
+  scroll-margin-top: calc(52px + env(safe-area-inset-top, 0px));
 }
 
 .mobile-window-body {
@@ -163,18 +169,30 @@ body {
     box-shadow 0.16s ease;
 }
 
-.mobile-carousel-card {
-  flex: 0 0 52vw;
-  max-width: 260px;
-  aspect-ratio: 5 / 4;
-  scroll-snap-align: center;
-  transform-origin: center center;
-  will-change: transform, opacity;
-  contain: layout style;
+.mobile-carousel {
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x;
 }
 
-.mobile-carousel-card--scroll {
-  transition: transform 75ms linear, opacity 75ms linear;
+.mobile-carousel-card {
+  flex: 0 0 min(84vw, 320px);
+  width: min(84vw, 320px);
+  aspect-ratio: 5 / 4;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+  transform-origin: center center;
+  opacity: 0.45;
+  transition:
+    opacity 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+  contain: layout style paint;
+}
+
+.mobile-carousel-card--active {
+  opacity: 1;
 }
 
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
