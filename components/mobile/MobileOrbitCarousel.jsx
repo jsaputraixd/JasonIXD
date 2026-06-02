@@ -1,8 +1,8 @@
 "use client";
 
 import {
+  memo,
   useCallback,
-  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -45,6 +45,105 @@ function preloadCarouselImages() {
   });
 }
 
+const CarouselCard = memo(function CarouselCard({
+  project,
+  index,
+  rel,
+  metrics,
+  dragging,
+  reduceMotion,
+  isCenter,
+}) {
+  const absRel = Math.abs(rel);
+  const x = rel * metrics.spacing;
+  const opacity = isCenter ? 1 : absRel < 0.85 ? 0.72 : 0.45;
+  const scale = isCenter ? 1 : absRel < 0.85 ? 0.9 : 0.82;
+  const zIndex = 20 - Math.round(absRel * 10);
+  const heroSrc = project.thumb ?? project.caseStudyHero;
+
+  return (
+    <div
+      className={
+        isCenter
+          ? "mobile-cover-card mobile-cover-card--center"
+          : "mobile-cover-card"
+      }
+      style={{
+        width: metrics.cardW,
+        height: metrics.cardH,
+        transform: `translate3d(calc(-50% + ${x}px), -50%, 0) scale(${scale})`,
+        opacity,
+        zIndex,
+        pointerEvents: isCenter ? "auto" : "none",
+        transition:
+          dragging || reduceMotion
+            ? "none"
+            : `transform 0.32s ${EASE}, opacity 0.22s ${EASE}`,
+      }}
+    >
+      <ProjectViewLink
+        href={`/work/${project.slug}`}
+        prefetch={isCenter}
+        className="mobile-project-card"
+        aria-label={`Open case study: ${project.title}`}
+        onClick={() => playClick()}
+        style={{
+          position: "relative",
+          display: "block",
+          width: "100%",
+          height: "100%",
+          overflow: "hidden",
+          borderRadius: 3,
+          border: `1px solid rgba(255, 122, 41, ${isCenter ? 0.6 : 0.35})`,
+          boxShadow: isCenter
+            ? "0 10px 28px rgba(0, 0, 0, 0.5)"
+            : "0 6px 18px rgba(0, 0, 0, 0.4)",
+          textDecoration: "none",
+          color: "inherit",
+          WebkitTapHighlightColor: "transparent",
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: PROJECT_CARD_GRADIENTS[index % PROJECT_CARD_GRADIENTS.length],
+            viewTransitionName:
+              isCenter && !dragging
+                ? projectHeroTransitionName(project.slug)
+                : undefined,
+          }}
+        >
+          {heroSrc ? (
+            <ProjectCardHeroImage
+              src={heroSrc}
+              variant="carousel"
+              loading={absRel <= 1 ? "eager" : "lazy"}
+              fetchPriority={isCenter ? "high" : "auto"}
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+              }}
+            />
+          ) : null}
+          <div
+            aria-hidden
+            style={{
+              position: "absolute",
+              inset: 0,
+              background:
+                "linear-gradient(180deg, rgba(12,8,6,0.1) 0%, rgba(8,5,4,0.45) 100%)",
+            }}
+          />
+        </div>
+      </ProjectViewLink>
+    </div>
+  );
+});
+
 export default function MobileOrbitCarousel({
   activeIdx: controlledIdx,
   onActiveChange,
@@ -54,6 +153,8 @@ export default function MobileOrbitCarousel({
 
   const stageRef = useRef(null);
   const dragRef = useRef(null);
+  const rafRef = useRef(0);
+  const pendingDragPxRef = useRef(0);
   const [internalIdx, setInternalIdx] = useState(0);
   const [dragPx, setDragPx] = useState(0);
   const [dragging, setDragging] = useState(false);
@@ -96,6 +197,15 @@ export default function MobileOrbitCarousel({
     [count, setActiveIdx]
   );
 
+  const scheduleDragPx = useCallback((px) => {
+    pendingDragPxRef.current = px;
+    if (rafRef.current) return;
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = 0;
+      setDragPx(pendingDragPxRef.current);
+    });
+  }, []);
+
   const onPointerDown = useCallback(
     (e) => {
       if (e.pointerType === "mouse" && e.button !== 0) return;
@@ -132,15 +242,9 @@ export default function MobileOrbitCarousel({
       }
       if (d.axis !== "x") return;
 
-      setDragPx(dx);
-
-      const liveIdx = wrapIndex(
-        d.startIdx + Math.round(-dx / metrics.spacing),
-        count
-      );
-      setActiveIdx(liveIdx);
+      scheduleDragPx(dx);
     },
-    [count, metrics.spacing, setActiveIdx]
+    [scheduleDragPx]
   );
 
   const endDrag = useCallback(
@@ -149,6 +253,10 @@ export default function MobileOrbitCarousel({
       if (!d || d.pointerId !== e.pointerId) return;
       dragRef.current = null;
       setDragging(false);
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = 0;
+      }
       try {
         e.currentTarget.releasePointerCapture(e.pointerId);
       } catch {
@@ -170,17 +278,17 @@ export default function MobileOrbitCarousel({
     [count, metrics.spacing, setActiveIdx]
   );
 
-  const dragStartIdx = dragRef.current?.startIdx ?? activeIdx;
-  const centerFloat =
-    dragging && dragRef.current
-      ? dragRef.current.startIdx - dragPx / metrics.spacing
-      : activeIdx;
+  const dragStartIdx = dragging && dragRef.current ? dragRef.current.startIdx : activeIdx;
+  const centerFloat = dragStartIdx - dragPx / metrics.spacing;
+  const displayIdx = dragging
+    ? wrapIndex(dragStartIdx + Math.round(-dragPx / metrics.spacing), count)
+    : activeIdx;
 
   return (
     <div style={{ marginBottom: 4 }}>
       <div
         ref={stageRef}
-        className="mobile-cover-stage"
+        className={dragging ? "mobile-cover-stage mobile-cover-stage--dragging" : "mobile-cover-stage"}
         role="region"
         aria-roledescription="carousel"
         aria-label="Selected projects — swipe to browse"
@@ -191,96 +299,21 @@ export default function MobileOrbitCarousel({
       >
         {featuredProjects.map((p, i) => {
           const rel = relativeOffset(i, centerFloat, count);
-          const absRel = Math.abs(rel);
-          if (absRel > 1.05) return null;
+          if (Math.abs(rel) > 1.05) return null;
 
-          const isCenter = absRel < 0.35;
-          const x = rel * metrics.spacing;
-          const opacity = isCenter ? 1 : absRel < 0.85 ? 0.72 : 0.45;
-          const scale = isCenter ? 1 : absRel < 0.85 ? 0.9 : 0.82;
-          const zIndex = 20 - Math.round(absRel * 10);
+          const isCenter = Math.abs(rel) < 0.35;
 
           return (
-            <div
+            <CarouselCard
               key={p.id}
-              className={
-                isCenter
-                  ? "mobile-cover-card mobile-cover-card--center"
-                  : "mobile-cover-card"
-              }
-              style={{
-                width: metrics.cardW,
-                height: metrics.cardH,
-                transform: `translate(-50%, -50%) translateX(${x}px) scale(${scale})`,
-                opacity,
-                zIndex,
-                pointerEvents: isCenter ? "auto" : "none",
-                transition:
-                  dragging || reduceMotion
-                    ? "opacity 0.1s linear"
-                    : `transform 0.38s ${EASE}, opacity 0.28s ${EASE}`,
-              }}
-            >
-              <ProjectViewLink
-                href={`/work/${p.slug}`}
-                prefetch
-                className="mobile-project-card"
-                aria-label={`Open case study: ${p.title}`}
-                onClick={() => playClick()}
-                style={{
-                  position: "relative",
-                  display: "block",
-                  width: "100%",
-                  height: "100%",
-                  overflow: "hidden",
-                  borderRadius: 3,
-                  border: `1px solid rgba(255, 122, 41, ${isCenter ? 0.6 : 0.35})`,
-                  boxShadow: isCenter
-                    ? "0 14px 40px rgba(0, 0, 0, 0.55), 0 0 28px rgba(255, 122, 41, 0.18)"
-                    : "0 8px 24px rgba(0, 0, 0, 0.45)",
-                  textDecoration: "none",
-                  color: "inherit",
-                  WebkitTapHighlightColor: "transparent",
-                }}
-              >
-                <div
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    background:
-                      PROJECT_CARD_GRADIENTS[i % PROJECT_CARD_GRADIENTS.length],
-                    viewTransitionName: isCenter
-                      ? projectHeroTransitionName(p.slug)
-                      : undefined,
-                  }}
-                >
-                  {(p.thumb ?? p.caseStudyHero) ? (
-                    <ProjectCardHeroImage
-                      src={p.thumb ?? p.caseStudyHero}
-                      variant="carousel"
-                      loading={absRel <= 1 ? "eager" : "lazy"}
-                      fetchPriority={isCenter ? "high" : "auto"}
-                      style={{
-                        position: "absolute",
-                        inset: 0,
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                      }}
-                    />
-                  ) : null}
-                  <div
-                    aria-hidden
-                    style={{
-                      position: "absolute",
-                      inset: 0,
-                      background:
-                        "linear-gradient(180deg, rgba(12,8,6,0.1) 0%, rgba(8,5,4,0.5) 100%)",
-                    }}
-                  />
-                </div>
-              </ProjectViewLink>
-            </div>
+              project={p}
+              index={i}
+              rel={rel}
+              metrics={metrics}
+              dragging={dragging}
+              reduceMotion={reduceMotion}
+              isCenter={isCenter}
+            />
           );
         })}
       </div>
@@ -296,42 +329,19 @@ export default function MobileOrbitCarousel({
           padding: "0 16px 8px",
         }}
       >
-        <div
+        <span
           style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "flex-end",
-            gap: 2,
-            minWidth: 72,
+            fontFamily: "'VT323', monospace",
+            fontSize: 12,
+            letterSpacing: "0.28em",
+            textTransform: "uppercase",
+            color: ACCENT,
+            textShadow: "0 0 6px rgba(255, 122, 41, 0.4)",
           }}
         >
-          <span
-            style={{
-              fontFamily: "'VT323', monospace",
-              fontSize: 12,
-              letterSpacing: "0.28em",
-              textTransform: "uppercase",
-              color: ACCENT,
-              textShadow: "0 0 6px rgba(255, 122, 41, 0.4)",
-            }}
-          >
-            {String(activeIdx + 1).padStart(2, "0")} /{" "}
-            {String(count).padStart(2, "0")}
-          </span>
-          <span
-            style={{
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: 11,
-              color: "rgba(255, 220, 190, 0.75)",
-              maxWidth: 140,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {featuredProjects[activeIdx]?.title}
-          </span>
-        </div>
+          {String(displayIdx + 1).padStart(2, "0")} /{" "}
+          {String(count).padStart(2, "0")}
+        </span>
         <div style={{ display: "flex", gap: 6, alignItems: "center" }} aria-hidden>
           {featuredProjects.map((p, i) => (
             <button
@@ -360,19 +370,6 @@ export default function MobileOrbitCarousel({
           ))}
         </div>
       </div>
-      <p
-        style={{
-          margin: "0 0 4px",
-          textAlign: "center",
-          fontFamily: "'VT323', monospace",
-          fontSize: 11,
-          letterSpacing: "0.22em",
-          textTransform: "uppercase",
-          color: "rgba(255, 180, 112, 0.55)",
-        }}
-      >
-        Swipe →
-      </p>
     </div>
   );
 }

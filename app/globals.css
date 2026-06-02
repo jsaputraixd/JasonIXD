@@ -189,6 +189,10 @@ body {
   position: absolute;
   left: 50%;
   top: 50%;
+  contain: layout style paint;
+}
+
+.mobile-cover-stage--dragging .mobile-cover-card {
   will-change: transform, opacity;
 }
 

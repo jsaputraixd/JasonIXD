@@ -52,7 +52,7 @@ const ACCENT_DIM = "#FFB570";
 
 const MOBILE_BLOCK_GAP = 40;
 const MOBILE_CARD_INSET = 16;
-const MOBILE_DOCK_HEIGHT = 66;
+const MOBILE_DOCK_HEIGHT = 46;
 
 const MOBILE_NAV_SECTIONS = [
   {
@@ -339,8 +339,6 @@ function MobileOpenForWorkStrip() {
 function MobileDockNav({ scrollRoot, activeId, visible }) {
   const reduceMotion = useReducedMotion();
   const [pulseWork, setPulseWork] = useState(false);
-  const activeMeta =
-    MOBILE_NAV_SECTIONS.find((s) => s.id === activeId) ?? MOBILE_NAV_SECTIONS[0];
   const activeIndex = Math.max(
     0,
     MOBILE_NAV_SECTIONS.findIndex((s) => s.id === activeId)
@@ -395,7 +393,7 @@ function MobileDockNav({ scrollRoot, activeId, visible }) {
             display: "flex",
             flexDirection: "column",
             gap: 5,
-            padding: "5px 4px 6px",
+            padding: "5px 4px 5px",
             borderRadius: 3,
             border: "1px solid rgba(255, 122, 41, 0.35)",
             background: "rgba(10, 6, 4, 0.88)",
@@ -461,16 +459,6 @@ function MobileDockNav({ scrollRoot, activeId, visible }) {
           </div>
 
           <div
-            className="mobile-dock-context"
-            aria-live="polite"
-            aria-atomic="true"
-            key={activeMeta.id}
-          >
-            <span className="mobile-dock-context__path">{activeMeta.path}</span>
-            <span className="mobile-dock-context__hint">{activeMeta.hint}</span>
-          </div>
-
-          <div
             className="mobile-dock-segments"
             aria-hidden
             style={{
@@ -520,7 +508,7 @@ function useMobileSectionSpy(scrollRoot, enabled) {
     if (!root) return;
 
     let raf = 0;
-    const markerOffset = MOBILE_DOCK_HEIGHT + 36;
+    const markerOffset = MOBILE_DOCK_HEIGHT + 16;
 
     const update = () => {
       raf = 0;
