@@ -7,23 +7,20 @@ const nextConfig = {
     if (dev) {
       const prev = config.watchOptions?.ignored;
       const prevList = Array.isArray(prev)
-        ? prev.filter(
-            (item) =>
-              (typeof item === "string" && item.length > 0) ||
-              item instanceof RegExp
-          )
-        : typeof prev === "string" && prev.length > 0
+        ? prev
+        : typeof prev === "string"
           ? [prev]
-          : prev instanceof RegExp
-            ? [prev]
-            : [];
+          : [];
+      // Webpack 5 watchOptions.ignored: non-empty glob strings only (no "", RegExp, or functions).
+      const ignored = [
+        ...prevList,
+        "**/public/images/**",
+        "**/public/videos/**",
+      ].filter((item) => typeof item === "string" && item.length > 0);
+
       config.watchOptions = {
         ...config.watchOptions,
-        ignored: [
-          ...prevList,
-          "**/public/images/**",
-          "**/public/videos/**",
-        ],
+        ignored,
       };
     }
     return config;

@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { projectCardThumbSrc } from "@/lib/projectMedia";
+import { projectCardThumbSrc, projectCarouselThumbSrc } from "@/lib/projectMedia";
 import { DESKTOP_PROJECT_CARD_ASPECT } from "@/lib/projectDesktopCards";
+import { projectCardMeta } from "@/lib/projectCardMeta";
 
 export const PROJECT_CARD_GRADIENTS = [
   "linear-gradient(135deg, #4a1f0a 0%, #1a0a05 60%, #0a0505 100%)",
@@ -14,12 +15,24 @@ export const PROJECT_CARD_GRADIENTS = [
   "linear-gradient(135deg, #1a3040 0%, #0a1520 60%, #0a0505 100%)",
 ];
 
-export function ProjectCardHeroImage({ src, style, loading = "lazy" }) {
-  const [displaySrc, setDisplaySrc] = useState(() => projectCardThumbSrc(src));
+export function ProjectCardHeroImage({
+  src,
+  style,
+  loading = "lazy",
+  fetchPriority,
+  variant = "card",
+}) {
+  const [displaySrc, setDisplaySrc] = useState(() =>
+    variant === "carousel" ? projectCarouselThumbSrc(src) : projectCardThumbSrc(src)
+  );
 
   useEffect(() => {
-    setDisplaySrc(projectCardThumbSrc(src));
-  }, [src]);
+    setDisplaySrc(
+      variant === "carousel"
+        ? projectCarouselThumbSrc(src)
+        : projectCardThumbSrc(src)
+    );
+  }, [src, variant]);
 
   return (
     /* eslint-disable-next-line @next/next/no-img-element */
@@ -29,6 +42,7 @@ export function ProjectCardHeroImage({ src, style, loading = "lazy" }) {
       aria-hidden
       loading={loading}
       decoding="async"
+      fetchPriority={fetchPriority}
       style={style}
       onError={() => {
         const fallback = encodeURI(src);
@@ -53,6 +67,7 @@ export default function ProjectFlipCard({
     frameHeight ?? Math.round(innerW / (aspectRatio ?? DESKTOP_PROJECT_CARD_ASPECT));
 
   const heroSrc = project.thumb ?? project.caseStudyHero ?? null;
+  const { category, role, timeline } = projectCardMeta(project);
 
   return (
     <Link
@@ -131,9 +146,17 @@ export default function ProjectFlipCard({
           />
         </div>
 
-        <div className="project-card-caption" aria-hidden="true">
+        <div className="project-card-caption">
           <p className="project-card-caption__title">{project.title}</p>
           <p className="project-card-caption__tagline">{project.tagline}</p>
+          {(category || timeline || role) ? (
+            <p className="project-card-caption__meta">
+              {[category, timeline].filter(Boolean).join(" · ")}
+              {role ? (
+                <span className="project-card-caption__meta-role">{role}</span>
+              ) : null}
+            </p>
+          ) : null}
           <span className="project-card-caption__cta">Case study →</span>
         </div>
       </div>

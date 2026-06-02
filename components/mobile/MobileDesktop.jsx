@@ -26,6 +26,7 @@ import {
   PROJECT_CARD_GRADIENTS as PROJECT_GRADIENTS,
   ProjectCardHeroImage,
 } from "@/components/ProjectFlipCard";
+import MobileOrbitCarousel from "@/components/mobile/MobileOrbitCarousel";
 import WelcomeAsciiPortrait from "@/components/WelcomeAsciiPortrait";
 import {
   TypedLine,
@@ -51,15 +52,45 @@ const ACCENT_DIM = "#FFB570";
 
 const MOBILE_BLOCK_GAP = 40;
 const MOBILE_CARD_INSET = 16;
-const MOBILE_DOCK_HEIGHT = 44;
+const MOBILE_DOCK_HEIGHT = 66;
 
 const MOBILE_NAV_SECTIONS = [
-  { id: "mobile-about", label: "About" },
-  { id: "mobile-work", label: "Work" },
-  { id: "mobile-skills", label: "Skills" },
-  { id: "mobile-more-projects", label: "Archive" },
-  { id: "mobile-more", label: "Art" },
-  { id: "mobile-contact", label: "Contact" },
+  {
+    id: "mobile-about",
+    label: "About",
+    path: "~/me.txt",
+    hint: "Bio & open for work",
+  },
+  {
+    id: "mobile-work",
+    label: "Work",
+    path: "~/work/",
+    hint: "Featured projects · swipe carousel",
+  },
+  {
+    id: "mobile-skills",
+    label: "Skills",
+    path: "~/skills.log",
+    hint: "Tap a node on the globe",
+  },
+  {
+    id: "mobile-more-projects",
+    label: "Archive",
+    path: "~/archive/",
+    hint: "More case studies",
+  },
+  {
+    id: "mobile-more",
+    label: "Art",
+    path: "~/other/",
+    hint: "Illustration, photo & motion",
+  },
+  {
+    id: "mobile-contact",
+    label: "Contact",
+    path: "~/contact.msg",
+    hint: "Email & social links",
+  },
 ];
 
 function MobileJourneyChapter({
@@ -84,7 +115,7 @@ function MobileWorkSection({ scrollRoot }) {
   return (
     <div className="mobile-work-section" style={{ position: "relative" }}>
       <MobileScrollReveal scrollRoot={scrollRoot} variant="up" delay={0.04}>
-        <MobileProjectsCarousel
+        <MobileOrbitCarousel
           activeIdx={activeIdx}
           onActiveChange={setActiveIdx}
         />
@@ -305,46 +336,37 @@ function MobileOpenForWorkStrip() {
   );
 }
 
-function useMobileScrollProgress(scrollRoot, enabled) {
-  const [progress, setProgress] = useState(0);
+function MobileDockNav({ scrollRoot, activeId, visible }) {
+  const reduceMotion = useReducedMotion();
+  const [pulseWork, setPulseWork] = useState(false);
+  const activeMeta =
+    MOBILE_NAV_SECTIONS.find((s) => s.id === activeId) ?? MOBILE_NAV_SECTIONS[0];
+  const activeIndex = Math.max(
+    0,
+    MOBILE_NAV_SECTIONS.findIndex((s) => s.id === activeId)
+  );
 
   useEffect(() => {
-    if (!enabled) return;
-    const root = scrollRoot?.current;
-    if (!root) return;
-
-    let raf = 0;
-    const update = () => {
-      raf = 0;
-      const max = root.scrollHeight - root.clientHeight;
-      setProgress(max <= 4 ? 0 : Math.min(1, root.scrollTop / max));
-    };
-
-    const onScroll = () => {
-      if (raf) return;
-      raf = requestAnimationFrame(update);
-    };
-
-    update();
-    root.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      root.removeEventListener("scroll", onScroll);
-      if (raf) cancelAnimationFrame(raf);
-    };
-  }, [scrollRoot, enabled]);
-
-  return progress;
-}
-
-function MobileDockNav({ scrollRoot, activeId, visible }) {
-  const progress = useMobileScrollProgress(scrollRoot, visible);
-  const reduceMotion = useReducedMotion();
+    if (!visible || reduceMotion) return;
+    if (typeof sessionStorage === "undefined") return;
+    if (sessionStorage.getItem("js-os-mobile-dock-hint")) return;
+    sessionStorage.setItem("js-os-mobile-dock-hint", "1");
+    setPulseWork(true);
+    const t = setTimeout(() => setPulseWork(false), 3600);
+    return () => clearTimeout(t);
+  }, [visible, reduceMotion]);
 
   const scrollTo = (sectionId) => {
     const root = scrollRoot?.current;
     const target = document.getElementById(sectionId);
     if (!root || !target) return;
     playClick();
+    target.classList.remove("mobile-journey-chapter--nav-flash");
+    void target.offsetWidth;
+    target.classList.add("mobile-journey-chapter--nav-flash");
+    window.setTimeout(() => {
+      target.classList.remove("mobile-journey-chapter--nav-flash");
+    }, 720);
     const rootTop = root.getBoundingClientRect().top;
     const targetTop = target.getBoundingClientRect().top;
     root.scrollTo({
@@ -371,9 +393,9 @@ function MobileDockNav({ scrollRoot, activeId, visible }) {
             right: MOBILE_CARD_INSET,
             zIndex: 35,
             display: "flex",
-            gap: 4,
-            padding: 4,
-            paddingBottom: 6,
+            flexDirection: "column",
+            gap: 5,
+            padding: "5px 4px 6px",
             borderRadius: 3,
             border: "1px solid rgba(255, 122, 41, 0.35)",
             background: "rgba(10, 6, 4, 0.88)",
@@ -383,77 +405,105 @@ function MobileDockNav({ scrollRoot, activeId, visible }) {
             overflow: "hidden",
           }}
         >
-          {MOBILE_NAV_SECTIONS.map(({ id, label }) => {
-            const isActive = activeId === id;
-            return (
-              <button
-                key={id}
-                type="button"
-                className={
-                  isActive
-                    ? "mobile-dock-nav__btn mobile-dock-nav__btn--active"
-                    : "mobile-dock-nav__btn"
-                }
-                onClick={() => scrollTo(id)}
-                aria-current={isActive ? "true" : undefined}
-                style={{
-                  flex: "1 1 0",
-                  minWidth: 0,
-                  margin: 0,
-                  padding: "6px 2px",
-                  border: isActive
-                    ? "1px solid rgba(255, 122, 41, 0.65)"
-                    : "1px solid transparent",
-                  borderRadius: 2,
-                  background: isActive
-                    ? "rgba(255, 122, 41, 0.18)"
-                    : "transparent",
-                  fontFamily: "'VT323', monospace",
-                  fontSize: 11,
-                  letterSpacing: "0.14em",
-                  textTransform: "uppercase",
-                  color: isActive ? ACCENT : "rgba(255, 180, 112, 0.72)",
-                  textShadow: isActive
-                    ? "0 0 8px rgba(255, 122, 41, 0.5)"
-                    : "none",
-                  cursor: "pointer",
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                }}
-              >
-                {label}
-              </button>
-            );
-          })}
           <div
-            className="mobile-dock-progress-track"
-            aria-hidden
             style={{
-              position: "absolute",
-              left: 6,
-              right: 6,
-              bottom: 3,
-              height: 2,
-              borderRadius: 1,
-              background: "rgba(255, 122, 41, 0.14)",
-              overflow: "hidden",
+              display: "flex",
+              gap: 3,
+              width: "100%",
             }}
           >
-            <motion.div
-              className="mobile-dock-progress-fill"
-              initial={false}
-              animate={{ scaleX: progress }}
-              transition={{ duration: 0.12, ease: "linear" }}
-              style={{
-                height: "100%",
-                width: "100%",
-                transformOrigin: "left center",
-                background:
-                  "linear-gradient(90deg, rgba(255,122,41,0.55), #ff7a29)",
-                boxShadow: "0 0 10px rgba(255, 122, 41, 0.55)",
-              }}
-            />
+            {MOBILE_NAV_SECTIONS.map(({ id, label }) => {
+              const isActive = activeId === id;
+              const shouldPulse = pulseWork && id === "mobile-work";
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  className={
+                    isActive
+                      ? "mobile-dock-nav__btn mobile-dock-nav__btn--active"
+                      : shouldPulse
+                        ? "mobile-dock-nav__btn mobile-dock-nav__btn--pulse"
+                        : "mobile-dock-nav__btn"
+                  }
+                  onClick={() => scrollTo(id)}
+                  aria-current={isActive ? "true" : undefined}
+                  style={{
+                    flex: "1 1 0",
+                    minWidth: 0,
+                    margin: 0,
+                    padding: "5px 1px",
+                    border: isActive
+                      ? "1px solid rgba(255, 122, 41, 0.65)"
+                      : "1px solid transparent",
+                    borderRadius: 2,
+                    background: isActive
+                      ? "rgba(255, 122, 41, 0.18)"
+                      : "transparent",
+                    fontFamily: "'VT323', monospace",
+                    fontSize: 10,
+                    letterSpacing: "0.1em",
+                    textTransform: "uppercase",
+                    color: isActive ? ACCENT : "rgba(255, 180, 112, 0.72)",
+                    textShadow: isActive
+                      ? "0 0 8px rgba(255, 122, 41, 0.5)"
+                      : "none",
+                    cursor: "pointer",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+
+          <div
+            className="mobile-dock-context"
+            aria-live="polite"
+            aria-atomic="true"
+            key={activeMeta.id}
+          >
+            <span className="mobile-dock-context__path">{activeMeta.path}</span>
+            <span className="mobile-dock-context__hint">{activeMeta.hint}</span>
+          </div>
+
+          <div
+            className="mobile-dock-segments"
+            aria-hidden
+            style={{
+              display: "flex",
+              gap: 3,
+              width: "100%",
+              padding: "0 2px",
+            }}
+          >
+            {MOBILE_NAV_SECTIONS.map(({ id }, i) => (
+              <div
+                key={id}
+                className={
+                  i <= activeIndex
+                    ? "mobile-dock-segment mobile-dock-segment--on"
+                    : "mobile-dock-segment"
+                }
+                style={{
+                  flex: 1,
+                  height: 3,
+                  borderRadius: 1,
+                  background:
+                    i <= activeIndex
+                      ? "linear-gradient(90deg, rgba(255,122,41,0.55), #ff7a29)"
+                      : "rgba(255, 122, 41, 0.14)",
+                  boxShadow:
+                    i === activeIndex
+                      ? "0 0 10px rgba(255, 122, 41, 0.55)"
+                      : "none",
+                  transition: "background 0.25s ease, box-shadow 0.25s ease",
+                }}
+              />
+            ))}
           </div>
         </motion.nav>
       ) : null}
@@ -836,7 +886,6 @@ function MobileDesktop() {
         activeId={activeSection}
         visible={showMobileRest}
       />
-      <MobileBootReady show={showMobileRest} />
 
       <div
         ref={scrollRef}
@@ -1216,205 +1265,6 @@ function MobileWelcomeBody({ skipTyping = false, onTypingComplete }) {
           ) : null}
         </>
       ) : null}
-    </div>
-  );
-}
-
-function carouselIndexFromScroll(carousel, cards) {
-  if (!carousel || cards.length === 0) return 0;
-  const centerX = carousel.scrollLeft + carousel.clientWidth / 2;
-  let bestIdx = 0;
-  let bestDist = Infinity;
-  cards.forEach((el, i) => {
-    if (!el) return;
-    const cardCenter = el.offsetLeft + el.offsetWidth / 2;
-    const dist = Math.abs(cardCenter - centerX);
-    if (dist < bestDist) {
-      bestDist = dist;
-      bestIdx = i;
-    }
-  });
-  return bestIdx;
-}
-
-function scrollCarouselToIndex(carousel, cards, idx, smooth = true) {
-  const el = cards[idx];
-  if (!carousel || !el) return;
-  const target = el.offsetLeft - (carousel.clientWidth - el.offsetWidth) / 2;
-  carousel.scrollTo({
-    left: Math.max(0, target),
-    behavior: smooth ? "smooth" : "auto",
-  });
-}
-
-function MobileProjectsCarousel({ activeIdx: controlledIdx, onActiveChange }) {
-  const carouselRef = useRef(null);
-  const cardShellRefs = useRef([]);
-  const [internalIdx, setInternalIdx] = useState(0);
-  const activeIdx = controlledIdx ?? internalIdx;
-
-  const syncFromScroll = useCallback(() => {
-    const carousel = carouselRef.current;
-    const cards = cardShellRefs.current;
-    if (!carousel) return;
-    const bestIdx = carouselIndexFromScroll(carousel, cards);
-    if (onActiveChange) onActiveChange(bestIdx);
-    else setInternalIdx((prev) => (prev === bestIdx ? prev : bestIdx));
-  }, [onActiveChange]);
-
-  useLayoutEffect(() => {
-    const carousel = carouselRef.current;
-    const cards = cardShellRefs.current;
-    if (!carousel || !cards[0]) return;
-    scrollCarouselToIndex(carousel, cards, 0, false);
-    syncFromScroll();
-  }, [syncFromScroll]);
-
-  useEffect(() => {
-    const carousel = carouselRef.current;
-    if (!carousel) return;
-
-    let scrollEndTimer = 0;
-    const onScrollEnd = () => syncFromScroll();
-
-    const onScroll = () => {
-      window.clearTimeout(scrollEndTimer);
-      scrollEndTimer = window.setTimeout(onScrollEnd, 100);
-    };
-
-    carousel.addEventListener("scroll", onScroll, { passive: true });
-    carousel.addEventListener("scrollend", onScrollEnd);
-    return () => {
-      carousel.removeEventListener("scroll", onScroll);
-      carousel.removeEventListener("scrollend", onScrollEnd);
-      window.clearTimeout(scrollEndTimer);
-    };
-  }, [syncFromScroll]);
-
-  return (
-    <div style={{ marginBottom: 4 }}>
-      <div
-        ref={carouselRef}
-        className="project-carousel mobile-carousel"
-        role="region"
-        aria-roledescription="carousel"
-        aria-label="Selected projects — swipe horizontally"
-        style={{
-          display: "flex",
-          gap: 16,
-          overflowX: "auto",
-          overflowY: "hidden",
-          width: "100%",
-          maxWidth: "100%",
-          paddingBlock: "12px 20px",
-          paddingInline: "max(16px, calc((100% - min(84vw, 320px)) / 2))",
-          scrollPaddingInline: "max(16px, calc((100% - min(84vw, 320px)) / 2))",
-        }}
-      >
-      {featuredProjects.map((p, i) => (
-        <div
-          key={p.id}
-          ref={(el) => {
-            cardShellRefs.current[i] = el;
-          }}
-          data-idx={i}
-          className={
-            i === activeIdx
-              ? "mobile-carousel-card mobile-carousel-card--active"
-              : "mobile-carousel-card"
-          }
-        >
-          <MobileProjectCard
-            project={p}
-            gradient={PROJECT_GRADIENTS[i % PROJECT_GRADIENTS.length]}
-            isActive={i === activeIdx}
-            showOverlay={false}
-            imageLoading="eager"
-          />
-        </div>
-      ))}
-      </div>
-      <div
-        className="mobile-carousel-meta"
-        aria-live="polite"
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 12,
-          padding: "0 16px 8px",
-        }}
-      >
-        <span
-          style={{
-            fontFamily: "'VT323', monospace",
-            fontSize: 12,
-            letterSpacing: "0.28em",
-            textTransform: "uppercase",
-            color: ACCENT,
-            textShadow: "0 0 6px rgba(255, 122, 41, 0.4)",
-          }}
-        >
-          {String(activeIdx + 1).padStart(2, "0")} / {String(featuredProjects.length).padStart(2, "0")}
-        </span>
-        <motion.div
-          style={{ display: "flex", gap: 6, alignItems: "center" }}
-          aria-hidden
-        >
-          {featuredProjects.map((p, i) => (
-            <button
-              key={p.id}
-              type="button"
-              className="mobile-carousel-dot"
-              aria-label={`Go to ${p.title}`}
-              onClick={() => {
-                const carousel = carouselRef.current;
-                if (!carousel) return;
-                playClick();
-                scrollCarouselToIndex(
-                  carousel,
-                  cardShellRefs.current,
-                  i,
-                  true
-                );
-                if (onActiveChange) onActiveChange(i);
-                else setInternalIdx(i);
-              }}
-              style={{
-                width: i === activeIdx ? 18 : 7,
-                height: 7,
-                margin: 0,
-                padding: 0,
-                border: "none",
-                borderRadius: 1,
-                background:
-                  i === activeIdx
-                    ? ACCENT
-                    : "rgba(255, 122, 41, 0.28)",
-                boxShadow:
-                  i === activeIdx
-                    ? "0 0 10px rgba(255, 122, 41, 0.65)"
-                    : "none",
-                cursor: "pointer",
-                transition: "width 0.25s ease, background 0.25s ease",
-              }}
-            />
-          ))}
-        </motion.div>
-      </div>
-      <p
-        style={{
-          margin: "0 0 4px",
-          textAlign: "center",
-          fontFamily: "'VT323', monospace",
-          fontSize: 11,
-          letterSpacing: "0.22em",
-          textTransform: "uppercase",
-          color: "rgba(255, 180, 112, 0.55)",
-        }}
-      >
-        Swipe for more →
-      </p>
     </div>
   );
 }

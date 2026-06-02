@@ -169,30 +169,37 @@ body {
     box-shadow 0.16s ease;
 }
 
-.mobile-carousel {
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-x: contain;
-  touch-action: pan-x;
+.mobile-carousel-meta {
+  flex-wrap: wrap;
 }
 
-.mobile-carousel-card {
-  flex: 0 0 min(84vw, 320px);
-  width: min(84vw, 320px);
-  aspect-ratio: 5 / 4;
-  scroll-snap-align: center;
-  scroll-snap-stop: always;
-  transform-origin: center center;
-  opacity: 0.45;
+.mobile-cover-stage {
+  position: relative;
+  width: 100%;
+  height: min(62vw, 260px);
+  min-height: 220px;
+  margin: 8px 0 4px;
+  touch-action: pan-y;
+  overflow: hidden;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.mobile-cover-card {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  will-change: transform, opacity;
+}
+
+.mobile-cover-card--center {
+  z-index: 30;
+}
+
+.mobile-cover-stage .mobile-project-card {
   transition:
-    opacity 0.2s ease,
     border-color 0.2s ease,
     box-shadow 0.2s ease;
-  contain: layout style paint;
-}
-
-.mobile-carousel-card--active {
-  opacity: 1;
 }
 
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
@@ -208,6 +215,16 @@ body {
   .project-card-shell:hover .project-card-caption__cta {
     color: #ffb570;
     letter-spacing: 0.2em;
+  }
+
+  .project-card-shell:hover .project-card-caption__meta {
+    max-height: 2.8em;
+    opacity: 1;
+    margin-top: 5px;
+  }
+
+  .project-card-shell:hover .project-card-caption__meta-role {
+    -webkit-line-clamp: 2;
   }
 }
 
@@ -250,6 +267,40 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.project-card-caption__meta {
+  margin: 0;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  font-family: "DM Sans", sans-serif;
+  font-size: 10px;
+  line-height: 1.45;
+  color: rgba(255, 210, 175, 0.88);
+  transition:
+    max-height 0.22s ease,
+    opacity 0.18s ease,
+    margin-top 0.22s ease;
+}
+
+.project-card-caption__meta-role {
+  margin-top: 2px;
+  font-size: 9px;
+  line-height: 1.35;
+  color: rgba(255, 190, 140, 0.78);
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+@media (hover: none) {
+  .project-card-caption__meta {
+    max-height: 2.8em;
+    opacity: 1;
+    margin-top: 4px;
+  }
 }
 
 .project-card-caption__cta {

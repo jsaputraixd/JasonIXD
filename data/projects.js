@@ -286,6 +286,7 @@ const elearaGallery = Array.from({ length: 19 }, (_, i) => {
   const n = String(i + 1).padStart(4, "0");
   return `${EL}/Eleara_pages-to-jpg-${n}.jpg`;
 });
+/** Title slide — cards use optimized carousel URL; full res on case study. */
 const elearaHero = elearaGallery[0];
 
 /** Built at dev/build from slide JPGs → Eleara-full-deck.pdf */

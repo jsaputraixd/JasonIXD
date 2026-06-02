@@ -3,7 +3,6 @@
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import PortfolioErrorBoundary from "@/components/PortfolioErrorBoundary";
-import MobileDesktop from "@/components/mobile/MobileDesktop";
 
 const MOBILE_BREAK = 900;
 
@@ -33,6 +32,14 @@ const Desktop = dynamic(() => import("@/components/Desktop"), {
   ssr: false,
   loading: PortfolioLoading,
 });
+
+const MobileDesktop = dynamic(
+  () => import("@/components/mobile/MobileDesktop"),
+  {
+    ssr: false,
+    loading: PortfolioLoading,
+  }
+);
 
 export default function Home() {
   const [isMobile, setIsMobile] = useState(null);
