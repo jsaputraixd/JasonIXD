@@ -288,6 +288,8 @@ const elearaGallery = Array.from({ length: 19 }, (_, i) => {
 });
 /** Title slide — cards use optimized carousel URL; full res on case study. */
 const elearaHero = elearaGallery[0];
+/** 560px export for mobile carousel — source slide is 8000×4500 / ~20MB. */
+const elearaCarouselThumb = `${EL}/eleara-carousel-thumb.jpg`;
 
 /** Built at dev/build from slide JPGs → Eleara-full-deck.pdf */
 const elearaDeckPdf = {
@@ -1258,6 +1260,7 @@ export const projects = [
     tags: ["UX Design", "Product Design", "Systems Design", "Team Lead"],
     slug: "eleara",
     thumb: elearaHero,
+    mobileCarouselThumb: elearaCarouselThumb,
     caseStudyHero: elearaHero,
     caseStudyGallery: [],
     caseStudyDeckPdf: elearaDeckPdf,

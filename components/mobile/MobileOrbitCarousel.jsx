@@ -16,7 +16,7 @@ import {
   ProjectCardHeroImage,
 } from "@/components/ProjectFlipCard";
 import ProjectViewLink from "@/components/ProjectViewLink";
-import { projectCarouselThumbSrc } from "@/lib/projectMedia";
+import { projectCarouselThumbSrc, resolveProjectCarouselSrc } from "@/lib/projectMedia";
 import { projectHeroTransitionName } from "@/lib/viewTransition";
 import { playClick } from "@/lib/typingSound";
 
@@ -93,7 +93,8 @@ function preloadCarouselNeighbors(centerIdx) {
     [centerIdx, centerIdx - 1, centerIdx + 1].map((i) => wrapIndex(i, count))
   );
   slots.forEach((i) => {
-    const src = featuredProjects[i]?.thumb ?? featuredProjects[i]?.caseStudyHero;
+    const p = featuredProjects[i];
+    const src = resolveProjectCarouselSrc(p);
     if (!src) return;
     const url = projectCarouselThumbSrc(src);
     const img = new Image();
@@ -110,7 +111,7 @@ const CarouselCard = memo(function CarouselCard({
   animate,
   isCenter,
 }) {
-  const heroSrc = project.thumb ?? project.caseStudyHero;
+  const heroSrc = resolveProjectCarouselSrc(project);
   const transition = animate
     ? `transform ${MOBILE_CAROUSEL_TRANSITION_MS}ms ${MOBILE_CAROUSEL_EASE}, opacity ${MOBILE_CAROUSEL_TRANSITION_MS}ms ${MOBILE_CAROUSEL_EASE}`
     : "none";
