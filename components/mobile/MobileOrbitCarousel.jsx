@@ -3,6 +3,7 @@
 import {
   memo,
   useCallback,
+  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -165,8 +166,8 @@ const CarouselCard = memo(function CarouselCard({
             <ProjectCardHeroImage
               src={heroSrc}
               variant="carousel"
-              loading={isCenter ? "eager" : "lazy"}
-              fetchPriority={isCenter ? "high" : "low"}
+              loading="eager"
+              fetchPriority={isCenter ? "high" : "auto"}
               style={{
                 position: "absolute",
                 inset: 0,
@@ -260,8 +261,11 @@ export default function MobileOrbitCarousel({
 
   useLayoutEffect(() => {
     preloadCarouselNeighbors(activeIdx);
-    return () => window.clearTimeout(animTimerRef.current);
   }, [activeIdx]);
+
+  useEffect(() => {
+    return () => window.clearTimeout(animTimerRef.current);
+  }, []);
 
   const metrics = useMemo(() => {
     if (typeof window === "undefined") {
