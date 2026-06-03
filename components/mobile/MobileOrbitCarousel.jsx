@@ -19,11 +19,22 @@ import { projectCarouselThumbSrc } from "@/lib/projectMedia";
 import { projectHeroTransitionName } from "@/lib/viewTransition";
 import { playClick } from "@/lib/typingSound";
 
+export const MOBILE_CAROUSEL_TRANSITION_MS = 560;
+export const MOBILE_CAROUSEL_EASE_BEZIER = [0.42, 0, 0.58, 1];
+export const MOBILE_CAROUSEL_EASE = `cubic-bezier(${MOBILE_CAROUSEL_EASE_BEZIER.join(", ")})`;
+
 const ACCENT = "#FF7A29";
-const EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
+const SWIPE_THRESHOLD = 48;
 
 function wrapIndex(idx, count) {
   return ((idx % count) + count) % count;
+}
+
+export function carouselDirection(from, to, count) {
+  if (from === to) return 1;
+  const forward = (to - from + count) % count;
+  const backward = (from - to + count) % count;
+  return forward <= backward ? 1 : -1;
 }
 
 function relativeOffset(i, center, count) {
@@ -31,6 +42,61 @@ function relativeOffset(i, center, count) {
   if (d > count / 2) d -= count;
   if (d < -count / 2) d += count;
   return d;
+}
+
+function roleFromRel(rel) {
+  if (Math.abs(rel) < 0.45) return "center";
+  if (rel > 0.45 && rel < 1.55) return "right";
+  if (rel < -0.45 && rel > -1.55) return "left";
+  if (Math.abs(rel) >= 1.45) return "back";
+  return null;
+}
+
+function layoutForRole(role, metrics, dragOffsetX = 0) {
+  const { stageW, cardW, cardH } = metrics;
+  const layouts = {
+    center: {
+      x: dragOffsetX,
+      y: 0,
+      scale: 1,
+      blur: 0,
+      opacity: 1,
+      z: 20,
+      w: cardW,
+      h: cardH,
+    },
+    left: {
+      x: -stageW * 0.34 + dragOffsetX * 0.25,
+      y: 16,
+      scale: 0.5,
+      blur: 2,
+      opacity: 0.88,
+      z: 10,
+      w: cardW * 0.56,
+      h: cardH * 0.56,
+    },
+    right: {
+      x: stageW * 0.34 + dragOffsetX * 0.25,
+      y: 16,
+      scale: 0.5,
+      blur: 2,
+      opacity: 0.88,
+      z: 10,
+      w: cardW * 0.56,
+      h: cardH * 0.56,
+    },
+    back: {
+      x: dragOffsetX * 0.12,
+      y: 26,
+      scale: 0.42,
+      blur: 4,
+      opacity: 0.4,
+      z: 5,
+      w: cardW * 0.48,
+      h: cardH * 0.46,
+    },
+  };
+  return layouts[role];
 }
 
 function preloadCarouselImages() {
@@ -48,18 +114,14 @@ function preloadCarouselImages() {
 const CarouselCard = memo(function CarouselCard({
   project,
   index,
-  rel,
-  metrics,
-  dragging,
-  reduceMotion,
+  layout,
+  animate,
   isCenter,
 }) {
-  const absRel = Math.abs(rel);
-  const x = rel * metrics.spacing;
-  const opacity = isCenter ? 1 : absRel < 0.85 ? 0.72 : 0.45;
-  const scale = isCenter ? 1 : absRel < 0.85 ? 0.9 : 0.82;
-  const zIndex = 20 - Math.round(absRel * 10);
   const heroSrc = project.thumb ?? project.caseStudyHero;
+  const transition = animate
+    ? `transform ${MOBILE_CAROUSEL_TRANSITION_MS}ms ${MOBILE_CAROUSEL_EASE}, opacity ${MOBILE_CAROUSEL_TRANSITION_MS}ms ${MOBILE_CAROUSEL_EASE}, filter ${MOBILE_CAROUSEL_TRANSITION_MS}ms ${MOBILE_CAROUSEL_EASE}`
+    : "none";
 
   return (
     <div
@@ -69,16 +131,14 @@ const CarouselCard = memo(function CarouselCard({
           : "mobile-cover-card"
       }
       style={{
-        width: metrics.cardW,
-        height: metrics.cardH,
-        transform: `translate3d(calc(-50% + ${x}px), -50%, 0) scale(${scale})`,
-        opacity,
-        zIndex,
+        width: layout.w,
+        height: layout.h,
+        transform: `translate3d(calc(-50% + ${layout.x}px), calc(-50% + ${layout.y}px), 0) scale(${layout.scale})`,
+        opacity: layout.opacity,
+        filter: layout.blur ? `blur(${layout.blur}px)` : "none",
+        zIndex: layout.z,
         pointerEvents: isCenter ? "auto" : "none",
-        transition:
-          dragging || reduceMotion
-            ? "none"
-            : `transform 0.32s ${EASE}, opacity 0.22s ${EASE}`,
+        transition,
       }}
     >
       <ProjectViewLink
@@ -94,10 +154,10 @@ const CarouselCard = memo(function CarouselCard({
           height: "100%",
           overflow: "hidden",
           borderRadius: 3,
-          border: `1px solid rgba(255, 122, 41, ${isCenter ? 0.6 : 0.35})`,
+          border: `1px solid rgba(255, 122, 41, ${isCenter ? 0.62 : 0.32})`,
           boxShadow: isCenter
-            ? "0 10px 28px rgba(0, 0, 0, 0.5)"
-            : "0 6px 18px rgba(0, 0, 0, 0.4)",
+            ? "0 12px 32px rgba(0, 0, 0, 0.52)"
+            : "0 6px 16px rgba(0, 0, 0, 0.38)",
           textDecoration: "none",
           color: "inherit",
           WebkitTapHighlightColor: "transparent",
@@ -108,17 +168,14 @@ const CarouselCard = memo(function CarouselCard({
             position: "absolute",
             inset: 0,
             background: PROJECT_CARD_GRADIENTS[index % PROJECT_CARD_GRADIENTS.length],
-            viewTransitionName:
-              isCenter && !dragging
-                ? projectHeroTransitionName(project.slug)
-                : undefined,
+            viewTransitionName: isCenter ? projectHeroTransitionName(project.slug) : undefined,
           }}
         >
           {heroSrc ? (
             <ProjectCardHeroImage
               src={heroSrc}
               variant="carousel"
-              loading={absRel <= 1 ? "eager" : "lazy"}
+              loading="eager"
               fetchPriority={isCenter ? "high" : "auto"}
               style={{
                 position: "absolute",
@@ -135,7 +192,7 @@ const CarouselCard = memo(function CarouselCard({
               position: "absolute",
               inset: 0,
               background:
-                "linear-gradient(180deg, rgba(12,8,6,0.1) 0%, rgba(8,5,4,0.45) 100%)",
+                "linear-gradient(180deg, rgba(12,8,6,0.08) 0%, rgba(8,5,4,0.42) 100%)",
             }}
           />
         </div>
@@ -143,6 +200,39 @@ const CarouselCard = memo(function CarouselCard({
     </div>
   );
 });
+
+function CarouselNavButton({ label, onClick, disabled, children }) {
+  return (
+    <button
+      type="button"
+      className="mobile-carousel-nav__btn"
+      aria-label={label}
+      disabled={disabled}
+      onClick={onClick}
+      style={{
+        width: 44,
+        height: 44,
+        margin: 0,
+        padding: 0,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: 2,
+        border: "1px solid rgba(255, 180, 112, 0.55)",
+        background: "rgba(10, 6, 4, 0.75)",
+        color: ACCENT,
+        fontFamily: "'VT323', monospace",
+        fontSize: 20,
+        lineHeight: 1,
+        cursor: disabled ? "default" : "pointer",
+        opacity: disabled ? 0.4 : 1,
+        transition: "transform 150ms ease, background-color 150ms ease",
+      }}
+    >
+      {children}
+    </button>
+  );
+}
 
 export default function MobileOrbitCarousel({
   activeIdx: controlledIdx,
@@ -153,11 +243,11 @@ export default function MobileOrbitCarousel({
 
   const stageRef = useRef(null);
   const dragRef = useRef(null);
-  const rafRef = useRef(0);
-  const pendingDragPxRef = useRef(0);
+  const animTimerRef = useRef(0);
   const [internalIdx, setInternalIdx] = useState(0);
   const [dragPx, setDragPx] = useState(0);
   const [dragging, setDragging] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   const activeIdx = controlledIdx ?? internalIdx;
 
@@ -170,50 +260,63 @@ export default function MobileOrbitCarousel({
     [count, onActiveChange]
   );
 
+  const startAnimationLock = useCallback(() => {
+    setIsAnimating(true);
+    window.clearTimeout(animTimerRef.current);
+    animTimerRef.current = window.setTimeout(() => {
+      setIsAnimating(false);
+    }, reduceMotion ? 80 : MOBILE_CAROUSEL_TRANSITION_MS);
+  }, [reduceMotion]);
+
   useLayoutEffect(() => {
     preloadCarouselImages();
+    return () => window.clearTimeout(animTimerRef.current);
   }, []);
 
   const metrics = useMemo(() => {
     if (typeof window === "undefined") {
-      return { cardW: 260, cardH: 200, spacing: 200 };
+      return { stageW: 320, cardW: 260, cardH: 208 };
     }
     const vw = window.innerWidth;
-    const cardW = Math.min(Math.round(vw * 0.72), 300);
+    const stageW = Math.min(vw - 32, 360);
+    const cardW = Math.min(Math.round(vw * 0.68), 280);
     const cardH = Math.round(cardW * 0.8);
-    return {
-      cardW,
-      cardH,
-      spacing: Math.round(cardW * 0.62),
-    };
+    return { stageW, cardW, cardH };
   }, []);
+
+  const navigate = useCallback(
+    (direction) => {
+      if (isAnimating) return;
+      playClick();
+      startAnimationLock();
+      setDragPx(0);
+      setActiveIdx(
+        direction === "next" ? activeIdx + 1 : activeIdx - 1
+      );
+    },
+    [activeIdx, isAnimating, setActiveIdx, startAnimationLock]
+  );
 
   const goToIndex = useCallback(
     (idx) => {
+      const wrapped = wrapIndex(idx, count);
+      if (isAnimating || wrapped === activeIdx) return;
       playClick();
+      startAnimationLock();
       setDragPx(0);
-      setActiveIdx(wrapIndex(idx, count));
+      setActiveIdx(wrapped);
     },
-    [count, setActiveIdx]
+    [activeIdx, count, isAnimating, setActiveIdx, startAnimationLock]
   );
-
-  const scheduleDragPx = useCallback((px) => {
-    pendingDragPxRef.current = px;
-    if (rafRef.current) return;
-    rafRef.current = requestAnimationFrame(() => {
-      rafRef.current = 0;
-      setDragPx(pendingDragPxRef.current);
-    });
-  }, []);
 
   const onPointerDown = useCallback(
     (e) => {
+      if (isAnimating) return;
       if (e.pointerType === "mouse" && e.button !== 0) return;
       dragRef.current = {
         pointerId: e.pointerId,
         startX: e.clientX,
         startY: e.clientY,
-        startIdx: activeIdx,
         axis: null,
       };
       setDragPx(0);
@@ -224,28 +327,25 @@ export default function MobileOrbitCarousel({
         /* ignore */
       }
     },
-    [activeIdx]
+    [isAnimating]
   );
 
-  const onPointerMove = useCallback(
-    (e) => {
-      const d = dragRef.current;
-      if (!d || d.pointerId !== e.pointerId) return;
+  const onPointerMove = useCallback((e) => {
+    const d = dragRef.current;
+    if (!d || d.pointerId !== e.pointerId) return;
 
-      const dx = e.clientX - d.startX;
-      const dy = e.clientY - d.startY;
+    const dx = e.clientX - d.startX;
+    const dy = e.clientY - d.startY;
 
-      if (d.axis === null) {
-        if (Math.hypot(dx, dy) < 10) return;
-        d.axis = Math.abs(dx) > Math.abs(dy) * 1.15 ? "x" : "y";
-        if (d.axis === "y") return;
-      }
-      if (d.axis !== "x") return;
+    if (d.axis === null) {
+      if (Math.hypot(dx, dy) < 10) return;
+      d.axis = Math.abs(dx) > Math.abs(dy) * 1.15 ? "x" : "y";
+      if (d.axis === "y") return;
+    }
+    if (d.axis !== "x") return;
 
-      scheduleDragPx(dx);
-    },
-    [scheduleDragPx]
-  );
+    setDragPx(dx);
+  }, []);
 
   const endDrag = useCallback(
     (e) => {
@@ -253,10 +353,6 @@ export default function MobileOrbitCarousel({
       if (!d || d.pointerId !== e.pointerId) return;
       dragRef.current = null;
       setDragging(false);
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
-        rafRef.current = 0;
-      }
       try {
         e.currentTarget.releasePointerCapture(e.pointerId);
       } catch {
@@ -268,50 +364,57 @@ export default function MobileOrbitCarousel({
       }
 
       const dx = e.clientX - d.startX;
-      const nextIdx = wrapIndex(
-        d.startIdx + Math.round(-dx / metrics.spacing),
-        count
-      );
-      setActiveIdx(nextIdx);
       setDragPx(0);
+      if (Math.abs(dx) >= SWIPE_THRESHOLD) {
+        navigate(dx < 0 ? "next" : "prev");
+      }
     },
-    [count, metrics.spacing, setActiveIdx]
+    [navigate]
   );
 
-  const dragStartIdx = dragging && dragRef.current ? dragRef.current.startIdx : activeIdx;
-  const centerFloat = dragStartIdx - dragPx / metrics.spacing;
-  const displayIdx = dragging
-    ? wrapIndex(dragStartIdx + Math.round(-dragPx / metrics.spacing), count)
-    : activeIdx;
+  const centerFloat = activeIdx - dragPx / (metrics.stageW * 0.45);
+  const animate = !dragging && !reduceMotion;
 
   return (
     <div style={{ marginBottom: 4 }}>
       <div
         ref={stageRef}
-        className={dragging ? "mobile-cover-stage mobile-cover-stage--dragging" : "mobile-cover-stage"}
+        className={
+          dragging
+            ? "mobile-cover-stage mobile-cover-stage--dragging"
+            : "mobile-cover-stage"
+        }
         role="region"
         aria-roledescription="carousel"
-        aria-label="Selected projects — swipe to browse"
+        aria-label="Selected projects — swipe or use arrows"
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={endDrag}
         onPointerCancel={endDrag}
       >
+        <div className="mobile-cover-watermark" aria-hidden>
+          WORK
+        </div>
+
         {featuredProjects.map((p, i) => {
           const rel = relativeOffset(i, centerFloat, count);
-          if (Math.abs(rel) > 1.05) return null;
+          const role = roleFromRel(rel);
+          if (!role) return null;
 
-          const isCenter = Math.abs(rel) < 0.35;
+          const layout = layoutForRole(
+            role,
+            metrics,
+            dragging ? dragPx : 0
+          );
+          const isCenter = role === "center";
 
           return (
             <CarouselCard
               key={p.id}
               project={p}
               index={i}
-              rel={rel}
-              metrics={metrics}
-              dragging={dragging}
-              reduceMotion={reduceMotion}
+              layout={layout}
+              animate={animate}
               isCenter={isCenter}
             />
           );
@@ -325,50 +428,77 @@ export default function MobileOrbitCarousel({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          gap: 12,
-          padding: "0 16px 8px",
+          gap: 10,
+          padding: "4px 12px 8px",
         }}
       >
-        <span
+        <CarouselNavButton
+          label="Previous project"
+          disabled={isAnimating}
+          onClick={() => navigate("prev")}
+        >
+          ◀
+        </CarouselNavButton>
+
+        <div
           style={{
-            fontFamily: "'VT323', monospace",
-            fontSize: 12,
-            letterSpacing: "0.28em",
-            textTransform: "uppercase",
-            color: ACCENT,
-            textShadow: "0 0 6px rgba(255, 122, 41, 0.4)",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 6,
+            minWidth: 88,
           }}
         >
-          {String(displayIdx + 1).padStart(2, "0")} /{" "}
-          {String(count).padStart(2, "0")}
-        </span>
-        <div style={{ display: "flex", gap: 6, alignItems: "center" }} aria-hidden>
-          {featuredProjects.map((p, i) => (
-            <button
-              key={p.id}
-              type="button"
-              className="mobile-carousel-dot"
-              aria-label={`Go to ${p.title}`}
-              onClick={() => goToIndex(i)}
-              style={{
-                width: i === activeIdx ? 18 : 7,
-                height: 7,
-                margin: 0,
-                padding: 0,
-                border: "none",
-                borderRadius: 1,
-                background:
-                  i === activeIdx ? ACCENT : "rgba(255, 122, 41, 0.28)",
-                boxShadow:
-                  i === activeIdx
-                    ? "0 0 10px rgba(255, 122, 41, 0.65)"
-                    : "none",
-                cursor: "pointer",
-                transition: "width 0.2s ease, background 0.2s ease",
-              }}
-            />
-          ))}
+          <span
+            style={{
+              fontFamily: "'VT323', monospace",
+              fontSize: 12,
+              letterSpacing: "0.28em",
+              textTransform: "uppercase",
+              color: ACCENT,
+              textShadow: "0 0 6px rgba(255, 122, 41, 0.4)",
+            }}
+          >
+            {String(activeIdx + 1).padStart(2, "0")} /{" "}
+            {String(count).padStart(2, "0")}
+          </span>
+          <div style={{ display: "flex", gap: 6, alignItems: "center" }} aria-hidden>
+            {featuredProjects.map((p, i) => (
+              <button
+                key={p.id}
+                type="button"
+                className="mobile-carousel-dot"
+                aria-label={`Go to ${p.title}`}
+                disabled={isAnimating}
+                onClick={() => goToIndex(i)}
+                style={{
+                  width: i === activeIdx ? 18 : 7,
+                  height: 7,
+                  margin: 0,
+                  padding: 0,
+                  border: "none",
+                  borderRadius: 1,
+                  background:
+                    i === activeIdx ? ACCENT : "rgba(255, 122, 41, 0.28)",
+                  boxShadow:
+                    i === activeIdx
+                      ? "0 0 10px rgba(255, 122, 41, 0.65)"
+                      : "none",
+                  cursor: isAnimating ? "default" : "pointer",
+                  transition: "width 0.2s ease, background 0.2s ease",
+                }}
+              />
+            ))}
+          </div>
         </div>
+
+        <CarouselNavButton
+          label="Next project"
+          disabled={isAnimating}
+          onClick={() => navigate("next")}
+        >
+          ▶
+        </CarouselNavButton>
       </div>
     </div>
   );

@@ -1269,7 +1269,7 @@ export const projects = [
     category: "Product Design",
     tagline: "Try new hobbies without commitment.",
     description:
-      "Kits! needed a system that allowed people to easily try new hobbies without committing to expensive equipment purchases. Existing hobby entry points require buying tools upfront, creating a barrier for casual experimentation. I designed a kiosk-based sharing platform and mobile interface that lets users borrow or lend curated hobby kits — lowering the cost of entry while encouraging community participation and discovery of new activities.",
+      "A kiosk and app for sharing curated hobby kits — borrow gear to try new activities without buying in upfront.",
     tags: ["Product Design", "UX Design"],
     slug: "kits",
     thumb: kitsHero,

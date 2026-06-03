@@ -1,7 +1,11 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import ProjectViewLink from "@/components/ProjectViewLink";
+import {
+  MOBILE_CAROUSEL_EASE_BEZIER,
+  MOBILE_CAROUSEL_TRANSITION_MS,
+} from "@/components/mobile/MobileOrbitCarousel";
 import { projectTitleTransitionName } from "@/lib/viewTransition";
 
 const ACCENT = "#FF7A29";
@@ -170,18 +174,60 @@ export default function ProjectPreviewPane({
   return <div style={shellStyle}>{inner}</div>;
 }
 
-export function MobileProjectPreviewPanel({ project }) {
+export function MobileProjectPreviewPanel({ project, direction = 1 }) {
+  const reduceMotion = useReducedMotion();
+
+  const transition = {
+    duration: reduceMotion ? 0.16 : MOBILE_CAROUSEL_TRANSITION_MS / 1000,
+    ease: MOBILE_CAROUSEL_EASE_BEZIER,
+  };
+
+  const flipVariants = {
+    enter: (dir) => ({
+      opacity: 0,
+      rotateY: dir > 0 ? 78 : -78,
+      x: dir > 0 ? 40 : -40,
+      scale: 0.93,
+      zIndex: 1,
+    }),
+    center: {
+      opacity: 1,
+      rotateY: 0,
+      x: 0,
+      scale: 1,
+      zIndex: 2,
+    },
+    exit: (dir) => ({
+      opacity: 0,
+      rotateY: dir > 0 ? -78 : 78,
+      x: dir > 0 ? -40 : 40,
+      scale: 0.93,
+      zIndex: 0,
+    }),
+  };
+
+  const fadeVariants = {
+    enter: { opacity: 0, scale: 0.98 },
+    center: { opacity: 1, scale: 1, zIndex: 2 },
+    exit: { opacity: 0, scale: 0.98, zIndex: 0 },
+  };
+
   return (
-    <AnimatePresence mode="sync" initial={false}>
-      <motion.div
-        key={project.slug}
-        initial={{ opacity: 0.72 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0.72 }}
-        transition={{ duration: 0.14, ease: EASE }}
-      >
-        <ProjectPreviewPane project={project} variant="mobile" />
-      </motion.div>
-    </AnimatePresence>
+    <div className="mobile-project-preview-stage">
+      <AnimatePresence initial={false} custom={direction} mode="sync">
+        <motion.div
+          key={project.slug}
+          custom={direction}
+          variants={reduceMotion ? fadeVariants : flipVariants}
+          initial="enter"
+          animate="center"
+          exit="exit"
+          transition={transition}
+          className="mobile-project-preview-flip"
+        >
+          <ProjectPreviewPane project={project} variant="mobile" />
+        </motion.div>
+      </AnimatePresence>
+    </div>
   );
 }

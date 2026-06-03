@@ -26,7 +26,11 @@ import {
   PROJECT_CARD_GRADIENTS as PROJECT_GRADIENTS,
   ProjectCardHeroImage,
 } from "@/components/ProjectFlipCard";
-import MobileOrbitCarousel from "@/components/mobile/MobileOrbitCarousel";
+import MobileOrbitCarousel, {
+  MOBILE_CAROUSEL_EASE,
+  MOBILE_CAROUSEL_TRANSITION_MS,
+  carouselDirection,
+} from "@/components/mobile/MobileOrbitCarousel";
 import WelcomeAsciiPortrait from "@/components/WelcomeAsciiPortrait";
 import {
   TypedLine,
@@ -53,14 +57,69 @@ const ACCENT_DIM = "#FFB570";
 const MOBILE_BLOCK_GAP = 40;
 const MOBILE_CARD_INSET = 16;
 const MOBILE_DOCK_HEIGHT = 46;
+/** Space below the fixed dock nav where section titles should land. */
+const MOBILE_NAV_CLEARANCE_FALLBACK = MOBILE_DOCK_HEIGHT + 24;
+
+function getMobileNavClearance(root) {
+  const nav = root?.parentElement?.querySelector(".mobile-dock-nav");
+  if (!nav) return MOBILE_NAV_CLEARANCE_FALLBACK;
+  const rootRect = root.getBoundingClientRect();
+  const navRect = nav.getBoundingClientRect();
+  return Math.max(56, Math.round(navRect.bottom - rootRect.top + 10));
+}
+
+function getSectionScrollTarget(root, element) {
+  const clearance = getMobileNavClearance(root);
+  const rootRect = root.getBoundingClientRect();
+  const elRect = element.getBoundingClientRect();
+  const desired = root.scrollTop + (elRect.top - rootRect.top) - clearance;
+  const maxScroll = Math.max(0, root.scrollHeight - root.clientHeight);
+  return Math.min(Math.max(0, desired), maxScroll);
+}
+
+function scrollMobileSection(root, sectionId) {
+  const target = document.getElementById(sectionId);
+  if (!root || !target) return false;
+  const top = getSectionScrollTarget(root, target);
+  root.scrollTo({ top, behavior: "smooth" });
+  return true;
+}
+
+function useMobileScrollEndSpacer(scrollRoot, spacerRef, enabled) {
+  useLayoutEffect(() => {
+    if (!enabled) return;
+    const root = scrollRoot?.current;
+    const spacer = spacerRef?.current;
+    if (!root || !spacer) return;
+
+    const sync = () => {
+      const lastSection = MOBILE_NAV_SECTIONS[MOBILE_NAV_SECTIONS.length - 1];
+      const last = lastSection ? document.getElementById(lastSection.id) : null;
+      if (!last) return;
+
+      spacer.style.height = "0px";
+      const neededScroll = getSectionScrollTarget(root, last);
+      const currentMax = Math.max(0, root.scrollHeight - root.clientHeight);
+      const deficit = neededScroll - currentMax;
+      spacer.style.height = `${Math.max(32, Math.ceil(deficit + 48))}px`;
+    };
+
+    sync();
+    const ro = new ResizeObserver(sync);
+    ro.observe(root);
+    for (const { id } of MOBILE_NAV_SECTIONS) {
+      const el = document.getElementById(id);
+      if (el) ro.observe(el);
+    }
+    window.addEventListener("resize", sync);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", sync);
+    };
+  }, [scrollRoot, spacerRef, enabled]);
+}
 
 const MOBILE_NAV_SECTIONS = [
-  {
-    id: "mobile-about",
-    label: "About",
-    path: "~/me.txt",
-    hint: "Bio & open for work",
-  },
   {
     id: "mobile-work",
     label: "Work",
@@ -86,6 +145,12 @@ const MOBILE_NAV_SECTIONS = [
     hint: "Illustration, photo & motion",
   },
   {
+    id: "mobile-about",
+    label: "About",
+    path: "~/me.txt",
+    hint: "Bio & open for work",
+  },
+  {
     id: "mobile-contact",
     label: "Contact",
     path: "~/contact.msg",
@@ -108,29 +173,60 @@ function MobileJourneyChapter({
   );
 }
 
+const MOBILE_WORK_TINTS = [
+  "rgba(255, 122, 41, 0.14)",
+  "rgba(255, 105, 48, 0.11)",
+  "rgba(255, 145, 55, 0.12)",
+  "rgba(120, 90, 200, 0.1)",
+];
+
 function MobileWorkSection({ scrollRoot }) {
+  const count = featuredProjects.length;
+  const prevIdxRef = useRef(0);
   const [activeIdx, setActiveIdx] = useState(0);
+  const [flipDir, setFlipDir] = useState(1);
   const project = featuredProjects[activeIdx] ?? featuredProjects[0];
+  const workTint = MOBILE_WORK_TINTS[activeIdx % MOBILE_WORK_TINTS.length];
+
+  const handleActiveChange = useCallback(
+    (idx) => {
+      const next = ((idx % count) + count) % count;
+      setFlipDir(carouselDirection(prevIdxRef.current, next, count));
+      prevIdxRef.current = next;
+      setActiveIdx(next);
+    },
+    [count]
+  );
 
   return (
-    <div className="mobile-work-section" style={{ position: "relative" }}>
+    <div
+      className="mobile-work-section"
+      style={{
+        position: "relative",
+        margin: `0 ${MOBILE_CARD_INSET}px`,
+        padding: "8px 0 4px",
+        borderRadius: 3,
+        transition: `background ${MOBILE_CAROUSEL_TRANSITION_MS}ms ${MOBILE_CAROUSEL_EASE}`,
+        background: `linear-gradient(165deg, ${workTint} 0%, transparent 58%)`,
+      }}
+    >
       <MobileScrollReveal scrollRoot={scrollRoot} variant="up" delay={0.04}>
         <MobileOrbitCarousel
           activeIdx={activeIdx}
-          onActiveChange={setActiveIdx}
+          onActiveChange={handleActiveChange}
         />
       </MobileScrollReveal>
       <MobileScrollReveal scrollRoot={scrollRoot} variant="fade" delay={0.06}>
         <div
           style={{
-            margin: `8px ${MOBILE_CARD_INSET}px 0`,
+            margin: "8px 0 0",
             position: "relative",
             zIndex: 2,
           }}
           aria-live="polite"
           aria-atomic="true"
         >
-          <MobileProjectPreviewPanel project={project} />
+          <MobileProjectPreviewPanel project={project} direction={flipDir} />
         </div>
       </MobileScrollReveal>
     </div>
@@ -365,12 +461,7 @@ function MobileDockNav({ scrollRoot, activeId, visible }) {
     window.setTimeout(() => {
       target.classList.remove("mobile-journey-chapter--nav-flash");
     }, 720);
-    const rootTop = root.getBoundingClientRect().top;
-    const targetTop = target.getBoundingClientRect().top;
-    root.scrollTo({
-      top: root.scrollTop + targetTop - rootTop - (MOBILE_DOCK_HEIGHT + 20),
-      behavior: "smooth",
-    });
+    scrollMobileSection(root, sectionId);
   };
 
   return (
@@ -499,6 +590,32 @@ function MobileDockNav({ scrollRoot, activeId, visible }) {
   );
 }
 
+/** How far above the scroll viewport bottom a section top must be before it registers. */
+const MOBILE_SECTION_PEEK_INSET = 88;
+
+function getActiveSectionFromBottomPeek(root) {
+  const rootRect = root.getBoundingClientRect();
+  const peekLine = rootRect.bottom - MOBILE_SECTION_PEEK_INSET;
+  const maxScroll = Math.max(0, root.scrollHeight - root.clientHeight);
+
+  if (root.scrollTop >= maxScroll - 6) {
+    return (
+      MOBILE_NAV_SECTIONS[MOBILE_NAV_SECTIONS.length - 1]?.id ??
+      MOBILE_NAV_SECTIONS[0].id
+    );
+  }
+
+  let activeId = MOBILE_NAV_SECTIONS[0].id;
+  for (const { id } of MOBILE_NAV_SECTIONS) {
+    const el = document.getElementById(id);
+    if (!el) continue;
+    if (el.getBoundingClientRect().top <= peekLine) {
+      activeId = id;
+    }
+  }
+  return activeId;
+}
+
 function useMobileSectionSpy(scrollRoot, enabled) {
   const [activeId, setActiveId] = useState(MOBILE_NAV_SECTIONS[0].id);
 
@@ -508,39 +625,10 @@ function useMobileSectionSpy(scrollRoot, enabled) {
     if (!root) return;
 
     let raf = 0;
-    const markerOffset = MOBILE_DOCK_HEIGHT + 16;
 
     const update = () => {
       raf = 0;
-      const rootTop = root.getBoundingClientRect().top;
-      const markerY = rootTop + markerOffset;
-
-      let bestId = MOBILE_NAV_SECTIONS[0].id;
-      let bestTop = -Infinity;
-
-      for (const { id } of MOBILE_NAV_SECTIONS) {
-        const el = document.getElementById(id);
-        if (!el) continue;
-        const top = el.getBoundingClientRect().top;
-        if (top <= markerY + 8 && top > bestTop) {
-          bestTop = top;
-          bestId = id;
-        }
-      }
-
-      if (bestTop === -Infinity) {
-        let nearest = Infinity;
-        for (const { id } of MOBILE_NAV_SECTIONS) {
-          const el = document.getElementById(id);
-          if (!el) continue;
-          const dist = Math.abs(el.getBoundingClientRect().top - markerY);
-          if (dist < nearest) {
-            nearest = dist;
-            bestId = id;
-          }
-        }
-      }
-
+      const bestId = getActiveSectionFromBottomPeek(root);
       setActiveId((prev) => (prev === bestId ? prev : bestId));
     };
 
@@ -865,7 +953,9 @@ function MobileDesktop() {
   const showMobileRest = phase === "dashboard";
   const skipWelcomeTyping = phase === "dashboard";
   const scrollRef = useRef(null);
+  const scrollEndSpacerRef = useRef(null);
   const activeSection = useMobileSectionSpy(scrollRef, showMobileRest);
+  useMobileScrollEndSpacer(scrollRef, scrollEndSpacerRef, showMobileRest);
 
   return (
     <div className="mobile-os">
@@ -896,23 +986,6 @@ function MobileDesktop() {
 
         {showMobileRest ? (
           <>
-            <MobileJourneyChapter scrollRoot={scrollRef} sectionId="mobile-about">
-              <MobileJourneySectionLabel scrollRoot={scrollRef} skipTyping={skipWelcomeTyping}>
-                ▢ About
-              </MobileJourneySectionLabel>
-              <MobileCard title="me.txt" titleUppercase={false}>
-                <MobileMeTxtJourney
-                  scrollRoot={scrollRef}
-                  skipTyping={skipWelcomeTyping}
-                />
-              </MobileCard>
-              <div style={{ marginTop: 18 }}>
-                <MobileOpenForWorkStrip />
-              </div>
-            </MobileJourneyChapter>
-
-            <MobileSectionRule />
-
             <MobileJourneyChapter
               scrollRoot={scrollRef}
               variant="right"
@@ -960,6 +1033,23 @@ function MobileDesktop() {
 
             <MobileSectionRule />
 
+            <MobileJourneyChapter scrollRoot={scrollRef} sectionId="mobile-about">
+              <MobileJourneySectionLabel scrollRoot={scrollRef} skipTyping={skipWelcomeTyping}>
+                ▢ About
+              </MobileJourneySectionLabel>
+              <MobileCard title="me.txt" titleUppercase={false}>
+                <MobileMeTxtJourney
+                  scrollRoot={scrollRef}
+                  skipTyping={skipWelcomeTyping}
+                />
+              </MobileCard>
+              <div style={{ marginTop: 18 }}>
+                <MobileOpenForWorkStrip />
+              </div>
+            </MobileJourneyChapter>
+
+            <MobileSectionRule />
+
             <MobileJourneyChapter scrollRoot={scrollRef} sectionId="mobile-contact">
               <MobileJourneySectionLabel scrollRoot={scrollRef} skipTyping={skipWelcomeTyping}>
                 ▢ Contact
@@ -971,6 +1061,12 @@ function MobileDesktop() {
                 />
               </MobileCard>
             </MobileJourneyChapter>
+
+            <div
+              ref={scrollEndSpacerRef}
+              className="mobile-scroll-end-spacer"
+              aria-hidden
+            />
           </>
         ) : null}
       </div>
