@@ -48,7 +48,6 @@ function roleFromRel(rel) {
   if (Math.abs(rel) < 0.45) return "center";
   if (rel > 0.45 && rel < 1.55) return "right";
   if (rel < -0.45 && rel > -1.55) return "left";
-  if (Math.abs(rel) >= 1.45) return "back";
   return null;
 }
 
@@ -69,8 +68,7 @@ function layoutForRole(role, metrics, dragOffsetX = 0) {
       x: -stageW * 0.34 + dragOffsetX * 0.25,
       y: 16,
       scale: 0.5,
-      blur: 2,
-      opacity: 0.88,
+      opacity: 0.72,
       z: 10,
       w: cardW * 0.56,
       h: cardH * 0.56,
@@ -79,34 +77,27 @@ function layoutForRole(role, metrics, dragOffsetX = 0) {
       x: stageW * 0.34 + dragOffsetX * 0.25,
       y: 16,
       scale: 0.5,
-      blur: 2,
-      opacity: 0.88,
+      opacity: 0.72,
       z: 10,
       w: cardW * 0.56,
       h: cardH * 0.56,
-    },
-    back: {
-      x: dragOffsetX * 0.12,
-      y: 26,
-      scale: 0.42,
-      blur: 4,
-      opacity: 0.4,
-      z: 5,
-      w: cardW * 0.48,
-      h: cardH * 0.46,
     },
   };
   return layouts[role];
 }
 
-function preloadCarouselImages() {
-  featuredProjects.forEach((p, i) => {
-    const src = p.thumb ?? p.caseStudyHero;
+function preloadCarouselNeighbors(centerIdx) {
+  const count = featuredProjects.length;
+  const slots = new Set(
+    [centerIdx, centerIdx - 1, centerIdx + 1].map((i) => wrapIndex(i, count))
+  );
+  slots.forEach((i) => {
+    const src = featuredProjects[i]?.thumb ?? featuredProjects[i]?.caseStudyHero;
     if (!src) return;
     const url = projectCarouselThumbSrc(src);
     const img = new Image();
     img.decoding = "async";
-    if (i === 0) img.fetchPriority = "high";
+    if (i === centerIdx) img.fetchPriority = "high";
     img.src = url;
   });
 }
@@ -120,7 +111,7 @@ const CarouselCard = memo(function CarouselCard({
 }) {
   const heroSrc = project.thumb ?? project.caseStudyHero;
   const transition = animate
-    ? `transform ${MOBILE_CAROUSEL_TRANSITION_MS}ms ${MOBILE_CAROUSEL_EASE}, opacity ${MOBILE_CAROUSEL_TRANSITION_MS}ms ${MOBILE_CAROUSEL_EASE}, filter ${MOBILE_CAROUSEL_TRANSITION_MS}ms ${MOBILE_CAROUSEL_EASE}`
+    ? `transform ${MOBILE_CAROUSEL_TRANSITION_MS}ms ${MOBILE_CAROUSEL_EASE}, opacity ${MOBILE_CAROUSEL_TRANSITION_MS}ms ${MOBILE_CAROUSEL_EASE}`
     : "none";
 
   return (
@@ -135,7 +126,6 @@ const CarouselCard = memo(function CarouselCard({
         height: layout.h,
         transform: `translate3d(calc(-50% + ${layout.x}px), calc(-50% + ${layout.y}px), 0) scale(${layout.scale})`,
         opacity: layout.opacity,
-        filter: layout.blur ? `blur(${layout.blur}px)` : "none",
         zIndex: layout.z,
         pointerEvents: isCenter ? "auto" : "none",
         transition,
@@ -175,8 +165,8 @@ const CarouselCard = memo(function CarouselCard({
             <ProjectCardHeroImage
               src={heroSrc}
               variant="carousel"
-              loading="eager"
-              fetchPriority={isCenter ? "high" : "auto"}
+              loading={isCenter ? "eager" : "lazy"}
+              fetchPriority={isCenter ? "high" : "low"}
               style={{
                 position: "absolute",
                 inset: 0,
@@ -269,9 +259,9 @@ export default function MobileOrbitCarousel({
   }, [reduceMotion]);
 
   useLayoutEffect(() => {
-    preloadCarouselImages();
+    preloadCarouselNeighbors(activeIdx);
     return () => window.clearTimeout(animTimerRef.current);
-  }, []);
+  }, [activeIdx]);
 
   const metrics = useMemo(() => {
     if (typeof window === "undefined") {
