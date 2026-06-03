@@ -114,6 +114,11 @@ body {
     min-height: 100dvh;
     overflow: visible;
   }
+
+  /* CRT corner caps + bezel frame — desktop-only TV illusion */
+  .crt-overlay {
+    display: none !important;
+  }
 }
 
 /* Mobile project strip — let horizontal swipes hit the carousel, not the page */

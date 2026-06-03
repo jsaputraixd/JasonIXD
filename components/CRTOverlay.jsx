@@ -9,6 +9,7 @@ const CORNER_MASK_RADIUS = BEZEL_RADIUS + 8;
 export default function CRTOverlay() {
   return (
     <div
+      className="crt-overlay"
       aria-hidden="true"
       style={{
         position: "fixed",
