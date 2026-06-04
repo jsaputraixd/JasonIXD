@@ -4,11 +4,9 @@ import GlobalBackground from "@/components/GlobalBackground";
 import CRTOverlayGate from "@/components/CRTOverlayGate";
 import LoadingOverlay from "@/components/LoadingOverlay";
 import TypingSoundInit from "@/components/TypingSoundInit";
+import { getSiteUrl } from "@/lib/siteUrl";
 
-const siteUrl =
-  (process.env.NEXT_PUBLIC_SITE_URL &&
-    process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "")) ||
-  "https://jasonixd.com";
+const siteUrl = getSiteUrl();
 
 export const metadata = {
   title: "Jason Saputra — Interaction & Visual Designer",
