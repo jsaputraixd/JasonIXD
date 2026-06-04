@@ -600,11 +600,10 @@ export default function Desktop() {
 
   const trashIconLeft = pos.trashIcon.left + iconOffsets.trashIcon.dx;
   const trashIconTop = pos.trashIcon.top + iconOffsets.trashIcon.dy;
+  const trashIconW = 76;
+  const trashIconH = 96;
   const coffeeIconW = 76;
   const coffeeIconH = Math.round(coffeeIconW * 1.26);
-  const coffeeSpawnLeft =
-    trashIconLeft + Math.round(coffeeIconW * 0.34) - Math.round(coffeeIconW / 2);
-  const coffeeSpawnTop = trashIconTop + Math.round(coffeeIconH * 0.22);
 
   const showIntroCard =
     phase === "intro-typing" ||
@@ -821,7 +820,12 @@ export default function Desktop() {
             key="coffee-reveal"
             baseLeft={pos.coffeeIcon.left}
             baseTop={pos.coffeeIcon.top}
-            spawnFrom={{ left: coffeeSpawnLeft, top: coffeeSpawnTop }}
+            binBounds={{
+              left: trashIconLeft,
+              top: trashIconTop,
+              width: trashIconW,
+              height: trashIconH,
+            }}
             width={coffeeIconW}
             height={coffeeIconH}
             stageRef={stageRef}
