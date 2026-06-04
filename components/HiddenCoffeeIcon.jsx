@@ -29,6 +29,11 @@ export default function HiddenCoffeeIcon({
   const [revealPos, setRevealPos] = useState(null);
   const [revealActive, setRevealActive] = useState(false);
   const cancelPhysicsRef = useRef(null);
+  const revealStartedRef = useRef(false);
+  const commitOffsetRef = useRef(null);
+  const onRevealCompleteRef = useRef(onRevealComplete);
+  onRevealCompleteRef.current = onRevealComplete;
+
   const { commitOffset, ...dragHandlers } = useDesktopIconDrag({
     iconId: COFFEE_ICON_ID,
     baseLeft,
@@ -41,21 +46,30 @@ export default function HiddenCoffeeIcon({
   });
 
   const drag = { commitOffset, ...dragHandlers };
+  commitOffsetRef.current = commitOffset;
 
   useLayoutEffect(() => {
-    if (!playReveal) return;
+    if (!playReveal) {
+      revealStartedRef.current = false;
+      return;
+    }
+    if (revealStartedRef.current) return;
+    revealStartedRef.current = true;
 
     cancelPhysicsRef.current?.();
 
+    const commit = commitOffsetRef.current;
+    if (!commit) return;
+
     if (reduceMotion) {
-      commitOffset({ dx: 0, dy: 0 });
+      commit({ dx: 0, dy: 0 });
       setRevealActive(false);
       setRevealPos(null);
-      onRevealComplete?.();
+      onRevealCompleteRef.current?.();
       return;
     }
 
-    commitOffset({ dx: 0, dy: 0 });
+    commit({ dx: 0, dy: 0 });
 
     const target = { left: baseLeft, top: baseTop };
     const spawn = { left: spawnFrom.left, top: spawnFrom.top };
@@ -73,13 +87,13 @@ export default function HiddenCoffeeIcon({
       bounds: { width, height, stageWidth, stageHeight },
       onFrame: setRevealPos,
       onComplete: (final) => {
-        commitOffset({
+        commitOffsetRef.current?.({
           dx: Math.round(final.left - baseLeft),
           dy: Math.round(final.top - baseTop),
         });
         setRevealActive(false);
         setRevealPos(null);
-        onRevealComplete?.();
+        onRevealCompleteRef.current?.();
       },
     });
 
@@ -94,8 +108,6 @@ export default function HiddenCoffeeIcon({
     width,
     height,
     stageRef,
-    commitOffset,
-    onRevealComplete,
   ]);
 
   const parallax = drag.isDragging || revealActive ? { x: 0, y: 0 } : parallaxShift;

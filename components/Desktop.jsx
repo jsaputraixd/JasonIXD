@@ -240,6 +240,7 @@ export default function Desktop() {
   const [otherProjectsOpen, setOtherProjectsOpen] = useState(false);
   const [coffeeSnakeOpen, setCoffeeSnakeOpen] = useState(false);
   const [coffeeRevealed, setCoffeeRevealed] = useState(false);
+  const [coffeePlayReveal, setCoffeePlayReveal] = useState(false);
   const [trashPop, setTrashPop] = useState(false);
   const [minimizedIds, setMinimizedIds] = useState([]);
   const [trashMessage, setTrashMessage] = useState(null);
@@ -249,6 +250,7 @@ export default function Desktop() {
   const [parallax, setParallax] = useState({ x: 0, y: 0 });
   const [iconOffsets, setIconOffsets] = useState(() => ({
     trashIcon: readIconOffset("trashIcon"),
+    coffeeIcon: readIconOffset("coffeeIcon"),
   }));
 
   const handleIconOffset = useCallback((id, offset) => {
@@ -390,6 +392,15 @@ export default function Desktop() {
     setCoffeeSnakeOpen(true);
   }, []);
 
+  const onCoffeeIconOffsetChange = useCallback(
+    (offset) => handleIconOffset("coffeeIcon", offset),
+    [handleIconOffset]
+  );
+
+  const onCoffeeRevealComplete = useCallback(() => {
+    setCoffeePlayReveal(false);
+  }, []);
+
   const minimizeWindow = useCallback((id) => {
     setMinimizedIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
   }, []);
@@ -490,6 +501,7 @@ export default function Desktop() {
 
     if (clickCount === 5) {
       setCoffeeRevealed(true);
+      setCoffeePlayReveal(true);
       setTrashPop(true);
       bringToFront("coffeeIcon");
       window.setTimeout(() => setTrashPop(false), 520);
@@ -588,6 +600,11 @@ export default function Desktop() {
 
   const trashIconLeft = pos.trashIcon.left + iconOffsets.trashIcon.dx;
   const trashIconTop = pos.trashIcon.top + iconOffsets.trashIcon.dy;
+  const coffeeIconW = 76;
+  const coffeeIconH = Math.round(coffeeIconW * 1.26);
+  const coffeeSpawnLeft =
+    trashIconLeft + Math.round(coffeeIconW * 0.34) - Math.round(coffeeIconW / 2);
+  const coffeeSpawnTop = trashIconTop + Math.round(coffeeIconH * 0.22);
 
   const showIntroCard =
     phase === "intro-typing" ||
@@ -802,12 +819,19 @@ export default function Desktop() {
         {showOtherWindows && coffeeRevealed ? (
           <HiddenCoffeeIcon
             key="coffee-reveal"
-            anchorLeft={trashIconLeft + pShift.trashIcon.x}
-            anchorTop={trashIconTop + pShift.trashIcon.y}
-            layoutScale={layoutScale}
-            width={76}
+            baseLeft={pos.coffeeIcon.left}
+            baseTop={pos.coffeeIcon.top}
+            spawnFrom={{ left: coffeeSpawnLeft, top: coffeeSpawnTop }}
+            width={coffeeIconW}
+            height={coffeeIconH}
+            stageRef={stageRef}
+            playReveal={coffeePlayReveal}
+            parallaxShift={pShift.coffeeIcon}
             zIndex={zOf("coffeeIcon", 18)}
             selected={coffeeSnakeOpen}
+            onFocus={() => bringToFront("coffeeIcon")}
+            onOffsetChange={onCoffeeIconOffsetChange}
+            onRevealComplete={onCoffeeRevealComplete}
             onOpen={openCoffeeSnake}
           />
         ) : null}
