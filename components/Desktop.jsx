@@ -44,7 +44,6 @@ import {
   RIGHT_RESERVE,
 } from "@/lib/desktopWindowPlacement";
 import { getProjectDesktopCards, projectGridMetrics } from "@/lib/projectDesktopCards";
-import { projectCardThumbSrc } from "@/lib/projectMedia";
 import { preloadPortfolioAssets } from "@/lib/preloadPortfolio";
 import {
   markIntroSeen,

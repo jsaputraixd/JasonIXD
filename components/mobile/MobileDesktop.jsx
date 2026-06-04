@@ -7,7 +7,6 @@ import {
   useLayoutEffect,
   useRef,
   useState,
-  memo,
 } from "react";
 import {
   AnimatePresence,
@@ -21,11 +20,6 @@ import WelcomeReadAloud from "@/components/WelcomeReadAloud";
 import OtherStuffFolder from "@/components/OtherStuffFolder";
 import OtherProjectsFolder from "@/components/OtherProjectsFolder";
 import { MobileProjectPreviewPanel } from "@/components/ProjectPreviewPane";
-import ProjectViewLink from "@/components/ProjectViewLink";
-import {
-  PROJECT_CARD_GRADIENTS as PROJECT_GRADIENTS,
-  ProjectCardHeroImage,
-} from "@/components/ProjectFlipCard";
 import MobileOrbitCarousel, {
   MOBILE_CAROUSEL_EASE,
   MOBILE_CAROUSEL_TRANSITION_MS,
@@ -50,7 +44,6 @@ import {
 } from "@/lib/introSession";
 import { playClick, playTypingClick } from "@/lib/typingSound";
 import { pickTrashMessage } from "@/lib/trashMessage";
-import { projectHeroTransitionName } from "@/lib/viewTransition";
 
 const ACCENT_DIM = "#FFB570";
 
@@ -93,15 +86,18 @@ function useMobileScrollEndSpacer(scrollRoot, spacerRef, enabled) {
     if (!root || !spacer) return;
 
     const sync = () => {
+      const spacerEl = spacerRef.current;
+      if (!spacerEl) return;
+
       const lastSection = MOBILE_NAV_SECTIONS[MOBILE_NAV_SECTIONS.length - 1];
       const last = lastSection ? document.getElementById(lastSection.id) : null;
       if (!last) return;
 
-      spacer.style.height = "0px";
+      spacerEl.style.height = "0px";
       const neededScroll = getSectionScrollTarget(root, last);
       const currentMax = Math.max(0, root.scrollHeight - root.clientHeight);
       const deficit = neededScroll - currentMax;
-      spacer.style.height = `${Math.max(32, Math.ceil(deficit + 48))}px`;
+      spacerEl.style.height = `${Math.max(32, Math.ceil(deficit + 48))}px`;
     };
 
     sync();
@@ -646,72 +642,6 @@ function useMobileSectionSpy(scrollRoot, enabled) {
   }, [scrollRoot, enabled]);
 
   return activeId;
-}
-
-function MobileProjectOverlay({ project, isActive = true, size = "card" }) {
-  const titleSize = size === "hero" ? "clamp(22px, 6vw, 30px)" : "clamp(15px, 4.2vw, 19px)";
-  const tagSize = size === "hero" ? 13 : 11;
-
-  return (
-    <motion.div
-      initial={false}
-      animate={{ opacity: isActive ? 1 : 0.88 }}
-      style={{
-        position: "absolute",
-        inset: 0,
-        zIndex: 2,
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "flex-end",
-        padding: size === "hero" ? "18px 16px 16px" : "12px 12px 11px",
-        background:
-          "linear-gradient(180deg, transparent 0%, rgba(8, 5, 4, 0.35) 35%, rgba(6, 4, 3, 0.88) 100%)",
-        pointerEvents: "none",
-      }}
-    >
-      <p
-        style={{
-          margin: 0,
-          fontFamily: "'VT323', monospace",
-          fontSize: titleSize,
-          letterSpacing: "0.12em",
-          textTransform: "uppercase",
-          color: "#fff",
-          textShadow: "0 0 14px rgba(255, 122, 41, 0.35)",
-          lineHeight: 1.1,
-        }}
-      >
-        {project.title}
-      </p>
-      <p
-        style={{
-          margin: "6px 0 0",
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: tagSize,
-          lineHeight: 1.35,
-          color: "rgba(255, 220, 190, 0.9)",
-        }}
-      >
-        {project.tagline}
-      </p>
-      <span
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 6,
-          marginTop: 10,
-          fontFamily: "'VT323', monospace",
-          fontSize: size === "hero" ? 13 : 12,
-          letterSpacing: "0.22em",
-          textTransform: "uppercase",
-          color: ACCENT,
-          textShadow: "0 0 8px rgba(255, 122, 41, 0.45)",
-        }}
-      >
-        Case study →
-      </span>
-    </motion.div>
-  );
 }
 
 function MobileRecycleDock() {
@@ -1352,97 +1282,6 @@ function MobileWelcomeBody({ skipTyping = false, onTypingComplete }) {
     </div>
   );
 }
-
-const MobileProjectCard = memo(function MobileProjectCard({
-  project,
-  gradient,
-  size = "card",
-  isActive = true,
-  showOverlay = true,
-  imageLoading = "lazy",
-}) {
-  const heroSrc = project.thumb ?? project.caseStudyHero ?? null;
-  const isHero = size === "hero";
-
-  return (
-    <ProjectViewLink
-      href={`/work/${project.slug}`}
-      prefetch
-      className={isHero ? "mobile-project-card mobile-project-card--hero" : "mobile-project-card"}
-      aria-label={`Open case study: ${project.title}`}
-      onClick={() => playClick()}
-      style={{
-        position: "relative",
-        display: "block",
-        width: "100%",
-        height: isHero ? undefined : "100%",
-        aspectRatio: isHero ? "4 / 5" : undefined,
-        maxHeight: isHero ? "min(72vh, 520px)" : undefined,
-        overflow: "hidden",
-        borderRadius: 3,
-        border: `1px solid rgba(255, 122, 41, ${isActive ? 0.55 : 0.35})`,
-        boxShadow: isActive
-          ? "0 12px 36px rgba(0, 0, 0, 0.55), 0 0 24px rgba(255, 122, 41, 0.14)"
-          : "0 8px 24px rgba(0, 0, 0, 0.5)",
-        cursor: "pointer",
-        color: "inherit",
-        textDecoration: "none",
-        WebkitTapHighlightColor: "transparent",
-        touchAction: "manipulation",
-      }}
-    >
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          background: gradient,
-          viewTransitionName: isActive
-            ? projectHeroTransitionName(project.slug)
-            : undefined,
-        }}
-      >
-        {heroSrc ? (
-          <>
-            <ProjectCardHeroImage
-              src={heroSrc}
-              loading={imageLoading}
-              style={{
-                position: "absolute",
-                inset: 0,
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-              }}
-            />
-            <div
-              aria-hidden="true"
-              style={{
-                position: "absolute",
-                inset: 0,
-                background:
-                  "linear-gradient(180deg, rgba(12, 8, 6, 0.12) 0%, rgba(8, 5, 4, 0.45) 100%)",
-                pointerEvents: "none",
-              }}
-            />
-          </>
-        ) : null}
-        <div
-          aria-hidden="true"
-          style={{
-            position: "absolute",
-            inset: 0,
-            backgroundImage:
-              "repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.045) 0px, rgba(255, 255, 255, 0.045) 1px, transparent 2px, transparent 4px)",
-            pointerEvents: "none",
-          }}
-        />
-      </div>
-      {showOverlay ? (
-        <MobileProjectOverlay project={project} isActive={isActive} size={size} />
-      ) : null}
-    </ProjectViewLink>
-  );
-});
 
 function MobileScrollTypedMailto({ scrollRoot, skipTyping = false }) {
   const ref = useRef(null);

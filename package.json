@@ -7,21 +7,17 @@
   },
   "scripts": {
     "dev": "next dev --webpack -H 127.0.0.1 -p 3000",
-    "dev:fast": "next dev --webpack -H 127.0.0.1 -p 3000",
-    "dev:webpack": "next dev --webpack -H 127.0.0.1 -p 3000",
     "serve:prod": "next start -H 127.0.0.1 -p 3000",
     "dev:clean": "rm -rf .next && next dev -H 127.0.0.1 -p 3000",
     "dev:turbo": "next dev --turbo -H 127.0.0.1 -p 3000",
     "merge-pdfs": "node scripts/merge-case-study-decks.mjs",
     "build": "next build --webpack",
-    "build:fast": "next build --webpack",
     "preview": "next build --webpack && next start -H 127.0.0.1 -p 3000",
     "start": "next start",
     "lint": "eslint ."
   },
   "dependencies": {
     "framer-motion": "^11.11.0",
-    "gsap": "^3.12.5",
     "next": "^16.2.6",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"

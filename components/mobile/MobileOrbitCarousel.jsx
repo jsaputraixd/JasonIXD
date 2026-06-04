@@ -59,7 +59,6 @@ function layoutForRole(role, metrics, dragOffsetX = 0) {
       x: dragOffsetX,
       y: 0,
       scale: 1,
-      blur: 0,
       opacity: 1,
       z: 20,
       w: cardW,

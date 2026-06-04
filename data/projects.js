@@ -46,16 +46,6 @@ function simpleGalleryCaseStudy({
 
 /** Dream Detective */
 const DD = `${P}/dream-detective`;
-const DD_PDF = `${DD}/PDF Slides`;
-
-function dreamDetectiveSlideBase(i) {
-  const n = i === 0 ? "01" : String(i + 1);
-  return `Dream Detective - ${n}`;
-}
-
-const dreamDetectiveGallery = Array.from({ length: 17 }, (_, i) => {
-  return `${DD}/${dreamDetectiveSlideBase(i)}.jpg`;
-});
 
 /** Built at dev/build from PDF Slides/*.pdf → Dream-Detective-full-deck.pdf */
 const dreamDetectiveDeckPdf = {
