@@ -1,106 +1,152 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useLayoutEffect, useRef, useState } from "react";
+import { useReducedMotion } from "framer-motion";
+import { useDesktopIconDrag } from "@/hooks/useDesktopIconDrag";
+import { runCoffeeRevealPhysics } from "@/lib/coffeeRevealPhysics";
 import { playClick } from "@/lib/typingSound";
 
-const ACCENT = "#FF7A29";
-
-/** Pop-out arc: starts inside bin → up & left → lands beside the bin (not on top). */
-function popKeyframes(scale, iconWidth = 76) {
-  const s = scale;
-  const w = iconWidth;
-  const beside = Math.round((w + 24) * s);
-  return {
-    start: { x: Math.round(w * 0.32), y: Math.round(w * 0.22) },
-    apex: { x: Math.round(-w * 0.08), y: Math.round(-w * 0.62) },
-    land: { x: -beside, y: Math.round(2 * s) },
-  };
-}
+export const COFFEE_ICON_ID = "coffeeIcon";
 
 /** Only mounted after the 5th recycle-bin click. */
 export default function HiddenCoffeeIcon({
-  anchorLeft,
-  anchorTop,
+  baseLeft,
+  baseTop,
+  spawnFrom,
   width = 76,
+  height = Math.round(76 * 1.26),
+  stageRef,
   zIndex = 18,
-  layoutScale = 1,
+  parallaxShift = { x: 0, y: 0 },
   selected = false,
+  playReveal = false,
+  onFocus,
   onOpen,
+  onOffsetChange,
+  onRevealComplete,
 }) {
-  const k = popKeyframes(layoutScale, width);
+  const reduceMotion = useReducedMotion();
+  const [revealPos, setRevealPos] = useState(null);
+  const [revealActive, setRevealActive] = useState(false);
+  const cancelPhysicsRef = useRef(null);
+  const { commitOffset, ...dragHandlers } = useDesktopIconDrag({
+    iconId: COFFEE_ICON_ID,
+    baseLeft,
+    baseTop,
+    width,
+    height,
+    stageRef,
+    onFocus,
+    onOffsetChange,
+  });
+
+  const drag = { commitOffset, ...dragHandlers };
+
+  useLayoutEffect(() => {
+    if (!playReveal) return;
+
+    cancelPhysicsRef.current?.();
+
+    if (reduceMotion) {
+      commitOffset({ dx: 0, dy: 0 });
+      setRevealActive(false);
+      setRevealPos(null);
+      onRevealComplete?.();
+      return;
+    }
+
+    commitOffset({ dx: 0, dy: 0 });
+
+    const target = { left: baseLeft, top: baseTop };
+    const spawn = { left: spawnFrom.left, top: spawnFrom.top };
+
+    setRevealActive(true);
+    setRevealPos(spawn);
+
+    const stage = stageRef?.current?.getBoundingClientRect();
+    const stageWidth = stage?.width ?? window.innerWidth;
+    const stageHeight = stage?.height ?? window.innerHeight;
+
+    cancelPhysicsRef.current = runCoffeeRevealPhysics({
+      spawn,
+      target,
+      bounds: { width, height, stageWidth, stageHeight },
+      onFrame: setRevealPos,
+      onComplete: (final) => {
+        commitOffset({
+          dx: Math.round(final.left - baseLeft),
+          dy: Math.round(final.top - baseTop),
+        });
+        setRevealActive(false);
+        setRevealPos(null);
+        onRevealComplete?.();
+      },
+    });
+
+    return () => cancelPhysicsRef.current?.();
+  }, [
+    playReveal,
+    reduceMotion,
+    baseLeft,
+    baseTop,
+    spawnFrom.left,
+    spawnFrom.top,
+    width,
+    height,
+    stageRef,
+    commitOffset,
+    onRevealComplete,
+  ]);
+
+  const parallax = drag.isDragging || revealActive ? { x: 0, y: 0 } : parallaxShift;
+  const left = revealPos?.left ?? drag.left;
+  const top = revealPos?.top ?? drag.top;
+  const canDrag = !revealActive;
 
   return (
-    <motion.button
+    <button
       type="button"
       data-cursor="hover"
-      className="desktop-coffee-icon desktop-coffee-icon--revealed"
+      className={
+        selected
+          ? "desktop-coffee-icon desktop-coffee-icon--selected"
+          : "desktop-coffee-icon"
+      }
       aria-label="Open coffee snake game"
       title="coffee_snake.exe"
+      onPointerDown={canDrag ? drag.onPointerDown : undefined}
+      onPointerMove={canDrag ? drag.onPointerMove : undefined}
+      onPointerUp={canDrag ? drag.onPointerUp : undefined}
+      onPointerCancel={canDrag ? drag.onPointerCancel : undefined}
       onClick={() => {
+        if (!canDrag || drag.consumeClickIfDragged()) return;
         playClick();
+        onFocus?.();
         onOpen?.();
-      }}
-      initial={{
-        opacity: 0,
-        scale: 0.1,
-        x: k.start.x,
-        y: k.start.y,
-      }}
-      animate={{
-        opacity: [0, 1, 1],
-        scale: [0.1, 1.14, 1],
-        x: [k.start.x, k.apex.x, k.land.x],
-        y: [k.start.y, k.apex.y, k.land.y],
-      }}
-      transition={{
-        duration: 0.92,
-        times: [0, 0.4, 1],
-        ease: [
-          [0.22, 1, 0.36, 1],
-          [0.34, 1.55, 0.48, 1],
-        ],
       }}
       style={{
         position: "absolute",
-        left: anchorLeft,
-        top: anchorTop,
+        left,
+        top,
         width,
-        height: Math.round(width * 1.26),
-        zIndex,
-        margin: 0,
-        padding: "4px 2px 6px",
-        border: "none",
-        background: selected
-          ? "rgba(255, 122, 41, 0.14)"
-          : "rgba(255, 122, 41, 0.1)",
-        borderRadius: 2,
-        cursor: "pointer",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: 3,
-        transformOrigin: "center center",
-        transition: "background 140ms ease",
+        height,
+        zIndex: drag.isDragging ? zIndex + 20 : zIndex,
+        cursor: revealActive ? "default" : drag.isDragging ? "grabbing" : "grab",
+        pointerEvents: revealActive ? "none" : "auto",
+        visibility: playReveal && !revealPos && !revealActive ? "hidden" : "visible",
       }}
     >
-      <span className="desktop-coffee-icon__glyph" aria-hidden>
-        ☕
-      </span>
       <span
+        className="desktop-coffee-icon__inner"
         style={{
-          fontFamily: "'VT323', monospace",
-          fontSize: 11,
-          lineHeight: 1.2,
-          letterSpacing: "0.04em",
-          textAlign: "center",
-          color: selected ? "#ffe2c4" : ACCENT,
-          textShadow: selected
-            ? "0 0 8px rgba(255, 122, 41, 0.55)"
-            : "0 0 6px rgba(255, 122, 41, 0.35)",
+          transform: `translate3d(${parallax.x}px, ${parallax.y}px, 0)`,
         }}
       >
-        coffee.exe
+        <span className="desktop-coffee-icon__glyph" aria-hidden>
+          ☕
+        </span>
+        <span className="desktop-coffee-icon__label">coffee.exe</span>
       </span>
-    </motion.button>
+    </button>
   );
 }
