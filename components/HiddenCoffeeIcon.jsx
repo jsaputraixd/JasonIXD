@@ -1,12 +1,25 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState } from "react";
-import { useReducedMotion } from "framer-motion";
+import { useMemo } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import { useDesktopIconDrag } from "@/hooks/useDesktopIconDrag";
-import { runCoffeeRevealPhysics } from "@/lib/coffeeRevealPhysics";
 import { playClick } from "@/lib/typingSound";
 
 export const COFFEE_ICON_ID = "coffeeIcon";
+
+const EASE_OUT = [0.22, 1.05, 0.36, 1];
+
+function resolveSpawnPoint({ spawnFrom, baseLeft, baseTop, width, height }) {
+  if (
+    spawnFrom &&
+    Number.isFinite(spawnFrom.left) &&
+    Number.isFinite(spawnFrom.top)
+  ) {
+    return { left: spawnFrom.left, top: spawnFrom.top };
+  }
+
+  return { left: baseLeft, top: baseTop + Math.round(height * 0.18) };
+}
 
 /** Only mounted after the 5th recycle-bin click. */
 export default function HiddenCoffeeIcon({
@@ -26,15 +39,8 @@ export default function HiddenCoffeeIcon({
   onRevealComplete,
 }) {
   const reduceMotion = useReducedMotion();
-  const [revealPos, setRevealPos] = useState(null);
-  const [revealActive, setRevealActive] = useState(false);
-  const cancelPhysicsRef = useRef(null);
-  const revealStartedRef = useRef(false);
-  const commitOffsetRef = useRef(null);
-  const onRevealCompleteRef = useRef(onRevealComplete);
-  onRevealCompleteRef.current = onRevealComplete;
 
-  const { commitOffset, ...dragHandlers } = useDesktopIconDrag({
+  const drag = useDesktopIconDrag({
     iconId: COFFEE_ICON_ID,
     baseLeft,
     baseTop,
@@ -45,76 +51,24 @@ export default function HiddenCoffeeIcon({
     onOffsetChange,
   });
 
-  const drag = { commitOffset, ...dragHandlers };
-  commitOffsetRef.current = commitOffset;
+  const spawnPoint = useMemo(
+    () => resolveSpawnPoint({ spawnFrom, baseLeft, baseTop, width, height }),
+    [spawnFrom, baseLeft, baseTop, width, height]
+  );
 
-  useLayoutEffect(() => {
-    if (!playReveal) {
-      revealStartedRef.current = false;
-      return;
-    }
-    if (revealStartedRef.current) return;
-    revealStartedRef.current = true;
+  const emergeFrom = useMemo(
+    () => ({
+      x: spawnPoint.left - baseLeft,
+      y: spawnPoint.top - baseTop,
+    }),
+    [spawnPoint.left, spawnPoint.top, baseLeft, baseTop]
+  );
 
-    cancelPhysicsRef.current?.();
-
-    const commit = commitOffsetRef.current;
-    if (!commit) return;
-
-    if (reduceMotion) {
-      commit({ dx: 0, dy: 0 });
-      setRevealActive(false);
-      setRevealPos(null);
-      onRevealCompleteRef.current?.();
-      return;
-    }
-
-    commit({ dx: 0, dy: 0 });
-
-    const spawn = { left: spawnFrom.left, top: spawnFrom.top };
-
-    setRevealActive(true);
-    setRevealPos(spawn);
-
-    const stage = stageRef?.current?.getBoundingClientRect();
-    const stageWidth = stage?.width ?? window.innerWidth;
-    const stageHeight = stage?.height ?? window.innerHeight;
-
-    cancelPhysicsRef.current = runCoffeeRevealPhysics({
-      spawn,
-      bounds: { width, height, stageWidth, stageHeight },
-      onFrame: setRevealPos,
-      onComplete: (final) => {
-        commitOffsetRef.current?.({
-          dx: Math.round(final.left - baseLeft),
-          dy: Math.round(final.top - baseTop),
-        });
-        setRevealActive(false);
-        setRevealPos(null);
-        onRevealCompleteRef.current?.();
-      },
-    });
-
-    return () => cancelPhysicsRef.current?.();
-  }, [
-    playReveal,
-    reduceMotion,
-    baseLeft,
-    baseTop,
-    spawnFrom.left,
-    spawnFrom.top,
-    width,
-    height,
-    stageRef,
-  ]);
-
-  const parallax = drag.isDragging || revealActive ? { x: 0, y: 0 } : parallaxShift;
-  const left = revealPos?.left ?? drag.left;
-  const top = revealPos?.top ?? drag.top;
-  const canDrag = !revealActive;
+  const shouldEmerge = playReveal && !reduceMotion;
+  const parallax = drag.isDragging ? { x: 0, y: 0 } : parallaxShift;
 
   return (
-    <button
+    <motion.button
       type="button"
       data-cursor="hover"
       className={
@@ -124,26 +78,44 @@ export default function HiddenCoffeeIcon({
       }
       aria-label="Open coffee snake game"
       title="coffee_snake.exe"
-      onPointerDown={canDrag ? drag.onPointerDown : undefined}
-      onPointerMove={canDrag ? drag.onPointerMove : undefined}
-      onPointerUp={canDrag ? drag.onPointerUp : undefined}
-      onPointerCancel={canDrag ? drag.onPointerCancel : undefined}
+      onPointerDown={drag.onPointerDown}
+      onPointerMove={drag.onPointerMove}
+      onPointerUp={drag.onPointerUp}
+      onPointerCancel={drag.onPointerCancel}
       onClick={() => {
-        if (!canDrag || drag.consumeClickIfDragged()) return;
+        if (drag.consumeClickIfDragged()) return;
         playClick();
         onFocus?.();
         onOpen?.();
       }}
+      initial={
+        shouldEmerge
+          ? {
+              x: emergeFrom.x,
+              y: emergeFrom.y,
+              scale: 0.28,
+              opacity: 0,
+            }
+          : false
+      }
+      animate={{ x: 0, y: 0, scale: 1, opacity: 1 }}
+      transition={{
+        duration: 0.52,
+        ease: EASE_OUT,
+        opacity: { duration: 0.18 },
+        scale: { duration: 0.46, ease: [0.34, 1.25, 0.64, 1] },
+      }}
+      onAnimationComplete={() => {
+        if (shouldEmerge) onRevealComplete?.();
+      }}
       style={{
         position: "absolute",
-        left,
-        top,
+        left: drag.left,
+        top: drag.top,
         width,
         height,
         zIndex: drag.isDragging ? zIndex + 20 : zIndex,
-        cursor: revealActive ? "default" : drag.isDragging ? "grabbing" : "grab",
-        pointerEvents: revealActive ? "none" : "auto",
-        visibility: playReveal && !revealPos && !revealActive ? "hidden" : "visible",
+        cursor: drag.isDragging ? "grabbing" : "grab",
       }}
     >
       <span
@@ -157,6 +129,6 @@ export default function HiddenCoffeeIcon({
         </span>
         <span className="desktop-coffee-icon__label">coffee.exe</span>
       </span>
-    </button>
+    </motion.button>
   );
 }

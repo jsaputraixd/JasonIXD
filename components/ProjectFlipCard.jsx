@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { projectCardThumbSrc, projectCarouselThumbSrc } from "@/lib/projectMedia";
 import { DESKTOP_PROJECT_CARD_ASPECT } from "@/lib/projectDesktopCards";
-import { projectCardMeta } from "@/lib/projectCardMeta";
+import { projectCardMeta, projectCardRoleSummary } from "@/lib/projectCardMeta";
 
 export const PROJECT_CARD_GRADIENTS = [
   "linear-gradient(135deg, #4a1f0a 0%, #1a0a05 60%, #0a0505 100%)",
@@ -68,6 +68,7 @@ export default function ProjectFlipCard({
 
   const heroSrc = project.thumb ?? project.caseStudyHero ?? null;
   const { category, role, timeline } = projectCardMeta(project);
+  const roleSummary = projectCardRoleSummary(role);
 
   return (
     <Link
@@ -149,11 +150,11 @@ export default function ProjectFlipCard({
         <div className="project-card-caption">
           <p className="project-card-caption__title">{project.title}</p>
           <p className="project-card-caption__tagline">{project.tagline}</p>
-          {(category || timeline || role) ? (
+          {(category || timeline || roleSummary) ? (
             <p className="project-card-caption__meta">
               {[category, timeline].filter(Boolean).join(" · ")}
-              {role ? (
-                <span className="project-card-caption__meta-role">{role}</span>
+              {roleSummary ? (
+                <span className="project-card-caption__meta-role">{roleSummary}</span>
               ) : null}
             </p>
           ) : null}

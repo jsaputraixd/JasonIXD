@@ -26,9 +26,9 @@ import ProjectViewLink from "@/components/ProjectViewLink";
 import { projectHeroTransitionName } from "@/lib/viewTransition";
 import DesktopIdleLayer from "./DesktopIdleLayer";
 import RecycleBinIcon from "./RecycleBinIcon";
-import SkillsPlanet from "./SkillsPlanet";
+import DesktopGlobeBackdrop from "./DesktopGlobeBackdrop";
 import { featuredProjects } from "@/data/projects";
-import { about } from "@/data/about";
+import { about, skills } from "@/data/about";
 import WelcomeReadAloud from "@/components/WelcomeReadAloud";
 import DesktopFolderIcon from "@/components/DesktopFolderIcon";
 import OtherStuffFolder from "@/components/OtherStuffFolder";
@@ -58,7 +58,7 @@ import {
 } from "@/lib/typingSound";
 import { pickTrashMessageForClick } from "@/lib/trashMessage";
 import { incrementCoffeeCount } from "@/lib/coffeeCounter";
-import { readIconOffset } from "@/lib/desktopIconPositions";
+import { readIconOffset, writeIconOffset } from "@/lib/desktopIconPositions";
 import WelcomeAsciiPortrait from "@/components/WelcomeAsciiPortrait";
 import { TypedLine, FadeInLine, BlinkCursor } from "@/components/TypedLine";
 
@@ -488,6 +488,12 @@ export default function Desktop() {
       Math.round((vhSafe - Math.round(420 * layoutScale)) / 2)
   );
 
+  useLayoutEffect(() => {
+    if (phase !== "dashboard") return;
+    writeIconOffset("otherStuffIcon", { dx: 0, dy: 0 });
+    writeIconOffset("otherProjectsIcon", { dx: 0, dy: 0 });
+  }, [phase, pos.folderIconRowTop]);
+
   useEffect(() => {
     if (!otherStuffOpen) setOtherStuffBrowsing(false);
   }, [otherStuffOpen]);
@@ -560,6 +566,7 @@ export default function Desktop() {
   // (recessed plane / “looking past the glass”). Only depth (amount) differs.
   const yz = 0.78;
   const depth = {
+    globe: 4,
     welcome: 8,
     me: 8,
     proj: 12,
@@ -573,6 +580,7 @@ export default function Desktop() {
     contact: 9,
   };
   const pShift = {
+    globe: { x: -px * depth.globe, y: -py * depth.globe * yz },
     welcome: { x: -px * depth.welcome, y: -py * depth.welcome * yz },
     me: { x: -px * depth.me, y: -py * depth.me * yz },
     proj: { x: -px * depth.proj, y: -py * depth.proj * yz },
@@ -600,10 +608,17 @@ export default function Desktop() {
 
   const trashIconLeft = pos.trashIcon.left + iconOffsets.trashIcon.dx;
   const trashIconTop = pos.trashIcon.top + iconOffsets.trashIcon.dy;
-  const trashIconW = 76;
-  const trashIconH = 96;
   const coffeeIconW = 76;
   const coffeeIconH = Math.round(coffeeIconW * 1.26);
+  const coffeeBesideGap = Math.round(24 * layoutScale);
+  const coffeeBaseLeft =
+    pos.coffeeIcon?.left ??
+    Math.round(pos.trashIcon.left - coffeeIconW - coffeeBesideGap);
+  const coffeeBaseTop =
+    pos.coffeeIcon?.top ?? pos.trashIcon.top + Math.round(2 * layoutScale);
+  const coffeeSpawnLeft =
+    trashIconLeft + Math.round(coffeeIconW * 0.34) - Math.round(coffeeIconW / 2);
+  const coffeeSpawnTop = trashIconTop + Math.round(coffeeIconH * 0.22);
 
   const showIntroCard =
     phase === "intro-typing" ||
@@ -622,6 +637,20 @@ export default function Desktop() {
       className="relative w-full"
       style={{ height: "100%", overflow: "hidden" }}
     >
+      {showOtherWindows && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            zIndex: 1,
+            pointerEvents: "none",
+            overflow: "hidden",
+          }}
+        >
+          <DesktopGlobeBackdrop parallaxShift={pShift.globe} />
+        </div>
+      )}
+
       {phase === "waiting-boot" && (
         <div
           aria-hidden="true"
@@ -756,6 +785,7 @@ export default function Desktop() {
 
       {showOtherWindows && (
         <DesktopFolderIcon
+          key={`other-stuff-${pos.folderIconRowTop}`}
           label={otherStuff.label}
           iconSrc={otherStuff.icon}
           left={pos.otherStuffIcon.left}
@@ -778,6 +808,7 @@ export default function Desktop() {
 
       {showOtherWindows && (
         <DesktopFolderIcon
+          key={`other-projects-${pos.folderIconRowTop}`}
           label={otherProjects.label}
           iconSrc={otherProjects.icon}
           iconId="otherProjectsIcon"
@@ -818,14 +849,9 @@ export default function Desktop() {
         {showOtherWindows && coffeeRevealed ? (
           <HiddenCoffeeIcon
             key="coffee-reveal"
-            baseLeft={pos.coffeeIcon.left}
-            baseTop={pos.coffeeIcon.top}
-            binBounds={{
-              left: trashIconLeft,
-              top: trashIconTop,
-              width: trashIconW,
-              height: trashIconH,
-            }}
+            baseLeft={coffeeBaseLeft}
+            baseTop={coffeeBaseTop}
+            spawnFrom={{ left: coffeeSpawnLeft, top: coffeeSpawnTop }}
             width={coffeeIconW}
             height={coffeeIconH}
             stageRef={stageRef}
@@ -941,36 +967,6 @@ export default function Desktop() {
           uiScale={layoutScale}
         >
           <OtherProjectsFolder variant="desktop" layoutScale={layoutScale} />
-        </Window>
-      )}
-
-      {showOtherWindows && (
-        <Window
-          id="skills"
-          title="skills.log"
-          left={pos.skills.left}
-          top={pos.skills.top}
-          width={W.skills}
-          delay={cascadeDelay(2.45)}
-          zIndex={zOf("skills", 16)}
-          onFocus={bringToFront}
-          minimized={isMinimized("skills")}
-          onMinimize={() => minimizeWindow("skills")}
-          dragConstraints={stageRef}
-          parallaxShift={pShift.skills}
-          uiScale={layoutScale}
-        >
-          <div
-            style={{
-              padding: `${Math.round(10 * layoutScale * SKILLS_WINDOW_BODY_SCALE)}px ${Math.round(12 * layoutScale * SKILLS_WINDOW_BODY_SCALE)}px ${Math.round(16 * layoutScale * SKILLS_WINDOW_BODY_SCALE)}px`,
-            }}
-          >
-            <SkillsPlanet
-              variant="desktop"
-              layoutScale={layoutScale}
-              globeScale={SKILLS_WINDOW_BODY_SCALE}
-            />
-          </div>
         </Window>
       )}
 
@@ -1193,7 +1189,7 @@ function MeTxtBody({ frameWidth, layoutScale = 1 }) {
     inner != null
       ? { width: `${inner}px`, height: `${inner}px` }
       : { width: "min(220px, 72vw)", height: "min(220px, 72vw)" };
-  const bioSize = isDesktop ? Math.max(12, Math.round(13.5 * s)) : 14;
+  const bioSize = isDesktop ? Math.max(13, Math.round(15 * s)) : 14;
   const bioPad = isDesktop ? Math.round(8 * s) : 12;
 
   return (
@@ -1243,8 +1239,37 @@ function MeTxtBody({ frameWidth, layoutScale = 1 }) {
           textAlign: "left",
         }}
       >
-        {about.bio}
+        {about.bioDesktop ?? about.bio}
       </p>
+      {isDesktop ? (
+        <div
+          style={{
+            margin: `${Math.round(14 * s)}px 0 0`,
+            paddingTop: Math.round(12 * s),
+            borderTop: "1px solid rgba(255, 122, 41, 0.22)",
+          }}
+        >
+          <p
+            style={{
+              margin: `0 0 ${Math.round(8 * s)}px`,
+              fontFamily: "'VT323', monospace",
+              fontSize: Math.max(11, Math.round(13 * s)),
+              letterSpacing: "0.28em",
+              textTransform: "uppercase",
+              color: ACCENT_DIM,
+            }}
+          >
+            ▢ skills
+          </p>
+          <div className="skills-tag-row skills-tag-row--start" aria-label="Skills">
+            {skills.map((skill) => (
+              <span key={skill} className="skills-tag-row__chip">
+                {skill}
+              </span>
+            ))}
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

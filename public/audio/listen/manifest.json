@@ -1,0 +1,85 @@
+{
+  "version": 1,
+  "voiceId": "JBFqnCBsd6RMkjVDRZzb",
+  "modelId": "eleven_turbo_v2_5",
+  "entries": {
+    "welcome": {
+      "textHash": "3c1e2c1078bab6ae",
+      "path": "welcome.mp3",
+      "charCount": 225,
+      "generatedAt": "2026-07-18T02:20:53.518Z"
+    },
+    "dream-detective": {
+      "textHash": "3f3d39b7b3879754",
+      "path": "dream-detective.mp3",
+      "charCount": 230,
+      "generatedAt": "2026-07-18T02:20:55.058Z"
+    },
+    "eleara": {
+      "textHash": "cb9c0a7385a53429",
+      "path": "eleara.mp3",
+      "charCount": 253,
+      "generatedAt": "2026-07-18T02:20:56.654Z"
+    },
+    "kits": {
+      "textHash": "9e04bf2f19749fec",
+      "path": "kits.mp3",
+      "charCount": 196,
+      "generatedAt": "2026-07-18T02:20:57.936Z"
+    },
+    "dairy-delight": {
+      "textHash": "9f1adedf39cfe813",
+      "path": "dairy-delight.mp3",
+      "charCount": 239,
+      "generatedAt": "2026-07-18T02:20:59.733Z"
+    },
+    "pulse": {
+      "textHash": "bfefa21b0995ebfc",
+      "path": "pulse.mp3",
+      "charCount": 286,
+      "generatedAt": "2026-07-18T02:21:01.421Z"
+    },
+    "pawfect": {
+      "textHash": "5152a2ebe9c35461",
+      "path": "pawfect.mp3",
+      "charCount": 228,
+      "generatedAt": "2026-07-18T02:21:02.901Z"
+    },
+    "safe-space": {
+      "textHash": "1d38dcff3caf462c",
+      "path": "safe-space.mp3",
+      "charCount": 225,
+      "generatedAt": "2026-07-18T02:21:04.568Z"
+    },
+    "shift-off": {
+      "textHash": "54794e4a3ab2a1bf",
+      "path": "shift-off.mp3",
+      "charCount": 215,
+      "generatedAt": "2026-07-18T02:21:05.953Z"
+    },
+    "cca-pathfinding": {
+      "textHash": "e267b9bf2f8cbc11",
+      "path": "cca-pathfinding.mp3",
+      "charCount": 264,
+      "generatedAt": "2026-07-18T02:21:07.473Z"
+    }
+  },
+  "lastRun": {
+    "at": "2026-07-18T02:21:07.594Z",
+    "generated": [
+      "welcome",
+      "dream-detective",
+      "eleara",
+      "kits",
+      "dairy-delight",
+      "pulse",
+      "pawfect",
+      "safe-space",
+      "shift-off",
+      "cca-pathfinding"
+    ],
+    "deferred": [],
+    "remainingCredits": 10000,
+    "resetAt": "2026-06-19T03:00:54.000Z"
+  }
+}

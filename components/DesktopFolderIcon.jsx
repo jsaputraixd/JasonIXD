@@ -121,7 +121,7 @@ export default function DesktopFolderIcon({
       <span
         style={{
           fontFamily: "'VT323', monospace",
-          fontSize: 11,
+          fontSize: 14,
           lineHeight: 1.25,
           letterSpacing: "0.06em",
           textAlign: "center",

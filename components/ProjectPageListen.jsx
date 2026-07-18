@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback } from "react";
+import { getListenCatalogEntry } from "@/data/listenScripts";
+import { listenAudioSrc } from "@/lib/listenAudio";
 import {
   SpeakerGlyph,
   ReadAloudPortal,
@@ -9,26 +11,17 @@ import {
   READ_ALOUD_ACCENT_DIM,
 } from "./ReadAloudShared";
 
-function buildProjectScript(project) {
-  const tags = project.tags?.length ? project.tags.join(", ") : "";
-  return [
-    project.title,
-    project.category,
-    tags,
-    project.tagline,
-    project.description.replace(/\s+/g, " ").trim(),
-  ]
-    .filter(Boolean)
-    .join(". ");
-}
-
 export default function ProjectPageListen({ project }) {
-  const { busy, supported, mounted, speak, stop } = useReadAloud();
+  const { busy, supported, mounted, speak, stop, voiceLabel } = useReadAloud();
+  const entry = getListenCatalogEntry(project.slug);
 
   const speakPage = useCallback(() => {
-    if (busy) return;
-    speak(buildProjectScript(project));
-  }, [busy, speak, project]);
+    if (busy || !entry?.text) return;
+    speak({
+      text: entry.text,
+      audioSrc: listenAudioSrc(project.slug),
+    });
+  }, [busy, speak, entry, project.slug]);
 
   const tagStyle = {
     border: "1px solid rgba(255,122,41,0.5)",
@@ -116,6 +109,7 @@ export default function ProjectPageListen({ project }) {
         busy={busy}
         stop={stop}
         panelTitle="listen.exe"
+        subtitle={voiceLabel}
       />
     </>
   );

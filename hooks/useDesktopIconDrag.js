@@ -157,6 +157,7 @@ export function useDesktopIconDrag({
     top,
     offset,
     isDragging,
+    commitOffset,
     onPointerDown,
     onPointerMove,
     onPointerUp,

@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback } from "react";
-import { about } from "@/data/about";
+import { getListenCatalogEntry } from "@/data/listenScripts";
+import { listenAudioSrc } from "@/lib/listenAudio";
 import {
   SpeakerGlyph,
   ReadAloudPortal,
@@ -9,28 +10,17 @@ import {
   READ_ALOUD_ACCENT,
 } from "./ReadAloudShared";
 
-function buildWelcomeScript() {
-  return [
-    "Hello.",
-    about.name,
-    about.title,
-    about.bio.replace(/\s+/g, " ").trim(),
-    "Dream, think, build.",
-  ]
-    .filter(Boolean)
-    .join(". ");
-}
-
 /**
  * Speaker control + floating stop panel for welcome copy (desktop window title bar or mobile card header).
  */
 export default function WelcomeReadAloud({ compact = false }) {
-  const { busy, supported, mounted, speak, stop } = useReadAloud();
+  const { busy, supported, mounted, speak, stop, voiceLabel } = useReadAloud();
+  const entry = getListenCatalogEntry("welcome");
 
   const play = useCallback(() => {
-    if (busy) return;
-    speak(buildWelcomeScript());
-  }, [busy, speak]);
+    if (busy || !entry?.text) return;
+    speak({ text: entry.text, audioSrc: listenAudioSrc("welcome") });
+  }, [busy, speak, entry]);
 
   if (!supported) return null;
 
@@ -75,6 +65,7 @@ export default function WelcomeReadAloud({ compact = false }) {
         busy={busy}
         stop={stop}
         panelTitle="welcome.exe"
+        subtitle={voiceLabel}
         floatKey="welcome-read-aloud-float"
       />
     </>

@@ -1,12 +1,30 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 
 export const READ_ALOUD_ACCENT = "#FF7A29";
 export const READ_ALOUD_ACCENT_DIM = "rgba(255, 180, 112, 0.75)";
 const EASE = [0.16, 1, 0.3, 1];
+
+function hasBrowserTts() {
+  return typeof window !== "undefined" && "speechSynthesis" in window;
+}
+
+function hasAudioPlayback() {
+  return typeof window !== "undefined" && typeof Audio !== "undefined";
+}
+
+function speakWithBrowser(text, onEnd) {
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = 0.93;
+  u.pitch = 1;
+  u.onend = onEnd;
+  u.onerror = onEnd;
+  window.speechSynthesis.speak(u);
+}
 
 /** Retro single-line speaker icon (stroke) — matches site accent. */
 export function SpeakerGlyph({ size = 20, active = false }) {
@@ -169,27 +187,47 @@ export function useReadAloud() {
   const [busy, setBusy] = useState(false);
   const [supported, setSupported] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [activeProvider, setActiveProvider] = useState(null);
+
+  const audioRef = useRef(null);
+  const abortRef = useRef(null);
+  const sessionRef = useRef(0);
 
   useEffect(() => {
     setMounted(true);
+    setSupported(hasAudioPlayback() || hasBrowserTts());
   }, []);
 
-  useEffect(() => {
-    setSupported(
-      typeof window !== "undefined" && "speechSynthesis" in window
-    );
+  const cleanupAudio = useCallback(() => {
+    abortRef.current?.abort();
+    abortRef.current = null;
+
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = "";
+      audioRef.current = null;
+    }
   }, []);
 
-  useEffect(() => {
-    return () => {
-      window.speechSynthesis?.cancel();
-    };
+  const finish = useCallback(() => {
+    setBusy(false);
+    setActiveProvider(null);
   }, []);
 
   const stop = useCallback(() => {
+    sessionRef.current += 1;
     window.speechSynthesis?.cancel();
-    setBusy(false);
-  }, []);
+    cleanupAudio();
+    finish();
+  }, [cleanupAudio, finish]);
+
+  useEffect(() => {
+    return () => {
+      sessionRef.current += 1;
+      window.speechSynthesis?.cancel();
+      cleanupAudio();
+    };
+  }, [cleanupAudio]);
 
   useEffect(() => {
     if (!busy) return;
@@ -200,20 +238,75 @@ export function useReadAloud() {
     return () => window.removeEventListener("keydown", onKey);
   }, [busy, stop]);
 
+  const playAudioSrc = useCallback(async (audioSrc, session) => {
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    const res = await fetch(audioSrc, {
+      signal: controller.signal,
+      cache: "force-cache",
+    });
+    if (session !== sessionRef.current) return false;
+    if (!res.ok) throw new Error("Audio file missing");
+
+    const blob = await res.blob();
+    if (session !== sessionRef.current) return false;
+
+    const url = URL.createObjectURL(blob);
+    const audio = new Audio(url);
+    audioRef.current = audio;
+
+    try {
+      await new Promise((resolve, reject) => {
+        audio.onended = () => resolve();
+        audio.onerror = () => reject(new Error("Playback failed"));
+        audio.play().catch(reject);
+      });
+    } finally {
+      URL.revokeObjectURL(url);
+      if (audioRef.current === audio) audioRef.current = null;
+    }
+
+    return session === sessionRef.current;
+  }, []);
+
   const speak = useCallback(
-    (text) => {
+    async ({ text, audioSrc }) => {
       if (!supported || !text) return;
-      window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      u.rate = 0.93;
-      u.pitch = 1;
-      u.onend = () => setBusy(false);
-      u.onerror = () => setBusy(false);
+
+      stop();
+      const session = sessionRef.current;
       setBusy(true);
-      window.speechSynthesis.speak(u);
+
+      if (audioSrc && hasAudioPlayback()) {
+        try {
+          setActiveProvider("prerecorded");
+          await playAudioSrc(audioSrc, session);
+          if (session === sessionRef.current) finish();
+          return;
+        } catch (err) {
+          if (err?.name === "AbortError") return;
+          cleanupAudio();
+        }
+      }
+
+      if (!hasBrowserTts()) {
+        finish();
+        return;
+      }
+
+      setActiveProvider("browser");
+      speakWithBrowser(text, () => {
+        if (session === sessionRef.current) finish();
+      });
     },
-    [supported]
+    [supported, stop, playAudioSrc, cleanupAudio, finish]
   );
 
-  return { busy, supported, mounted, speak, stop };
+  const voiceLabel =
+    activeProvider === "prerecorded"
+      ? "Playing · voiceover"
+      : "Playing · browser voice";
+
+  return { busy, supported, mounted, speak, stop, voiceLabel };
 }
