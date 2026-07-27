@@ -1,26 +1,20 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Next 16 defaults to Turbopack; empty config silences the webpack/turbopack mismatch warning.
-  turbopack: {},
+  /**
+   * Dev-only tuning: rapid saves generate new `/_next/static/*` URLs. Browsers still
+   * holding the previous HTML + chunk list then 404 until a full reload. Debouncing
+   * rebuilds and keeping entries warm a bit longer reduces how often that happens.
+   */
+  onDemandEntries: {
+    maxInactiveAge: 2 * 60 * 1000,
+    pagesBufferLength: 6,
+  },
   webpack: (config, { dev }) => {
     if (dev) {
-      const prev = config.watchOptions?.ignored;
-      const prevList = Array.isArray(prev)
-        ? prev
-        : typeof prev === "string"
-          ? [prev]
-          : [];
-      // Webpack 5 watchOptions.ignored: non-empty glob strings only (no "", RegExp, or functions).
-      const ignored = [
-        ...prevList,
-        "**/public/images/**",
-        "**/public/videos/**",
-      ].filter((item) => typeof item === "string" && item.length > 0);
-
       config.watchOptions = {
         ...config.watchOptions,
-        ignored,
+        aggregateTimeout: 400,
       };
     }
     return config;

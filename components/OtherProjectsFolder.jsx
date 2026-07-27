@@ -14,10 +14,11 @@ export default function OtherProjectsFolder({
   const gap = variant === "desktop" ? Math.round(12 * s) : 12;
   const projects = otherProjects.projects;
 
-  const cardWidth =
-    variant === "desktop" ? Math.round(220 * s) : 240;
-
-  const cardHeight = Math.round(cardWidth / DESKTOP_PROJECT_CARD_ASPECT);
+  const isMobile = variant === "mobile";
+  const cardWidth = isMobile ? undefined : Math.round(220 * s);
+  const cardHeight = isMobile
+    ? undefined
+    : Math.round(cardWidth / DESKTOP_PROJECT_CARD_ASPECT);
 
   return (
     <div

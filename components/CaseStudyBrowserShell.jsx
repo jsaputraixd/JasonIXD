@@ -10,11 +10,17 @@ export default function CaseStudyBrowserShell({ project, children, endcap }) {
       <div className="case-study-browser__frame">
         <header className="case-study-browser__chrome">
           <div className="case-study-browser__titlebar">
-            <span className="mobile-window-dots" aria-hidden>
-              <span />
-              <span />
-              <span />
-            </span>
+            <Link
+              href="/"
+              data-cursor="hover"
+              className="case-study-browser__window-controls"
+              aria-label="Close window and return to JS-OS desktop"
+              title="Close window"
+            >
+              <span className="case-study-browser__traffic case-study-browser__traffic--close" />
+              <span className="case-study-browser__traffic case-study-browser__traffic--dim" aria-hidden />
+              <span className="case-study-browser__traffic case-study-browser__traffic--dim" aria-hidden />
+            </Link>
             <span className="case-study-browser__title">{fileName}</span>
             <span className="case-study-browser__app" aria-hidden>
               JS-OS Browser
@@ -26,7 +32,7 @@ export default function CaseStudyBrowserShell({ project, children, endcap }) {
               data-cursor="hover"
               className="case-study-browser__back"
             >
-              ← Desktop
+              × Close window
             </Link>
             <div
               className="case-study-browser__url"

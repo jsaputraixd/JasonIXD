@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, useDragControls } from "framer-motion";
-import { playWindowWhoosh, playWindowPickup, playWindowDrop, playWindowClose } from "@/lib/typingSound";
+import { playClick, playWindowWhoosh } from "@/lib/typingSound";
 
 const ACCENT = "#FF7A29";
 const EASE = [0.16, 1, 0.3, 1];
@@ -43,7 +43,6 @@ export default function Window({
   const [hasBeenHeld, setHasBeenHeld] = useState(false);
   const dragControls = useDragControls();
   const openSoundPlayed = useRef(false);
-  const dragSoundActiveRef = useRef(false);
 
   useEffect(() => {
     if (!playOpenSound || openSoundPlayed.current) return;
@@ -55,13 +54,7 @@ export default function Window({
 
   useEffect(() => {
     if (!isHeld) return;
-    const release = () => {
-      if (dragSoundActiveRef.current) {
-        dragSoundActiveRef.current = false;
-        playWindowDrop();
-      }
-      setIsHeld(false);
-    };
+    const release = () => setIsHeld(false);
     window.addEventListener("pointerup", release);
     window.addEventListener("pointercancel", release);
     window.addEventListener("blur", release);
@@ -74,16 +67,12 @@ export default function Window({
 
   const handleMinimize = (e) => {
     e.stopPropagation();
-    playWindowClose();
+    playClick();
     handleMinimizeCb?.();
   };
 
   const startDrag = (event) => {
     onFocus?.(id);
-    if (!dragSoundActiveRef.current) {
-      dragSoundActiveRef.current = true;
-      playWindowPickup();
-    }
     setIsHeld(true);
     setHasBeenHeld(true);
     dragControls.start(event);
@@ -141,7 +130,6 @@ export default function Window({
               userSelect: "none",
               overflow: clipContent ? "hidden" : "visible",
               transform: `translate3d(${parallaxShift.x}px, ${parallaxShift.y}px, 0)`,
-              willChange: "transform",
             }}
           >
             {/* Title bar — only drag handle */}

@@ -61,7 +61,7 @@ function sectionAnchor(title) {
 function CaseStudyJumpNav({ sections, hasPrototype }) {
   const links = [
     ...sections.map((s) => ({ label: s.title, href: `#section-${sectionAnchor(s.title)}` })),
-    ...(hasPrototype ? [{ label: "Prototype", href: "#section-live-prototype" }] : []),
+    ...(hasPrototype ? [{ label: "Prototype", href: "#section-prototype" }] : []),
     { label: "Reflection", href: "#section-reflection" },
   ];
 
@@ -181,7 +181,6 @@ function CaseStudyRichLayout({ project, frameStyle }) {
     highlights,
     showJumpNav = false,
     showDeckEmbed = true,
-    livePrototype,
   } = rich;
   const bodyStyle = {};
   const metaLabel = {
@@ -229,41 +228,7 @@ function CaseStudyRichLayout({ project, frameStyle }) {
       </div>
     ) : null;
 
-  const livePrototypeSection = livePrototype ? (
-    <div id="section-live-prototype" className="mt-16 case-study-section-anchor case-study-prototype-anchor">
-      <CaseStudySectionTitle>Live prototype</CaseStudySectionTitle>
-      {livePrototype.intro ? (
-        <p className="m-0 mb-6 case-study-prose" style={{ color: "#aaa" }}>
-          {livePrototype.intro}
-        </p>
-      ) : null}
-      <a
-        href={livePrototype.href}
-        target="_blank"
-        rel="noopener noreferrer"
-        data-cursor="hover"
-        style={{
-          display: "inline-block",
-          fontFamily: "'VT323', monospace",
-          fontSize: 14,
-          letterSpacing: "0.22em",
-          textTransform: "uppercase",
-          color: "#FF7A29",
-          textDecoration: "none",
-          border: "1px solid rgba(255, 122, 41, 0.45)",
-          padding: "10px 16px",
-          borderRadius: 2,
-        }}
-      >
-        {livePrototype.label || "Open live prototype"} ↗
-      </a>
-    </div>
-  ) : null;
-
   const shouldShowJumpNav = showJumpNav && processSections.length > 1;
-  const hasPrototypeNav =
-    Boolean(livePrototype) ||
-    (Boolean(videos?.length) && videosPlacement === "afterSection");
 
   return (
     <>
@@ -295,7 +260,7 @@ function CaseStudyRichLayout({ project, frameStyle }) {
       {shouldShowJumpNav ? (
         <CaseStudyJumpNav
           sections={processSections}
-          hasPrototype={hasPrototypeNav}
+          hasPrototype={Boolean(videos?.length) && videosPlacement === "afterSection"}
         />
       ) : null}
 
@@ -353,8 +318,6 @@ function CaseStudyRichLayout({ project, frameStyle }) {
       ) : null}
 
       {videosPlacement === "afterProcess" ? videoSection : null}
-
-      {livePrototypeSection}
 
       {designSolution?.length > 0 ? (
         <div className="mt-16">
@@ -634,7 +597,7 @@ export default async function ProjectPage({ params }) {
           </div>
         ) : null}
 
-        {!rich && pdfs.length > 0 ? (
+        {pdfs.length > 0 ? (
           <div className="mt-16">
             <p
               style={{

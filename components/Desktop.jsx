@@ -21,14 +21,12 @@ import {
 import Window from "./Window";
 import StatusBar from "./StatusBar";
 import CoffeeSnakeGame from "./CoffeeSnakeGame";
-import HiddenCoffeeIcon from "./HiddenCoffeeIcon";
 import ProjectViewLink from "@/components/ProjectViewLink";
 import { projectHeroTransitionName } from "@/lib/viewTransition";
 import DesktopIdleLayer from "./DesktopIdleLayer";
-import RecycleBinIcon from "./RecycleBinIcon";
-import DesktopGlobeBackdrop from "./DesktopGlobeBackdrop";
+import SkillsPlanet, { desktopSkillsExpandedBox } from "./SkillsPlanet";
 import { featuredProjects } from "@/data/projects";
-import { about, skills } from "@/data/about";
+import { about } from "@/data/about";
 import WelcomeReadAloud from "@/components/WelcomeReadAloud";
 import DesktopFolderIcon from "@/components/DesktopFolderIcon";
 import OtherStuffFolder from "@/components/OtherStuffFolder";
@@ -56,11 +54,16 @@ import {
   playTypingClickThrottled,
   playWindowRestore,
 } from "@/lib/typingSound";
-import { pickTrashMessageForClick } from "@/lib/trashMessage";
 import { incrementCoffeeCount } from "@/lib/coffeeCounter";
 import { readIconOffset, writeIconOffset } from "@/lib/desktopIconPositions";
 import WelcomeAsciiPortrait from "@/components/WelcomeAsciiPortrait";
 import { TypedLine, FadeInLine, BlinkCursor } from "@/components/TypedLine";
+import {
+  DesktopVaultBreachOverlay,
+  MobileVaultKeyhole,
+  MobileVaultToast,
+  useVaultKeyState,
+} from "@/components/mobile/MobileVaultEasterEgg";
 
 const ACCENT = "#FF7A29";
 /** Brighter orange for small text — ~4.5:1 on dark window chrome. */
@@ -75,8 +78,6 @@ function getWindowTitle(id) {
       return "welcome.exe";
     case "me":
       return "me.txt";
-    case "skills":
-      return "skills.log";
     case "contact":
       return "contact.msg";
     case "otherStuff":
@@ -108,9 +109,6 @@ function clamp(n, lo, hi) {
 /** Reference width: at vw >= this, sizes match the original desktop design (scale 1). */
 const LAYOUT_REF_W = 1280;
 
-/** skills.log body + globe footprint (~50%); Window chrome title bar still uses `layoutScale` only. */
-const SKILLS_WINDOW_BODY_SCALE = 0.5;
-
 /** Viewport-aware sizes; positions are fixed zones (center welcome, grouped project row). */
 function getDesktopLayout(vw, vh) {
   const nProj = featuredProjects.length;
@@ -122,7 +120,8 @@ function getDesktopLayout(vw, vh) {
   const W0 = {
     welcome: Math.round(clamp(380, 540, 400 + 130 * u)),
     me: Math.round(clamp(208, 288, 218 + 70 * u)),
-    skills: Math.round(clamp(300, 440, 330 + 100 * u)),
+    /** Floating skills globe footprint (top-right, no window chrome). */
+    skills: Math.round(clamp(440, 520, 470 + 50 * u)),
     otherStuff: Math.round(clamp(340, 520, 420 + 32 * u)),
     otherProjects: Math.round(clamp(460, 620, 520 + 40 * u)),
     contact: Math.round(clamp(248, 298, 260 + 28 * u)),
@@ -131,16 +130,13 @@ function getDesktopLayout(vw, vh) {
   let W = {
     welcome: Math.round(W0.welcome * layoutScale),
     me: Math.round(W0.me * layoutScale),
-    skills: Math.max(
-      200,
-      Math.round(W0.skills * layoutScale * SKILLS_WINDOW_BODY_SCALE)
-    ),
+    skills: Math.max(400, Math.round(W0.skills * layoutScale)),
     otherStuff: Math.round(W0.otherStuff * layoutScale),
     otherProjects: Math.round(W0.otherProjects * layoutScale),
     contact: Math.round(W0.contact * layoutScale),
   };
 
-  const skillsLeft = Math.max(edge, vw - W.skills - edge);
+  const skillsLeft = Math.max(edge, vw - W.skills - edge - RIGHT_RESERVE);
   const topBand = vh * 0.034;
 
   // Keep welcome + me widths reasonable on narrow viewports (avoid wider than usable band).
@@ -239,19 +235,35 @@ export default function Desktop() {
   const [otherStuffBrowsing, setOtherStuffBrowsing] = useState(false);
   const [otherProjectsOpen, setOtherProjectsOpen] = useState(false);
   const [coffeeSnakeOpen, setCoffeeSnakeOpen] = useState(false);
-  const [coffeeRevealed, setCoffeeRevealed] = useState(false);
-  const [coffeePlayReveal, setCoffeePlayReveal] = useState(false);
-  const [trashPop, setTrashPop] = useState(false);
+  const [vaultBreachOpen, setVaultBreachOpen] = useState(false);
+  const [skillsFocused, setSkillsFocused] = useState(false);
+  const [skillsHovered, setSkillsHovered] = useState(false);
+  const skillsPointerRef = useRef(null);
   const [minimizedIds, setMinimizedIds] = useState([]);
-  const [trashMessage, setTrashMessage] = useState(null);
-  const trashMessageTimerRef = useRef(null);
-  const trashClickCountRef = useRef(0);
   const welcomeDoneTimerRef = useRef(null);
   const [parallax, setParallax] = useState({ x: 0, y: 0 });
-  const [iconOffsets, setIconOffsets] = useState(() => ({
-    trashIcon: readIconOffset("trashIcon"),
-    coffeeIcon: readIconOffset("coffeeIcon"),
-  }));
+  const [iconOffsets, setIconOffsets] = useState(() => ({}));
+  const { toastOpen, dismissToast } = useVaultKeyState();
+
+  const openSkillsFocus = useCallback(() => {
+    setSkillsFocused(true);
+    playClick();
+  }, []);
+
+  const closeSkillsFocus = useCallback(() => {
+    setSkillsFocused(false);
+    setSkillsHovered(false);
+    playClick();
+  }, []);
+
+  useEffect(() => {
+    if (!skillsFocused) return undefined;
+    const onKey = (e) => {
+      if (e.key === "Escape") closeSkillsFocus();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [skillsFocused, closeSkillsFocus]);
 
   const handleIconOffset = useCallback((id, offset) => {
     setIconOffsets((prev) => ({ ...prev, [id]: offset }));
@@ -386,19 +398,16 @@ export default function Desktop() {
     if (coffeeSnakeOpen) bringToFront("coffee-snake");
   }, [coffeeSnakeOpen, bringToFront]);
 
-  const openCoffeeSnake = useCallback(() => {
+  const openVaultFromKeyhole = useCallback(() => {
+    if (vaultBreachOpen || coffeeSnakeOpen) return;
+    setVaultBreachOpen(true);
+  }, [vaultBreachOpen, coffeeSnakeOpen]);
+
+  const finishVaultBreach = useCallback(() => {
+    setVaultBreachOpen(false);
     playClick();
     incrementCoffeeCount(1);
     setCoffeeSnakeOpen(true);
-  }, []);
-
-  const onCoffeeIconOffsetChange = useCallback(
-    (offset) => handleIconOffset("coffeeIcon", offset),
-    [handleIconOffset]
-  );
-
-  const onCoffeeRevealComplete = useCallback(() => {
-    setCoffeePlayReveal(false);
   }, []);
 
   const minimizeWindow = useCallback((id) => {
@@ -498,36 +507,6 @@ export default function Desktop() {
     if (!otherStuffOpen) setOtherStuffBrowsing(false);
   }, [otherStuffOpen]);
 
-  const showTrashBubble = useCallback(() => {
-    if (trashMessageTimerRef.current) {
-      clearTimeout(trashMessageTimerRef.current);
-    }
-    trashClickCountRef.current += 1;
-    const clickCount = trashClickCountRef.current;
-
-    if (clickCount === 5) {
-      setCoffeeRevealed(true);
-      setCoffeePlayReveal(true);
-      setTrashPop(true);
-      bringToFront("coffeeIcon");
-      window.setTimeout(() => setTrashPop(false), 520);
-    }
-
-    setTrashMessage(pickTrashMessageForClick(clickCount));
-    trashMessageTimerRef.current = setTimeout(() => {
-      setTrashMessage(null);
-    }, 5000);
-  }, [bringToFront]);
-
-  useEffect(
-    () => () => {
-      if (trashMessageTimerRef.current) {
-        clearTimeout(trashMessageTimerRef.current);
-      }
-    },
-    []
-  );
-
   if (!viewport) {
     return (
       <div
@@ -566,21 +545,17 @@ export default function Desktop() {
   // (recessed plane / “looking past the glass”). Only depth (amount) differs.
   const yz = 0.78;
   const depth = {
-    globe: 4,
     welcome: 8,
     me: 8,
     proj: 12,
-    skills: 10,
+    skills: 9,
     otherStuff: 9,
     otherStuffIcon: 7,
     otherProjects: 9,
     otherProjectsIcon: 7,
-    trashIcon: 7,
-    coffeeIcon: 7,
     contact: 9,
   };
   const pShift = {
-    globe: { x: -px * depth.globe, y: -py * depth.globe * yz },
     welcome: { x: -px * depth.welcome, y: -py * depth.welcome * yz },
     me: { x: -px * depth.me, y: -py * depth.me * yz },
     proj: { x: -px * depth.proj, y: -py * depth.proj * yz },
@@ -595,30 +570,8 @@ export default function Desktop() {
       x: -px * depth.otherProjectsIcon,
       y: -py * depth.otherProjectsIcon * yz,
     },
-    trashIcon: {
-      x: -px * depth.trashIcon,
-      y: -py * depth.trashIcon * yz,
-    },
-    coffeeIcon: {
-      x: -px * depth.coffeeIcon,
-      y: -py * depth.coffeeIcon * yz,
-    },
     contact: { x: -px * depth.contact, y: -py * depth.contact * yz },
   };
-
-  const trashIconLeft = pos.trashIcon.left + iconOffsets.trashIcon.dx;
-  const trashIconTop = pos.trashIcon.top + iconOffsets.trashIcon.dy;
-  const coffeeIconW = 76;
-  const coffeeIconH = Math.round(coffeeIconW * 1.26);
-  const coffeeBesideGap = Math.round(24 * layoutScale);
-  const coffeeBaseLeft =
-    pos.coffeeIcon?.left ??
-    Math.round(pos.trashIcon.left - coffeeIconW - coffeeBesideGap);
-  const coffeeBaseTop =
-    pos.coffeeIcon?.top ?? pos.trashIcon.top + Math.round(2 * layoutScale);
-  const coffeeSpawnLeft =
-    trashIconLeft + Math.round(coffeeIconW * 0.34) - Math.round(coffeeIconW / 2);
-  const coffeeSpawnTop = trashIconTop + Math.round(coffeeIconH * 0.22);
 
   const showIntroCard =
     phase === "intro-typing" ||
@@ -631,26 +584,23 @@ export default function Desktop() {
     introSkippedRef.current ? 0 : seconds;
   const skipWelcomeTyping = phase === "dashboard";
 
+  const skillsExpandedBox = skillsFocused
+    ? desktopSkillsExpandedBox(vwSafe, vhSafe)
+    : null;
+  const skillsFloatW = skillsExpandedBox ? skillsExpandedBox.boxW : W.skills;
+  const skillsFloatLeft = skillsFocused
+    ? Math.round((vwSafe - skillsFloatW) / 2)
+    : Math.round(vwSafe - skillsFloatW - pos.skills.right);
+  const skillsFloatTop = skillsFocused
+    ? Math.round((vhSafe - skillsExpandedBox.boxH) / 2)
+    : pos.skills.top;
+
   return (
     <div
       ref={stageRef}
       className="relative w-full"
       style={{ height: "100%", overflow: "hidden" }}
     >
-      {showOtherWindows && (
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            zIndex: 1,
-            pointerEvents: "none",
-            overflow: "hidden",
-          }}
-        >
-          <DesktopGlobeBackdrop parallaxShift={pShift.globe} />
-        </div>
-      )}
-
       {phase === "waiting-boot" && (
         <div
           aria-hidden="true"
@@ -719,6 +669,7 @@ export default function Desktop() {
             layoutScale={layoutScale}
             skipTyping={skipWelcomeTyping}
             onTypingComplete={handleWelcomeTypingComplete}
+            onVaultUnlock={openVaultFromKeyhole}
           />
         </Window>
       )}
@@ -742,6 +693,96 @@ export default function Desktop() {
         >
           <MeTxtBody frameWidth={W.me} layoutScale={layoutScale} />
         </Window>
+      )}
+
+      {showOtherWindows && (
+        <>
+          <AnimatePresence>
+            {skillsFocused ? (
+              <motion.button
+                key="skills-focus-backdrop"
+                type="button"
+                aria-label="Dismiss skills globe"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.28, ease: EASE }}
+                onClick={closeSkillsFocus}
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  zIndex: 40,
+                  margin: 0,
+                  padding: 0,
+                  border: "none",
+                  cursor: "default",
+                  background: "rgba(6, 4, 3, 0.42)",
+                  backdropFilter: "blur(12px)",
+                  WebkitBackdropFilter: "blur(12px)",
+                }}
+              />
+            ) : null}
+          </AnimatePresence>
+
+          <motion.div
+            aria-label={
+              skillsFocused
+                ? "Skills globe — expanded"
+                : "Skills globe — click to expand"
+            }
+            initial={{ opacity: 0, scale: 0.92 }}
+            animate={{
+              opacity: 1,
+              scale: skillsFocused ? 1 : skillsHovered ? 1.045 : 1,
+              left: skillsFloatLeft,
+              top: skillsFloatTop,
+              x: skillsFocused ? 0 : pShift.skills.x,
+              y: skillsFocused ? 0 : pShift.skills.y,
+            }}
+            transition={{ duration: 0.45, ease: EASE }}
+            onHoverStart={() => {
+              if (!skillsFocused) setSkillsHovered(true);
+            }}
+            onHoverEnd={() => setSkillsHovered(false)}
+            onPointerDown={(e) => {
+              skillsPointerRef.current = { x: e.clientX, y: e.clientY };
+            }}
+            onClickCapture={(e) => {
+              if (skillsFocused) return;
+              const origin = skillsPointerRef.current;
+              if (
+                origin &&
+                Math.hypot(e.clientX - origin.x, e.clientY - origin.y) > 10
+              ) {
+                return;
+              }
+              openSkillsFocus();
+            }}
+            style={{
+              position: "absolute",
+              width: skillsFloatW,
+              zIndex: skillsFocused ? 41 : 8,
+              pointerEvents: "auto",
+              overflow: "visible",
+              cursor: skillsFocused ? "default" : "pointer",
+              filter:
+                skillsHovered && !skillsFocused
+                  ? "drop-shadow(0 0 22px rgba(255, 122, 41, 0.55)) drop-shadow(0 0 48px rgba(255, 122, 41, 0.28))"
+                  : skillsFocused
+                    ? "drop-shadow(0 0 48px rgba(255, 122, 41, 0.45)) drop-shadow(0 0 96px rgba(255, 122, 41, 0.25))"
+                    : "drop-shadow(0 0 10px rgba(255, 122, 41, 0.12))",
+              transition:
+                "filter 0.35s ease, width 0.45s cubic-bezier(0.16, 1, 0.3, 1)",
+            }}
+          >
+            <SkillsPlanet
+              variant="desktop"
+              expanded={skillsFocused}
+              viewportWidth={vwSafe}
+              viewportHeight={vhSafe}
+            />
+          </motion.div>
+        </>
       )}
 
       {showOtherWindows &&
@@ -829,100 +870,6 @@ export default function Desktop() {
           selected={otherProjectsOpen}
         />
       )}
-
-      {showOtherWindows && (
-        <RecycleBinIcon
-          left={pos.trashIcon.left}
-          top={pos.trashIcon.top}
-          delay={cascadeDelay(2.18)}
-          zIndex={zOf("trashIcon", 16)}
-          stageRef={stageRef}
-          pop={trashPop}
-          onFocus={() => bringToFront("trashIcon")}
-          onOffsetChange={(offset) => handleIconOffset("trashIcon", offset)}
-          onActivate={showTrashBubble}
-          parallaxShift={pShift.trashIcon}
-        />
-      )}
-
-      <AnimatePresence>
-        {showOtherWindows && coffeeRevealed ? (
-          <HiddenCoffeeIcon
-            key="coffee-reveal"
-            baseLeft={coffeeBaseLeft}
-            baseTop={coffeeBaseTop}
-            spawnFrom={{ left: coffeeSpawnLeft, top: coffeeSpawnTop }}
-            width={coffeeIconW}
-            height={coffeeIconH}
-            stageRef={stageRef}
-            playReveal={coffeePlayReveal}
-            parallaxShift={pShift.coffeeIcon}
-            zIndex={zOf("coffeeIcon", 18)}
-            selected={coffeeSnakeOpen}
-            onFocus={() => bringToFront("coffeeIcon")}
-            onOffsetChange={onCoffeeIconOffsetChange}
-            onRevealComplete={onCoffeeRevealComplete}
-            onOpen={openCoffeeSnake}
-          />
-        ) : null}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {trashMessage && showOtherWindows ? (
-          <motion.div
-            key="trash-bubble"
-            role="status"
-            initial={{ opacity: 0, y: 8, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 6, scale: 0.96 }}
-            transition={{ duration: 0.28, ease: EASE }}
-            style={{
-              position: "absolute",
-              left: Math.max(
-                12,
-                Math.min(
-                  trashIconLeft - 40,
-                  vw - 280
-                )
-              ),
-              top: Math.max(12, trashIconTop - 88),
-              width: 248,
-              zIndex: zOf("trashIcon", 15) + 2,
-              padding: "10px 12px",
-              background: "rgba(14, 10, 6, 0.96)",
-              border: "1px solid rgba(255, 122, 41, 0.55)",
-              borderRadius: 3,
-              boxShadow:
-                "0 0 20px rgba(255, 122, 41, 0.18), 0 12px 32px rgba(0,0,0,0.5)",
-              pointerEvents: "none",
-            }}
-          >
-            <p
-              style={{
-                margin: 0,
-                fontFamily: "'VT323', monospace",
-                fontSize: 11,
-                letterSpacing: "0.18em",
-                textTransform: "uppercase",
-                color: ACCENT_DIM,
-              }}
-            >
-              Recycle Bin
-            </p>
-            <p
-              style={{
-                margin: "6px 0 0",
-                fontFamily: "'DM Sans', sans-serif",
-                fontSize: 12,
-                lineHeight: 1.45,
-                color: "rgba(255, 255, 255, 0.88)",
-              }}
-            >
-              {trashMessage}
-            </p>
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
 
       {showOtherWindows && otherStuffOpen && (
         <Window
@@ -1081,6 +1028,11 @@ export default function Desktop() {
       )}
 
       <NomineeTab />
+      <MobileVaultToast open={toastOpen} onDone={dismissToast} />
+      <DesktopVaultBreachOverlay
+        open={vaultBreachOpen}
+        onComplete={finishVaultBreach}
+      />
       {coffeeSnakeOpen && showOtherWindows ? (
         <Window
           id="coffee-snake"
@@ -1096,7 +1048,10 @@ export default function Desktop() {
           uiScale={layoutScale}
           clipContent
         >
-          <CoffeeSnakeGame onQuit={() => setCoffeeSnakeOpen(false)} />
+          <CoffeeSnakeGame
+            variant="desktop"
+            onQuit={() => setCoffeeSnakeOpen(false)}
+          />
         </Window>
       ) : null}
       <StatusBar
@@ -1241,35 +1196,6 @@ function MeTxtBody({ frameWidth, layoutScale = 1 }) {
       >
         {about.bioDesktop ?? about.bio}
       </p>
-      {isDesktop ? (
-        <div
-          style={{
-            margin: `${Math.round(14 * s)}px 0 0`,
-            paddingTop: Math.round(12 * s),
-            borderTop: "1px solid rgba(255, 122, 41, 0.22)",
-          }}
-        >
-          <p
-            style={{
-              margin: `0 0 ${Math.round(8 * s)}px`,
-              fontFamily: "'VT323', monospace",
-              fontSize: Math.max(11, Math.round(13 * s)),
-              letterSpacing: "0.28em",
-              textTransform: "uppercase",
-              color: ACCENT_DIM,
-            }}
-          >
-            ▢ skills
-          </p>
-          <div className="skills-tag-row skills-tag-row--start" aria-label="Skills">
-            {skills.map((skill) => (
-              <span key={skill} className="skills-tag-row__chip">
-                {skill}
-              </span>
-            ))}
-          </div>
-        </div>
-      ) : null}
     </div>
   );
 }
@@ -1278,6 +1204,7 @@ function WelcomeBody({
   layoutScale = 1,
   skipTyping = false,
   onTypingComplete,
+  onVaultUnlock,
 }) {
   const s = layoutScale;
   const px = Math.round;
@@ -1296,18 +1223,20 @@ function WelcomeBody({
   return (
     <div
       style={{
+        position: "relative",
         padding: `${px(20 * s)}px ${px(22 * s)}px ${px(22 * s)}px`,
       }}
     >
+      <MobileVaultKeyhole onUnlock={onVaultUnlock} />
       <TypedLine
-        text="▢ Hello."
-        charMs={48}
+        text="▢ Hello, my name is…"
+        charMs={42}
         delay={160}
         skipTyping={skipTyping}
         style={{
           fontFamily: "'VT323', monospace",
           fontSize: mono,
-          letterSpacing: "0.32em",
+          letterSpacing: "0.24em",
           textTransform: "uppercase",
           color: ACCENT,
           textShadow: "0 0 8px rgba(255, 122, 41, 0.45)",
@@ -1319,7 +1248,7 @@ function WelcomeBody({
         as="h1"
         text="Jason Saputra"
         charMs={72}
-        delay={580}
+        delay={1080}
         skipTyping={skipTyping}
         style={{
           fontFamily: "'Bonbon', cursive",
@@ -1334,13 +1263,13 @@ function WelcomeBody({
       <TypedLine
         text="Interaction · Visual · Designer"
         charMs={30}
-        delay={1580}
+        delay={2100}
         skipTyping={skipTyping}
         onComplete={skipTyping ? undefined : handleLinesComplete}
         style={{
           fontFamily: "'VT323', monospace",
           fontSize: mono,
-          letterSpacing: "0.42em",
+          letterSpacing: "0.32em",
           textTransform: "uppercase",
           color: ACCENT,
           textShadow: "0 0 8px rgba(255, 122, 41, 0.45)",
@@ -1355,7 +1284,7 @@ function WelcomeBody({
             style={{
               fontFamily: "'VT323', monospace",
               fontSize: Math.max(10, px(13 * s)),
-              letterSpacing: "0.35em",
+              letterSpacing: "0.28em",
               textTransform: "uppercase",
               color: ACCENT_DIM,
               margin: `${px(16 * s)}px 0 0`,
@@ -1377,8 +1306,8 @@ function NomineeTab() {
       target="_blank"
       rel="noopener noreferrer"
       data-cursor="hover"
-      title="Open for work — view LinkedIn profile"
-      aria-label="Open for work — view LinkedIn profile"
+      title="Let's connect — view LinkedIn profile"
+      aria-label="Let's connect — view LinkedIn profile"
       style={{
         position: "absolute",
         right: 0,
@@ -1401,7 +1330,7 @@ function NomineeTab() {
         textDecoration: "none",
       }}
     >
-      J.S. · Open for work
+      J.S. · Let's connect
     </a>
   );
 }

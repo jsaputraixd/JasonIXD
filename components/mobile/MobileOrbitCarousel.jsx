@@ -5,7 +5,6 @@ import {
   useCallback,
   useEffect,
   useLayoutEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -15,17 +14,19 @@ import {
   PROJECT_CARD_GRADIENTS,
   ProjectCardHeroImage,
 } from "@/components/ProjectFlipCard";
-import ProjectViewLink from "@/components/ProjectViewLink";
 import { projectCarouselThumbSrc, resolveProjectCarouselSrc } from "@/lib/projectMedia";
 import { projectHeroTransitionName } from "@/lib/viewTransition";
 import { playClick } from "@/lib/typingSound";
 
-export const MOBILE_CAROUSEL_TRANSITION_MS = 560;
-export const MOBILE_CAROUSEL_EASE_BEZIER = [0.42, 0, 0.58, 1];
+export const MOBILE_CAROUSEL_TRANSITION_MS = 640;
+export const MOBILE_CAROUSEL_EASE_BEZIER = [0.22, 1, 0.36, 1];
 export const MOBILE_CAROUSEL_EASE = `cubic-bezier(${MOBILE_CAROUSEL_EASE_BEZIER.join(", ")})`;
 
 const ACCENT = "#FF7A29";
 const SWIPE_THRESHOLD = 48;
+/** Radians between neighboring cards on the ring (~50°). */
+const SLOT_ANGLE = 0.88;
+const DEG = 180 / Math.PI;
 
 function wrapIndex(idx, count) {
   return ((idx % count) + count) % count;
@@ -45,45 +46,45 @@ function relativeOffset(i, center, count) {
   return d;
 }
 
-function roleFromRel(rel) {
-  if (Math.abs(rel) < 0.45) return "center";
-  if (rel > 0.45 && rel < 1.55) return "right";
-  if (rel < -0.45 && rel > -1.55) return "left";
-  return null;
+function clamp(n, min, max) {
+  return Math.max(min, Math.min(max, n));
 }
 
-function layoutForRole(role, metrics, dragOffsetX = 0) {
+function easeOutCubic(t) {
+  return 1 - (1 - t) ** 3;
+}
+
+/**
+ * Cards sit on a 3D ring — they orbit around the center instead of
+ * sliding through each other on a flat plane.
+ */
+function layoutFromRel(rel, metrics) {
   const { stageW, cardW, cardH } = metrics;
-  const layouts = {
-    center: {
-      x: dragOffsetX,
-      y: 0,
-      scale: 1,
-      opacity: 1,
-      z: 20,
-      w: cardW,
-      h: cardH,
-    },
-    left: {
-      x: -stageW * 0.34 + dragOffsetX * 0.25,
-      y: 16,
-      scale: 0.5,
-      opacity: 0.72,
-      z: 10,
-      w: cardW * 0.56,
-      h: cardH * 0.56,
-    },
-    right: {
-      x: stageW * 0.34 + dragOffsetX * 0.25,
-      y: 16,
-      scale: 0.5,
-      opacity: 0.72,
-      z: 10,
-      w: cardW * 0.56,
-      h: cardH * 0.56,
-    },
+  const abs = Math.abs(rel);
+  if (abs > 1.85) return null;
+
+  const angle = rel * SLOT_ANGLE;
+  const radius = stageW * 0.58;
+  const x = Math.sin(angle) * radius;
+  // Center at z=0; neighbors push back so paths arc around, not through.
+  const z = (Math.cos(angle) - 1) * radius * 1.15;
+  const rotateY = -angle * DEG;
+  const t = clamp(abs, 0, 1);
+  const scale = 1 - 0.16 * t - (abs > 1 ? (abs - 1) * 0.1 : 0);
+
+  return {
+    x,
+    y: 8 * t,
+    z,
+    rotateY,
+    scale: clamp(scale, 0.58, 1),
+    opacity: clamp(1 - 0.16 * t - (abs > 1 ? (abs - 1) * 0.65 : 0), 0, 1),
+    // Closer-to-center always paints in front (avoids mid-swap z fights).
+    zIndex: Math.round(100 - abs * 40),
+    w: cardW,
+    h: cardH,
+    isCenter: abs < 0.45,
   };
-  return layouts[role];
 }
 
 function preloadCarouselNeighbors(centerIdx) {
@@ -107,37 +108,63 @@ const CarouselCard = memo(function CarouselCard({
   project,
   index,
   layout,
-  animate,
   isCenter,
+  onActivate,
 }) {
   const heroSrc = resolveProjectCarouselSrc(project);
-  const transition = animate
-    ? `transform ${MOBILE_CAROUSEL_TRANSITION_MS}ms ${MOBILE_CAROUSEL_EASE}, opacity ${MOBILE_CAROUSEL_TRANSITION_MS}ms ${MOBILE_CAROUSEL_EASE}`
-    : "none";
 
   return (
     <div
       className={
         isCenter
           ? "mobile-cover-card mobile-cover-card--center"
-          : "mobile-cover-card"
+          : "mobile-cover-card mobile-cover-card--side"
+      }
+      role={isCenter ? undefined : "button"}
+      tabIndex={isCenter ? undefined : 0}
+      aria-label={isCenter ? undefined : `Focus ${project.title}`}
+      onClick={
+        isCenter
+          ? undefined
+          : (e) => {
+              e.stopPropagation();
+              onActivate?.(index);
+            }
+      }
+      onKeyDown={
+        isCenter
+          ? undefined
+          : (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                e.stopPropagation();
+                onActivate?.(index);
+              }
+            }
+      }
+      onPointerDown={
+        isCenter
+          ? undefined
+          : (e) => {
+              e.stopPropagation();
+            }
       }
       style={{
         width: layout.w,
         height: layout.h,
-        transform: `translate3d(calc(-50% + ${layout.x}px), calc(-50% + ${layout.y}px), 0) scale(${layout.scale})`,
+        transform: `translate3d(calc(-50% + ${layout.x}px), calc(-50% + ${layout.y}px), ${layout.z}px) rotateY(${layout.rotateY}deg) scale(${layout.scale})`,
         opacity: layout.opacity,
-        zIndex: layout.z,
-        pointerEvents: isCenter ? "auto" : "none",
-        transition,
+        zIndex: layout.zIndex,
+        pointerEvents: "auto",
+        cursor: isCenter ? "grab" : "pointer",
+        // RAF drives motion — avoid CSS fighting the glide
+        transition: "none",
+        willChange: "transform, opacity",
       }}
     >
-      <ProjectViewLink
-        href={`/work/${project.slug}`}
-        prefetch={isCenter}
+      <div
         className="mobile-project-card"
-        aria-label={`Open case study: ${project.title}`}
-        onClick={() => playClick()}
+        aria-hidden={!isCenter}
         style={{
           position: "relative",
           display: "block",
@@ -145,11 +172,10 @@ const CarouselCard = memo(function CarouselCard({
           height: "100%",
           overflow: "hidden",
           borderRadius: 3,
-          border: `1px solid rgba(255, 122, 41, ${isCenter ? 0.62 : 0.32})`,
+          border: `1px solid rgba(255, 122, 41, ${isCenter ? 0.62 : 0.38})`,
           boxShadow: isCenter
             ? "0 12px 32px rgba(0, 0, 0, 0.52)"
             : "0 6px 16px rgba(0, 0, 0, 0.38)",
-          textDecoration: "none",
           color: "inherit",
           WebkitTapHighlightColor: "transparent",
         }}
@@ -187,7 +213,7 @@ const CarouselCard = memo(function CarouselCard({
             }}
           />
         </div>
-      </ProjectViewLink>
+      </div>
     </div>
   );
 });
@@ -234,13 +260,18 @@ export default function MobileOrbitCarousel({
 
   const stageRef = useRef(null);
   const dragRef = useRef(null);
-  const animTimerRef = useRef(0);
+  const rafRef = useRef(0);
+  const visualCenterRef = useRef(0);
+  const activeIdxRef = useRef(0);
+  const dragUnitRef = useRef(144);
+
   const [internalIdx, setInternalIdx] = useState(0);
-  const [dragPx, setDragPx] = useState(0);
+  const [visualCenter, setVisualCenter] = useState(0);
   const [dragging, setDragging] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
 
   const activeIdx = controlledIdx ?? internalIdx;
+  activeIdxRef.current = activeIdx;
 
   const setActiveIdx = useCallback(
     (idx) => {
@@ -251,69 +282,141 @@ export default function MobileOrbitCarousel({
     [count, onActiveChange]
   );
 
-  const startAnimationLock = useCallback(() => {
-    setIsAnimating(true);
-    window.clearTimeout(animTimerRef.current);
-    animTimerRef.current = window.setTimeout(() => {
-      setIsAnimating(false);
-    }, reduceMotion ? 80 : MOBILE_CAROUSEL_TRANSITION_MS);
-  }, [reduceMotion]);
+  const stopRaf = useCallback(() => {
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = 0;
+    }
+  }, []);
+
+  /** Glide visualCenter from current float → integer target (no snap). */
+  const animateCenterTo = useCallback(
+    (target, { from } = {}) => {
+      stopRaf();
+      const start = from ?? visualCenterRef.current;
+      const end = target;
+      const duration = reduceMotion ? 0 : MOBILE_CAROUSEL_TRANSITION_MS;
+      const wrappedEnd = wrapIndex(Math.round(end), count);
+
+      setIsAnimating(true);
+      setActiveIdx(wrappedEnd);
+
+      if (duration <= 0 || Math.abs(end - start) < 0.001) {
+        visualCenterRef.current = wrappedEnd;
+        setVisualCenter(wrappedEnd);
+        setIsAnimating(false);
+        return;
+      }
+
+      const t0 = performance.now();
+      const tick = (now) => {
+        const t = Math.min(1, (now - t0) / duration);
+        const v = start + (end - start) * easeOutCubic(t);
+        visualCenterRef.current = v;
+        setVisualCenter(v);
+        if (t < 1) {
+          rafRef.current = requestAnimationFrame(tick);
+        } else {
+          visualCenterRef.current = wrappedEnd;
+          setVisualCenter(wrappedEnd);
+          setIsAnimating(false);
+          rafRef.current = 0;
+        }
+      };
+      rafRef.current = requestAnimationFrame(tick);
+    },
+    [count, reduceMotion, setActiveIdx, stopRaf]
+  );
 
   useLayoutEffect(() => {
     preloadCarouselNeighbors(activeIdx);
   }, [activeIdx]);
 
   useEffect(() => {
-    return () => window.clearTimeout(animTimerRef.current);
-  }, []);
+    return () => stopRaf();
+  }, [stopRaf]);
 
-  const metrics = useMemo(() => {
-    if (typeof window === "undefined") {
-      return { stageW: 320, cardW: 260, cardH: 208 };
+  // Keep visual center in sync if parent controls index externally
+  useEffect(() => {
+    if (dragging || isAnimating) return;
+    const current = wrapIndex(Math.round(visualCenterRef.current), count);
+    if (current !== activeIdx) {
+      visualCenterRef.current = activeIdx;
+      setVisualCenter(activeIdx);
     }
-    const vw = window.innerWidth;
-    const stageW = Math.min(vw - 32, 360);
-    const cardW = Math.min(Math.round(vw * 0.68), 280);
-    const cardH = Math.round(cardW * 0.8);
-    return { stageW, cardW, cardH };
+  }, [activeIdx, count, dragging, isAnimating]);
+
+  const [metrics, setMetrics] = useState({
+    stageW: 320,
+    cardW: 260,
+    cardH: 208,
+  });
+
+  useLayoutEffect(() => {
+    const measure = () => {
+      const vw = window.innerWidth;
+      const stageW = Math.min(vw - 32, 360);
+      const cardW = Math.min(Math.round(vw * 0.68), 280);
+      const cardH = Math.round(cardW * 0.8);
+      dragUnitRef.current = stageW * 0.45;
+      setMetrics((prev) =>
+        prev.stageW === stageW && prev.cardW === cardW && prev.cardH === cardH
+          ? prev
+          : { stageW, cardW, cardH }
+      );
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    window.visualViewport?.addEventListener("resize", measure);
+    return () => {
+      window.removeEventListener("resize", measure);
+      window.visualViewport?.removeEventListener("resize", measure);
+    };
   }, []);
 
   const navigate = useCallback(
     (direction) => {
       if (isAnimating) return;
       playClick();
-      startAnimationLock();
-      setDragPx(0);
-      setActiveIdx(
-        direction === "next" ? activeIdx + 1 : activeIdx - 1
-      );
+      const from = visualCenterRef.current;
+      const base = Math.round(from);
+      const end = direction === "next" ? base + 1 : base - 1;
+      animateCenterTo(end, { from });
     },
-    [activeIdx, isAnimating, setActiveIdx, startAnimationLock]
+    [animateCenterTo, isAnimating]
   );
 
   const goToIndex = useCallback(
     (idx) => {
       const wrapped = wrapIndex(idx, count);
-      if (isAnimating || wrapped === activeIdx) return;
+      if (isAnimating || wrapped === wrapIndex(Math.round(visualCenterRef.current), count)) {
+        return;
+      }
       playClick();
-      startAnimationLock();
-      setDragPx(0);
-      setActiveIdx(wrapped);
+      const from = visualCenterRef.current;
+      const current = wrapIndex(Math.round(from), count);
+      const dir = carouselDirection(current, wrapped, count);
+      const steps =
+        dir === 1
+          ? (wrapped - current + count) % count
+          : -((current - wrapped + count) % count);
+      animateCenterTo(Math.round(from) + steps, { from });
     },
-    [activeIdx, count, isAnimating, setActiveIdx, startAnimationLock]
+    [animateCenterTo, count, isAnimating]
   );
 
   const onPointerDown = useCallback(
     (e) => {
       if (isAnimating) return;
       if (e.pointerType === "mouse" && e.button !== 0) return;
+      stopRaf();
       dragRef.current = {
         pointerId: e.pointerId,
         startX: e.clientX,
         startY: e.clientY,
+        originCenter: visualCenterRef.current,
         axis: null,
       };
-      setDragPx(0);
       setDragging(true);
       try {
         e.currentTarget.setPointerCapture(e.pointerId);
@@ -321,7 +424,7 @@ export default function MobileOrbitCarousel({
         /* ignore */
       }
     },
-    [isAnimating]
+    [isAnimating, stopRaf]
   );
 
   const onPointerMove = useCallback((e) => {
@@ -338,7 +441,9 @@ export default function MobileOrbitCarousel({
     }
     if (d.axis !== "x") return;
 
-    setDragPx(dx);
+    const next = d.originCenter - dx / dragUnitRef.current;
+    visualCenterRef.current = next;
+    setVisualCenter(next);
   }, []);
 
   const endDrag = useCallback(
@@ -353,21 +458,24 @@ export default function MobileOrbitCarousel({
         /* ignore */
       }
       if (d.axis !== "x") {
-        setDragPx(0);
+        animateCenterTo(Math.round(d.originCenter), {
+          from: visualCenterRef.current,
+        });
         return;
       }
 
       const dx = e.clientX - d.startX;
-      setDragPx(0);
+      const from = visualCenterRef.current;
       if (Math.abs(dx) >= SWIPE_THRESHOLD) {
-        navigate(dx < 0 ? "next" : "prev");
+        playClick();
+        const base = Math.round(d.originCenter);
+        animateCenterTo(dx < 0 ? base + 1 : base - 1, { from });
+      } else {
+        animateCenterTo(Math.round(d.originCenter), { from });
       }
     },
-    [navigate]
+    [animateCenterTo]
   );
-
-  const centerFloat = activeIdx - dragPx / (metrics.stageW * 0.45);
-  const animate = !dragging && !reduceMotion;
 
   return (
     <div style={{ marginBottom: 4 }}>
@@ -380,7 +488,7 @@ export default function MobileOrbitCarousel({
         }
         role="region"
         aria-roledescription="carousel"
-        aria-label="Selected projects — swipe or use arrows"
+        aria-label="Selected projects — swipe, tap a side card, or use arrows"
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={endDrag}
@@ -391,16 +499,9 @@ export default function MobileOrbitCarousel({
         </div>
 
         {featuredProjects.map((p, i) => {
-          const rel = relativeOffset(i, centerFloat, count);
-          const role = roleFromRel(rel);
-          if (!role) return null;
-
-          const layout = layoutForRole(
-            role,
-            metrics,
-            dragging ? dragPx : 0
-          );
-          const isCenter = role === "center";
+          const rel = relativeOffset(i, visualCenter, count);
+          const layout = layoutFromRel(rel, metrics);
+          if (!layout) return null;
 
           return (
             <CarouselCard
@@ -408,8 +509,8 @@ export default function MobileOrbitCarousel({
               project={p}
               index={i}
               layout={layout}
-              animate={animate}
-              isCenter={isCenter}
+              isCenter={layout.isCenter}
+              onActivate={goToIndex}
             />
           );
         })}

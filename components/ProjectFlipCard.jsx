@@ -62,9 +62,10 @@ export default function ProjectFlipCard({
   onRequestFocus,
   loading = "lazy",
 }) {
+  const aspect = aspectRatio ?? DESKTOP_PROJECT_CARD_ASPECT;
+  const fluid = frameWidth == null && frameHeight == null;
   const innerW = frameWidth ?? 268;
-  const cardH =
-    frameHeight ?? Math.round(innerW / (aspectRatio ?? DESKTOP_PROJECT_CARD_ASPECT));
+  const cardH = frameHeight ?? Math.round(innerW / aspect);
 
   const heroSrc = project.thumb ?? project.caseStudyHero ?? null;
   const { category, role, timeline } = projectCardMeta(project);
@@ -81,7 +82,8 @@ export default function ProjectFlipCard({
         display: "block",
         position: "relative",
         width: "100%",
-        height: cardH,
+        height: fluid ? undefined : cardH,
+        aspectRatio: fluid ? String(aspect) : undefined,
         overflow: "hidden",
         cursor: "pointer",
         textDecoration: "none",

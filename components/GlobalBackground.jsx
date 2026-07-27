@@ -6,9 +6,42 @@ const PARTICLE_COUNT = 90;
 const REPEL_RADIUS = 140;
 const REPEL_STRENGTH = 1.4;
 const FRICTION = 0.93;
+const MAX_METEORS = 2;
+const METEOR_GAP_MIN_MS = 4200;
+const METEOR_GAP_MAX_MS = 12000;
 
 const GRADIENT =
   "radial-gradient(ellipse at 50% 35%, #1f1a2e 0%, #0e0c14 70%, #050405 100%)";
+
+function nextMeteorDelay() {
+  return METEOR_GAP_MIN_MS + Math.random() * (METEOR_GAP_MAX_MS - METEOR_GAP_MIN_MS);
+}
+
+function spawnMeteor(w, h) {
+  // Mostly down-right streaks; occasional down-left for variety.
+  const downRight = Math.random() < 0.72;
+  const angle = downRight
+    ? Math.PI * (0.18 + Math.random() * 0.22)
+    : Math.PI * (0.78 + Math.random() * 0.18);
+  const speed = 7.5 + Math.random() * 9;
+  const len = 70 + Math.random() * 120;
+  const startX = downRight
+    ? -40 + Math.random() * w * 0.75
+    : w * 0.25 + Math.random() * (w * 0.75 + 40);
+  const startY = -30 - Math.random() * h * 0.25;
+
+  return {
+    x: startX,
+    y: startY,
+    vx: Math.cos(angle) * speed,
+    vy: Math.sin(angle) * speed,
+    len,
+    life: 1,
+    decay: 0.0065 + Math.random() * 0.006,
+    width: 1.1 + Math.random() * 1.6,
+    color: Math.random() < 0.75 ? "255, 122, 41" : "255, 220, 180",
+  };
+}
 
 export default function GlobalBackground() {
   const canvasRef = useRef(null);
@@ -62,6 +95,9 @@ export default function GlobalBackground() {
 
     resize();
     let particles = makeParticles();
+    /** @type {ReturnType<typeof spawnMeteor>[]} */
+    let meteors = [];
+    let nextMeteorAt = performance.now() + nextMeteorDelay() * 0.45;
 
     const onResize = () => {
       resize();
@@ -80,7 +116,7 @@ export default function GlobalBackground() {
     window.addEventListener("mousemove", onMouseMove, { passive: true });
     window.addEventListener("mouseleave", onMouseLeave);
 
-    const draw = () => {
+    const draw = (now) => {
       const w = window.innerWidth;
       const h = window.innerHeight;
       ctx.clearRect(0, 0, w, h);
@@ -132,6 +168,56 @@ export default function GlobalBackground() {
         ctx.fillStyle = `rgba(${p.color}, ${alpha})`;
         ctx.fill();
       }
+
+      if (meteors.length < MAX_METEORS && now >= nextMeteorAt) {
+        meteors.push(spawnMeteor(w, h));
+        nextMeteorAt = now + nextMeteorDelay();
+      }
+
+      if (meteors.length > 0) {
+        const alive = [];
+        for (const meteor of meteors) {
+          meteor.x += meteor.vx;
+          meteor.y += meteor.vy;
+          meteor.life -= meteor.decay;
+
+          const speed = Math.hypot(meteor.vx, meteor.vy) || 1;
+          const tx = (meteor.vx / speed) * meteor.len;
+          const ty = (meteor.vy / speed) * meteor.len;
+          const x0 = meteor.x - tx;
+          const y0 = meteor.y - ty;
+          const fade = Math.max(0, Math.min(1, meteor.life));
+          const head = Math.min(1, fade * 1.15);
+
+          const grad = ctx.createLinearGradient(x0, y0, meteor.x, meteor.y);
+          grad.addColorStop(0, `rgba(${meteor.color}, 0)`);
+          grad.addColorStop(0.55, `rgba(${meteor.color}, ${0.22 * fade})`);
+          grad.addColorStop(0.88, `rgba(${meteor.color}, ${0.55 * head})`);
+          grad.addColorStop(1, `rgba(255, 245, 220, ${0.85 * head})`);
+
+          ctx.strokeStyle = grad;
+          ctx.lineWidth = meteor.width;
+          ctx.lineCap = "round";
+          ctx.beginPath();
+          ctx.moveTo(x0, y0);
+          ctx.lineTo(meteor.x, meteor.y);
+          ctx.stroke();
+
+          ctx.beginPath();
+          ctx.arc(meteor.x, meteor.y, meteor.width * 1.35, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255, 240, 210, ${0.7 * head})`;
+          ctx.fill();
+
+          const onScreen =
+            meteor.x > -120 &&
+            meteor.x < w + 120 &&
+            meteor.y > -120 &&
+            meteor.y < h + 120;
+          if (meteor.life > 0 && onScreen) alive.push(meteor);
+        }
+        meteors = alive;
+      }
+
       rafRef.current = requestAnimationFrame(draw);
     };
 

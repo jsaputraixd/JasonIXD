@@ -18,6 +18,8 @@ const EASE = [0.16, 1, 0.3, 1];
 
 const BOOT_LINES = [
   "> BOOTING JS-OS v1.0...",
+  "> LOADING work.exe...",
+  "> MOUNTING /work/featured...",
   "> LOC: SF // BALI",
   "> SYNC OK",
   "> READY \u25A2",

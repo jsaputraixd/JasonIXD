@@ -2,9 +2,6 @@ export const about = {
   name: "Jason Saputra",
   title: "Interaction & Visual Designer",
   bio: "Designer based in San Francisco, originally from Bali. I focus on providing unforgettable experiences through thoughtful, accessible design — combining research, speed, and empathy. Powered by exactly two oat-milk lattes a day. Currently open to new work.",
-  /** Shorter copy for the desktop me.txt window. */
-  bioDesktop:
-    "SF-based designer from Bali. I craft thoughtful, accessible experiences through research, speed, and empathy. Two oat lattes daily. Open to new work.",
   email: "Jsaputra.IXD@gmail.com",
   socials: {
     linkedin: "https://linkedin.com/in/jasonixd",

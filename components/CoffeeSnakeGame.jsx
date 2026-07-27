@@ -21,6 +21,13 @@ const KEY_TO_DIR = {
   d: { x: 1, y: 0 },
 };
 
+const DIRS = {
+  up: { x: 0, y: -1 },
+  down: { x: 0, y: 1 },
+  left: { x: -1, y: 0 },
+  right: { x: 1, y: 0 },
+};
+
 function randCell() {
   return {
     x: Math.floor(Math.random() * COLS),
@@ -48,7 +55,68 @@ function writeHi(n) {
   localStorage.setItem(HI_KEY, String(n));
 }
 
-export default function CoffeeSnakeGame({ onQuit }) {
+function MobileDPad({ onDir, disabled }) {
+  const press = (dir) => (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (disabled) return;
+    onDir(dir);
+  };
+
+  return (
+    <div className="coffee-snake-dpad" aria-label="Direction pad">
+      <button
+        type="button"
+        className="coffee-snake-dpad__btn coffee-snake-dpad__btn--up"
+        aria-label="Up"
+        disabled={disabled}
+        onPointerDown={press(DIRS.up)}
+      >
+        ▲
+      </button>
+      <button
+        type="button"
+        className="coffee-snake-dpad__btn coffee-snake-dpad__btn--left"
+        aria-label="Left"
+        disabled={disabled}
+        onPointerDown={press(DIRS.left)}
+      >
+        ◀
+      </button>
+      <button
+        type="button"
+        className="coffee-snake-dpad__btn coffee-snake-dpad__btn--center"
+        aria-hidden
+        tabIndex={-1}
+        disabled
+      />
+      <button
+        type="button"
+        className="coffee-snake-dpad__btn coffee-snake-dpad__btn--right"
+        aria-label="Right"
+        disabled={disabled}
+        onPointerDown={press(DIRS.right)}
+      >
+        ▶
+      </button>
+      <button
+        type="button"
+        className="coffee-snake-dpad__btn coffee-snake-dpad__btn--down"
+        aria-label="Down"
+        disabled={disabled}
+        onPointerDown={press(DIRS.down)}
+      >
+        ▼
+      </button>
+    </div>
+  );
+}
+
+/**
+ * @param {"desktop" | "mobile"} variant
+ */
+export default function CoffeeSnakeGame({ onQuit, variant = "desktop" }) {
+  const isMobile = variant === "mobile";
   const canvasRef = useRef(null);
   const wrapRef = useRef(null);
   const [score, setScore] = useState(0);
@@ -93,6 +161,7 @@ export default function CoffeeSnakeGame({ onQuit }) {
   }, []);
 
   const restartAfterGameOver = useCallback(() => {
+    playClick();
     resetBoard();
     setStarted(true);
     setStatus("RUN");
@@ -104,8 +173,8 @@ export default function CoffeeSnakeGame({ onQuit }) {
   }, [resetToReady]);
 
   useEffect(() => {
-    wrapRef.current?.focus();
-  }, []);
+    if (!isMobile) wrapRef.current?.focus();
+  }, [isMobile]);
 
   const draw = useCallback(() => {
     const canvas = canvasRef.current;
@@ -162,9 +231,9 @@ export default function CoffeeSnakeGame({ onQuit }) {
       ctx.fillText("GAME OVER", w / 2, h / 2 - 8);
       ctx.fillStyle = "rgba(255, 200, 160, 0.85)";
       ctx.font = "13px 'VT323', monospace";
-      ctx.fillText("SPACE · RETRY", w / 2, h / 2 + 14);
+      ctx.fillText(isMobile ? "TAP RETRY" : "SPACE · RETRY", w / 2, h / 2 + 14);
     }
-  }, []);
+  }, [isMobile]);
 
   const step = useCallback(() => {
     const g = gameRef.current;
@@ -220,13 +289,17 @@ export default function CoffeeSnakeGame({ onQuit }) {
     draw();
   }, [draw, gameOver, started]);
 
-  const queueDir = useCallback((dir) => {
-    const g = gameRef.current;
-    if (!started || g.over) return;
-    if (dir.x === -g.dir.x && dir.y === -g.dir.y) return;
-    g.nextDir = dir;
-  }, [started]);
+  const queueDir = useCallback(
+    (dir) => {
+      const g = gameRef.current;
+      if (!started || g.over) return;
+      if (dir.x === -g.dir.x && dir.y === -g.dir.y) return;
+      g.nextDir = dir;
+    },
+    [started]
+  );
 
+  // Desktop: keyboard. Mobile: optional Escape still works if a keyboard is attached.
   useEffect(() => {
     const onKey = (e) => {
       if (e.key === "Escape") {
@@ -234,6 +307,7 @@ export default function CoffeeSnakeGame({ onQuit }) {
         onQuit?.();
         return;
       }
+      if (isMobile) return;
       if (!started && (e.key === " " || e.key === "Enter")) {
         e.preventDefault();
         startGame();
@@ -251,8 +325,16 @@ export default function CoffeeSnakeGame({ onQuit }) {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [onQuit, queueDir, restartAfterGameOver, startGame, started]);
+  }, [
+    isMobile,
+    onQuit,
+    queueDir,
+    restartAfterGameOver,
+    startGame,
+    started,
+  ]);
 
+  // Desktop keeps swipe as a bonus; mobile relies on the D-pad (swipe still works on board).
   useEffect(() => {
     const el = wrapRef.current;
     if (!el) return;
@@ -261,12 +343,14 @@ export default function CoffeeSnakeGame({ onQuit }) {
     let startY = 0;
 
     const onTouchStart = (e) => {
+      if (e.target.closest?.(".coffee-snake-dpad")) return;
       const t = e.changedTouches[0];
       startX = t.clientX;
       startY = t.clientY;
     };
 
     const onTouchEnd = (e) => {
+      if (e.target.closest?.(".coffee-snake-dpad")) return;
       const t = e.changedTouches[0];
       const dx = t.clientX - startX;
       const dy = t.clientY - startY;
@@ -286,16 +370,22 @@ export default function CoffeeSnakeGame({ onQuit }) {
     };
   }, [queueDir]);
 
+  const dpadDisabled = !started || gameOver;
+
   return (
-    <div ref={wrapRef} className="coffee-snake-game" tabIndex={0}>
+    <div
+      ref={wrapRef}
+      className={
+        isMobile
+          ? "coffee-snake-game coffee-snake-game--mobile"
+          : "coffee-snake-game"
+      }
+      tabIndex={isMobile ? -1 : 0}
+    >
       <div className="coffee-snake-game__hud">
-        <span>
-          SCORE · {String(score).padStart(4, "0")}
-        </span>
+        <span>SCORE · {String(score).padStart(4, "0")}</span>
         <span className="coffee-snake-game__status">{status}</span>
-        <span>
-          HI · {String(hi).padStart(4, "0")}
-        </span>
+        <span>HI · {String(hi).padStart(4, "0")}</span>
       </div>
       <div className="coffee-snake-game__board">
         <canvas
@@ -313,15 +403,47 @@ export default function CoffeeSnakeGame({ onQuit }) {
               data-cursor="hover"
               onClick={startGame}
             >
-              SPACE · START
+              {isMobile ? "TAP · START" : "SPACE · START"}
+            </button>
+          </div>
+        ) : null}
+        {isMobile && gameOver ? (
+          <div className="coffee-snake-game__start">
+            <button
+              type="button"
+              className="coffee-snake-game__start-btn"
+              onClick={restartAfterGameOver}
+            >
+              TAP · RETRY
             </button>
           </div>
         ) : null}
       </div>
+
+      {isMobile ? (
+        <div className="coffee-snake-game__mobile-controls">
+          <MobileDPad onDir={queueDir} disabled={dpadDisabled} />
+          <button
+            type="button"
+            className="coffee-snake-game__quit-btn"
+            onClick={() => {
+              playClick();
+              onQuit?.();
+            }}
+          >
+            QUIT
+          </button>
+        </div>
+      ) : null}
+
       <p className="coffee-snake-game__hint">
-        {started
-          ? "ARROWS · WASD · SWIPE · ESC TO QUIT"
-          : "PRESS SPACE OR CLICK START · ESC TO QUIT"}
+        {isMobile
+          ? started
+            ? "USE THE PAD · SWIPE WORKS TOO"
+            : "TAP START · THEN STEER WITH THE PAD"
+          : started
+            ? "ARROWS · WASD · SWIPE · ESC TO QUIT"
+            : "PRESS SPACE OR CLICK START · ESC TO QUIT"}
       </p>
     </div>
   );
