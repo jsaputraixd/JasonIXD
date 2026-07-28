@@ -25,6 +25,12 @@ import MobileOrbitCarousel, {
   MOBILE_CAROUSEL_TRANSITION_MS,
   carouselDirection,
 } from "@/components/mobile/MobileOrbitCarousel";
+import {
+  MobileVaultGameFlow,
+  MobileVaultKeyhole,
+  MobileVaultToast,
+  useVaultKeyState,
+} from "@/components/mobile/MobileVaultEasterEgg";
 import WelcomeAsciiPortrait from "@/components/WelcomeAsciiPortrait";
 import {
   TypedLine,
@@ -43,7 +49,6 @@ import {
   signalBootComplete,
 } from "@/lib/introSession";
 import { playClick, playTypingClick } from "@/lib/typingSound";
-import { pickTrashMessage } from "@/lib/trashMessage";
 
 const ACCENT_DIM = "#FFB570";
 
@@ -763,120 +768,6 @@ function useMobileSectionSpy(scrollRoot, enabled) {
   return activeId;
 }
 
-function MobileRecycleDock() {
-  const [message, setMessage] = useState(null);
-  const timerRef = useRef(null);
-
-  const activate = () => {
-    playClick();
-    if (timerRef.current) clearTimeout(timerRef.current);
-    setMessage(pickTrashMessage());
-    timerRef.current = setTimeout(() => setMessage(null), 4800);
-  };
-
-  useEffect(
-    () => () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    },
-    []
-  );
-
-  return (
-    <motion.div
-      className="mobile-recycle-dock"
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay: 0.35, duration: 0.4, ease: EASE }}
-      style={{
-        position: "absolute",
-        right: MOBILE_CARD_INSET,
-        bottom: "calc(72px + env(safe-area-inset-bottom, 0px))",
-        zIndex: 32,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "flex-end",
-        gap: 8,
-        pointerEvents: "none",
-      }}
-    >
-      <AnimatePresence>
-        {message ? (
-          <motion.div
-            key="trash-msg"
-            role="status"
-            initial={{ opacity: 0, y: 8, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 6, scale: 0.96 }}
-            transition={{ duration: 0.28, ease: EASE }}
-            style={{
-              maxWidth: 220,
-              padding: "10px 12px",
-              border: "1px solid rgba(255, 122, 41, 0.55)",
-              borderRadius: 3,
-              background: "rgba(14, 10, 6, 0.96)",
-              boxShadow: "0 0 20px rgba(255, 122, 41, 0.18)",
-              pointerEvents: "none",
-            }}
-          >
-            <p
-              style={{
-                margin: 0,
-                fontFamily: "'DM Sans', sans-serif",
-                fontSize: 12,
-                lineHeight: 1.45,
-                color: "rgba(255, 255, 255, 0.9)",
-              }}
-            >
-              {message}
-            </p>
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
-      <button
-        type="button"
-        className="mobile-recycle-dock__btn"
-        aria-label="Recycle Bin"
-        onClick={activate}
-        style={{
-          pointerEvents: "auto",
-          margin: 0,
-          padding: "6px 8px 8px",
-          border: "1px solid rgba(255, 122, 41, 0.45)",
-          borderRadius: 3,
-          background: "rgba(10, 6, 4, 0.92)",
-          cursor: "pointer",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 4,
-          boxShadow: "0 6px 20px rgba(0, 0, 0, 0.45)",
-        }}
-      >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/images/trash-bin-icon.png"
-          alt=""
-          width={32}
-          height={28}
-          style={{ objectFit: "contain" }}
-          draggable={false}
-        />
-        <span
-          style={{
-            fontFamily: "'VT323', monospace",
-            fontSize: 9,
-            letterSpacing: "0.12em",
-            textTransform: "uppercase",
-            color: ACCENT,
-          }}
-        >
-          Bin
-        </span>
-      </button>
-    </motion.div>
-  );
-}
-
 function MobileBootReady({ show }) {
   const [dismissed, setDismissed] = useState(false);
   const reduceMotion = useReducedMotion();
@@ -1005,6 +896,8 @@ function MobileDesktop() {
   const scrollEndSpacerRef = useRef(null);
   const activeSection = useMobileSectionSpy(scrollRef, showMobileRest);
   useMobileScrollEndSpacer(scrollRef, scrollEndSpacerRef, showMobileRest);
+  const { toastOpen, dismissToast } = useVaultKeyState();
+  const [vaultGameOpen, setVaultGameOpen] = useState(false);
 
   return (
     <div className="mobile-os">
@@ -1027,12 +920,16 @@ function MobileDesktop() {
         }}
       >
         <MobileJourneyChapter scrollRoot={scrollRef} variant="fade">
-          <MobileCard title="welcome.exe" titleExtra={<WelcomeReadAloud compact />}>
+          <MobileCard
+            title="welcome.exe"
+            titleExtra={<WelcomeReadAloud compact />}
+          >
             <MobileWelcomeMorph
               phase={phase}
               typed={welcomeTyped}
               skipTyping={skipWelcomeTyping}
               onTypingComplete={handleWelcomeTypingComplete}
+              onVaultUnlock={() => setVaultGameOpen(true)}
             />
           </MobileCard>
         </MobileJourneyChapter>
@@ -1124,7 +1021,11 @@ function MobileDesktop() {
         ) : null}
       </div>
 
-      {showMobileRest ? <MobileRecycleDock /> : null}
+      <MobileVaultToast open={toastOpen} onDone={dismissToast} />
+      <MobileVaultGameFlow
+        open={vaultGameOpen}
+        onClose={() => setVaultGameOpen(false)}
+      />
       <StatusBar />
     </div>
   );
@@ -1186,7 +1087,16 @@ function MobileCard({
           {title}
         </span>
         {titleExtra ? (
-          <span style={{ flexShrink: 0, display: "inline-flex" }}>{titleExtra}</span>
+          <span
+            style={{
+              flexShrink: 0,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+            }}
+          >
+            {titleExtra}
+          </span>
         ) : null}
       </div>
       <div
@@ -1227,6 +1137,7 @@ function MobileWelcomeMorph({
   typed,
   skipTyping = false,
   onTypingComplete,
+  onVaultUnlock,
 }) {
   const showWaiting = phase === "waiting-boot";
   const showIntro = phase === "intro";
@@ -1292,6 +1203,7 @@ function MobileWelcomeMorph({
             <MobileWelcomeBody
               skipTyping={skipTyping}
               onTypingComplete={onTypingComplete}
+              onVaultUnlock={onVaultUnlock}
             />
           </motion.div>
         )}
@@ -1300,7 +1212,11 @@ function MobileWelcomeMorph({
   );
 }
 
-function MobileWelcomeBody({ skipTyping = false, onTypingComplete }) {
+function MobileWelcomeBody({
+  skipTyping = false,
+  onTypingComplete,
+  onVaultUnlock,
+}) {
   const [typingDone, setTypingDone] = useState(skipTyping);
 
   useEffect(() => {
@@ -1313,9 +1229,10 @@ function MobileWelcomeBody({ skipTyping = false, onTypingComplete }) {
   }, [onTypingComplete]);
 
   return (
-    <div>
+    <div style={{ position: "relative" }}>
+      <MobileVaultKeyhole onUnlock={onVaultUnlock} />
       <TypedLine
-        text="▢ Hello."
+        text="▢ Hello, my name is…"
         charMs={48}
         delay={160}
         skipTyping={skipTyping}

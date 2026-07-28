@@ -27,13 +27,13 @@ const GLOBE_Z = 3;
 
 const SIZE = {
   mobile: {
-    disc: 220,
-    orbitExtra: 82,
-    padX: 78,
-    padY: 56,
+    disc: 248,
+    orbitExtra: 78,
+    padX: 72,
+    padY: 52,
     labelFont: 10,
     homeFont: 20,
-    globeRows: 20,
+    globeRows: 24,
     lowPower: true,
   },
   desktop: {
@@ -581,20 +581,18 @@ export default function SkillsPlanet({
               zIndex: GLOBE_Z,
               width: discR * 2,
               height: discR * 2,
-              borderRadius: "50%",
-              overflow: "hidden",
-              background:
-                "radial-gradient(circle at 50% 48%, rgba(6, 4, 3, 0.94) 0%, rgba(4, 3, 2, 0.98) 72%, rgba(2, 2, 2, 1) 100%)",
-              boxShadow:
-                "0 0 0 1px rgba(255, 122, 41, 0.14), 0 0 28px rgba(255, 122, 41, 0.12), 0 12px 32px rgba(0,0,0,0.45)",
+              // No opaque disc / circular plate — ASCII globe floats on its own.
+              background: "transparent",
+              overflow: "visible",
+              pointerEvents: "auto",
             }}
           >
             <InteractiveAsciiGlobe
               rows={size.globeRows}
               lowPower={size.lowPower}
-              fillScale={1.14}
+              fillScale={isMobile ? 1.08 : 1.06}
               ariaLabel="Interactive globe — drag to rotate; watch for a signal over SF"
-              style={{ opacity: 0.92 }}
+              style={{ opacity: 0.96 }}
               surfacePin={surfacePin}
             />
           </div>

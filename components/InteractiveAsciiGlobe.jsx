@@ -536,6 +536,7 @@ export default function InteractiveAsciiGlobe({
 
   const onPinPointerUp = (e) => {
     e.stopPropagation();
+    e.preventDefault();
     const d = pinDragRef.current;
     pinDragRef.current = null;
     if (!d || d.moved) return;
@@ -599,6 +600,10 @@ export default function InteractiveAsciiGlobe({
           onPointerDown={onPinPointerDown}
           onPointerMove={onPinPointerMove}
           onPointerUp={onPinPointerUp}
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+          }}
           onPointerCancel={() => {
             pinDragRef.current = null;
           }}

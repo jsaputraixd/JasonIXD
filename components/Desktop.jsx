@@ -749,6 +749,13 @@ export default function Desktop() {
             }}
             onClickCapture={(e) => {
               if (skillsFocused) return;
+              // Don't steal the SF vault pin — let it collect before expand.
+              if (
+                e.target instanceof Element &&
+                e.target.closest(".globe-surface-pin")
+              ) {
+                return;
+              }
               const origin = skillsPointerRef.current;
               if (
                 origin &&

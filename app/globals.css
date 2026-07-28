@@ -1044,8 +1044,8 @@ body {
   z-index: 6;
   margin: 0;
   padding: 0;
-  width: 44px;
-  height: 44px;
+  width: 52px;
+  height: 52px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1065,34 +1065,34 @@ body {
 
 .globe-surface-pin__glow {
   position: absolute;
-  width: 18px;
-  height: 18px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   background: radial-gradient(
     circle,
-    rgba(255, 122, 41, 0.55) 0%,
-    rgba(255, 122, 41, 0.15) 55%,
-    transparent 70%
+    rgba(255, 122, 41, 0.7) 0%,
+    rgba(255, 122, 41, 0.22) 50%,
+    transparent 72%
   );
   animation: globe-surface-pin-pulse 1.6s ease-in-out infinite;
 }
 
 .globe-surface-pin__dot {
   position: absolute;
-  width: 7px;
-  height: 7px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
   background: #ff9a4a;
   box-shadow:
-    0 0 0 1px rgba(255, 200, 140, 0.7),
-    0 0 8px rgba(255, 122, 41, 1),
-    0 0 18px rgba(255, 122, 41, 0.75);
+    0 0 0 1px rgba(255, 200, 140, 0.85),
+    0 0 10px rgba(255, 122, 41, 1),
+    0 0 22px rgba(255, 122, 41, 0.85);
 }
 
 .globe-surface-pin__glyph {
   position: relative;
   font-family: "VT323", monospace;
-  font-size: 18px;
+  font-size: 20px;
   line-height: 1;
   color: #ffb070;
   text-shadow:
