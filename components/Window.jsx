@@ -34,6 +34,8 @@ export default function Window({
   titleBarExtra,
   /** When false, content may extend outside window bounds (e.g. hover scale on project cards). */
   clipContent = true,
+  /** Play a short whoosh when the window first appears (cascade delay respected). */
+  playOpenSound = true,
   /** When false, ignore focus/drag so overlays (skills zoom) stay on top. */
   interactive = true,
 }) {
