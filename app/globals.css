@@ -1544,16 +1544,7 @@ video {
   color: #fff;
 }
 
-/* Skills planet — radar / constellation live state (CSS-only, cheap) */
-@keyframes skills-radar-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
+/* Skills planet — constellation live state (CSS-only, cheap) */
 @keyframes skills-spoke-flow {
   to {
     stroke-dashoffset: -33;

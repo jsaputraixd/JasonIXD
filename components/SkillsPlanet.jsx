@@ -412,25 +412,6 @@ export default function SkillsPlanet({
             overflow: "visible",
           }}
         >
-          <div
-            className="skills-radar-sweep skills-radar-sweep--ellipse"
-            aria-hidden
-            style={{
-              position: "absolute",
-              left: "50%",
-              top: "50%",
-              width: rx * 2 + 12,
-              height: ry * 2 + 12,
-              marginLeft: -(rx + 6),
-              marginTop: -(ry + 6),
-              borderRadius: "50%",
-              zIndex: 0,
-              pointerEvents: "none",
-              opacity: constellationOpen ? 1 : 0,
-              transition: "opacity 0.4s ease",
-            }}
-          />
-
           <svg
             aria-hidden
             width={boxW}
