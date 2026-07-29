@@ -27,13 +27,13 @@ const GLOBE_Z = 3;
 
 const SIZE = {
   mobile: {
-    disc: 304,
-    orbitExtra: 64,
-    padX: 40,
-    padY: 44,
+    disc: 348,
+    orbitExtra: 56,
+    padX: 28,
+    padY: 36,
     labelFont: 11,
     homeFont: 22,
-    globeRows: 30,
+    globeRows: 34,
     lowPower: true,
   },
   desktop: {
@@ -261,11 +261,9 @@ export default function SkillsPlanet({
     const measure = () => {
       const available = el.getBoundingClientRect().width;
       if (available <= 0) return;
-      // Mobile: fit to the globe + a slim orbit margin so the disc reads large;
-      // skill labels can sit closer to / slightly past the card edges.
-      const fitW = isMobile
-        ? size.disc + size.orbitExtra + 28
-        : boxW;
+      // Mobile: size to the globe itself so the disc fills the column;
+      // orbit labels may overhang slightly (wrap is overflow: visible).
+      const fitW = isMobile ? size.disc + 12 : boxW;
       setStageScale(Math.min(1, available / fitW));
     };
     measure();
@@ -576,7 +574,7 @@ export default function SkillsPlanet({
             <InteractiveAsciiGlobe
               rows={size.globeRows}
               lowPower={size.lowPower}
-              fillScale={isMobile ? 1.14 : 1.06}
+              fillScale={isMobile ? 1.18 : 1.06}
               ariaLabel="Interactive globe — drag to rotate; watch for a signal over SF"
               style={{ opacity: 0.96 }}
               surfacePin={surfacePin}

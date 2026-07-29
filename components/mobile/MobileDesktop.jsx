@@ -1147,7 +1147,11 @@ function MobileWelcomeMorph({
   return (
     <div
       className="mobile-welcome-banner"
-      style={{ position: "relative", minHeight: 280 }}
+      style={{
+        position: "relative",
+        // Only reserve height for the Welcome! intro — ready content should hug its text.
+        minHeight: showReady ? undefined : 260,
+      }}
     >
       {showWaiting && (
         <p
@@ -1301,7 +1305,7 @@ function MobileWelcomeBody({
           textTransform: "uppercase",
           color: ACCENT,
           textShadow: "0 0 8px rgba(255, 122, 41, 0.45)",
-          margin: "0 0 16px",
+          margin: "0 0 10px",
           display: "block",
           lineHeight: 1.4,
           maxWidth: "100%",
@@ -1317,7 +1321,7 @@ function MobileWelcomeBody({
                 letterSpacing: "0.14em",
                 textTransform: "uppercase",
                 color: ACCENT_DIM,
-                margin: "14px 0 0",
+                margin: "0",
                 lineHeight: 1.45,
               }}
             >
@@ -1334,7 +1338,7 @@ function MobileWelcomeBody({
                 y: { duration: 0.5, delay: 0.35 },
               }}
               style={{
-                margin: "28px 0 0",
+                margin: "18px 0 0",
                 textAlign: "center",
                 fontFamily: "'VT323', monospace",
                 fontSize: 12,
