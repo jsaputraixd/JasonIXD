@@ -722,29 +722,52 @@ export default function Desktop() {
                   border: "none",
                   cursor: "default",
                   background: "rgba(6, 4, 3, 0.42)",
-                  backdropFilter: "blur(12px)",
-                  WebkitBackdropFilter: "blur(12px)",
+                  // Blur is cheaper than dual drop-shadows on the live ASCII mesh.
+                  backdropFilter: "blur(10px)",
+                  WebkitBackdropFilter: "blur(10px)",
                 }}
               />
             ) : null}
           </AnimatePresence>
 
+          {skillsFocused ? (
+            <div
+              aria-hidden
+              style={{
+                position: "absolute",
+                left: "50%",
+                bottom: 28,
+                transform: "translateX(-50%)",
+                zIndex: 42,
+                pointerEvents: "none",
+                fontFamily: "'VT323', monospace",
+                fontSize: 14,
+                letterSpacing: "0.28em",
+                textTransform: "uppercase",
+                color: "rgba(255, 180, 112, 0.72)",
+                textShadow: "0 0 8px rgba(255, 122, 41, 0.35)",
+              }}
+            >
+              esc to close
+            </div>
+          ) : null}
+
           <motion.div
             aria-label={
               skillsFocused
-                ? "Skills globe — expanded"
+                ? "Skills globe — expanded — press Escape to close"
                 : "Skills globe — click to expand"
             }
             initial={{ opacity: 0, scale: 0.92 }}
             animate={{
               opacity: 1,
-              scale: skillsFocused ? 1 : skillsHovered ? 1.045 : 1,
+              scale: skillsFocused ? 1 : skillsHovered ? 1.03 : 1,
               left: skillsFloatLeft,
               top: skillsFloatTop,
               x: skillsFocused ? 0 : pShift.skills.x,
               y: skillsFocused ? 0 : pShift.skills.y,
             }}
-            transition={{ duration: 0.45, ease: EASE }}
+            transition={{ duration: 0.4, ease: EASE }}
             onHoverStart={() => {
               if (!skillsFocused) setSkillsHovered(true);
             }}
@@ -777,14 +800,13 @@ export default function Desktop() {
               pointerEvents: "auto",
               overflow: "visible",
               cursor: skillsFocused ? "default" : "pointer",
-              filter:
-                skillsHovered && !skillsFocused
-                  ? "drop-shadow(0 0 22px rgba(255, 122, 41, 0.55)) drop-shadow(0 0 48px rgba(255, 122, 41, 0.28))"
-                  : skillsFocused
-                    ? "drop-shadow(0 0 48px rgba(255, 122, 41, 0.45)) drop-shadow(0 0 96px rgba(255, 122, 41, 0.25))"
-                    : "drop-shadow(0 0 10px rgba(255, 122, 41, 0.12))",
-              transition:
-                "filter 0.35s ease, width 0.45s cubic-bezier(0.16, 1, 0.3, 1)",
+              // Avoid CSS filter drop-shadow on the live ASCII (major jank source).
+              boxShadow: skillsFocused
+                ? "0 0 0 1px rgba(255, 122, 41, 0.18)"
+                : skillsHovered
+                  ? "0 0 28px rgba(255, 122, 41, 0.28)"
+                  : "none",
+              transition: "box-shadow 0.28s ease, width 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
             }}
           >
             <SkillsPlanet
