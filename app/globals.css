@@ -209,6 +209,10 @@ body {
   transition: box-shadow 0.35s ease;
 }
 
+.skills-globe-halo--none {
+  box-shadow: none;
+}
+
 .skills-globe-halo--hover {
   box-shadow:
     0 0 0 1px rgba(255, 122, 41, 0.4),

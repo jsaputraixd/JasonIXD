@@ -566,11 +566,13 @@ export default function SkillsPlanet({
 
           <div
             className={
-              glow === "focus"
-                ? "skills-globe-halo skills-globe-halo--focus"
-                : glow === "hover"
-                  ? "skills-globe-halo skills-globe-halo--hover"
-                  : "skills-globe-halo"
+              glow === "none"
+                ? "skills-globe-halo skills-globe-halo--none"
+                : glow === "focus"
+                  ? "skills-globe-halo skills-globe-halo--focus"
+                  : glow === "hover"
+                    ? "skills-globe-halo skills-globe-halo--hover"
+                    : "skills-globe-halo"
             }
             aria-hidden
             style={{

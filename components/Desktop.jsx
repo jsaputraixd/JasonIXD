@@ -810,9 +810,7 @@ export default function Desktop() {
             <SkillsPlanet
               variant="desktop"
               expanded={skillsFocused}
-              glow={
-                skillsFocused ? "idle" : skillsHovered ? "hover" : "idle"
-              }
+              glow={skillsFocused ? "none" : skillsHovered ? "hover" : "idle"}
               viewportWidth={vwSafe}
               viewportHeight={vhSafe}
             />
