@@ -189,7 +189,8 @@ body {
 .mobile-skills-wrap {
   display: flex;
   justify-content: center;
-  padding: 4px 8px 20px;
+  padding: 8px 0 24px;
+  overflow: visible;
 }
 
 .mobile-project-card {
