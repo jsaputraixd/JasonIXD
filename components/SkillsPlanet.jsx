@@ -27,13 +27,13 @@ const GLOBE_Z = 3;
 
 const SIZE = {
   mobile: {
-    disc: 348,
-    orbitExtra: 56,
-    padX: 28,
-    padY: 36,
+    disc: 286,
+    orbitExtra: 68,
+    padX: 56,
+    padY: 48,
     labelFont: 11,
     homeFont: 22,
-    globeRows: 34,
+    globeRows: 28,
     lowPower: true,
   },
   desktop: {
@@ -96,7 +96,7 @@ function pulseSkill() {
   }
 }
 
-function OurHomeLabel({ fontSize, margin, align = "center" }) {
+function OurHomeLabel({ fontSize, margin }) {
   return (
     <button
       type="button"
@@ -108,7 +108,7 @@ function OurHomeLabel({ fontSize, margin, align = "center" }) {
         width: "100%",
         margin,
         padding: "2px 8px 4px",
-        textAlign: align,
+        textAlign: "center",
         fontFamily: "'Bonbon', cursive",
         fontSize,
         color: "rgba(255, 180, 140, 0.95)",
@@ -261,16 +261,14 @@ export default function SkillsPlanet({
     const measure = () => {
       const available = el.getBoundingClientRect().width;
       if (available <= 0) return;
-      // Mobile: size to the globe itself so the disc fills the column;
-      // orbit labels may overhang slightly (wrap is overflow: visible).
-      const fitW = isMobile ? size.disc + 12 : boxW;
-      setStageScale(Math.min(1, available / fitW));
+      // Always fit the full orbit box so skill labels don't clip off-screen.
+      setStageScale(Math.min(1, available / boxW));
     };
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [boxW, expanded, isMobile, size.disc, size.orbitExtra]);
+  }, [boxW, expanded, isMobile]);
 
   useLayoutEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -384,30 +382,24 @@ export default function SkillsPlanet({
       style={{
         position: "relative",
         width: "100%",
-        marginLeft: isMobile ? 0 : "auto",
-        marginRight: isMobile ? 0 : "auto",
+        marginLeft: "auto",
+        marginRight: "auto",
         paddingBottom: isMobile ? 6 : 2,
       }}
     >
       {isMobile ? (
         <OurHomeLabel
           fontSize={size.homeFont}
-          margin="0 18px 12px 0"
-          align="right"
+          margin="0 6px 10px"
         />
       ) : null}
 
       <div
-        className={isMobile ? "skills-planet-stage skills-planet-stage--peek-left" : undefined}
         style={{
           position: "relative",
           width: boxW * stageScale,
           height: boxH * stageScale,
-          // Peek from the left: keep globe size, clip ~1/3 of the disc off-screen.
-          // Offset accounts for orbit padding so the *disc* (not the whole stage) is cut.
-          margin: isMobile
-            ? `0 0 0 ${Math.round(stageScale * (size.disc / 6 - boxW / 2))}px`
-            : "0 auto",
+          margin: "0 auto",
           overflow: "visible",
         }}
       >
@@ -580,7 +572,7 @@ export default function SkillsPlanet({
             <InteractiveAsciiGlobe
               rows={size.globeRows}
               lowPower={size.lowPower}
-              fillScale={isMobile ? 1.18 : 1.06}
+              fillScale={isMobile ? 1.1 : 1.06}
               ariaLabel="Interactive globe — drag to rotate; watch for a signal over SF"
               style={{ opacity: 0.96 }}
               surfacePin={surfacePin}
@@ -631,8 +623,8 @@ export default function SkillsPlanet({
       {isMobile ? (
         <p
           style={{
-            margin: "10px 18px 0 0",
-            textAlign: "right",
+            margin: "10px 8px 0",
+            textAlign: "center",
             fontFamily: "'VT323', monospace",
             fontSize: 11,
             letterSpacing: "0.16em",

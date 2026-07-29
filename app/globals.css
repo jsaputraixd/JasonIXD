@@ -196,18 +196,10 @@ body {
 
 .mobile-skills-wrap {
   display: flex;
-  justify-content: flex-start;
-  /* Bleed to the true left screen edge so the globe can peek/clip there. */
-  width: 100vw;
-  max-width: 100vw;
-  margin-left: calc(50% - 50vw);
+  justify-content: center;
   padding: 4px 0 20px;
+  margin: 0 -6px;
   overflow: visible;
-}
-
-.skills-planet-stage--peek-left {
-  /* Orbit labels on the clipped side can hang; scroll clips x overflow. */
-  pointer-events: auto;
 }
 
 /* Mobile other-projects — compact CRT directory rows */
