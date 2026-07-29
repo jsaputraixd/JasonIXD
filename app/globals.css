@@ -170,6 +170,14 @@ body {
   max-width: 100%;
 }
 
+.mobile-welcome-banner:has(.mobile-welcome-body) {
+  min-height: 0;
+}
+
+.mobile-window-card:has(.mobile-welcome-body) .mobile-window-body {
+  padding-bottom: 14px;
+}
+
 @media (max-width: 380px) {
   .mobile-window-body {
     padding: 14px 12px 16px;
