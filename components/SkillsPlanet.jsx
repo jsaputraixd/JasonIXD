@@ -43,7 +43,8 @@ const SIZE = {
     padY: 52,
     labelFont: 12,
     homeFont: 18,
-    globeRows: 32,
+    // Keep rows stable when expanding so the ASCII grid isn't rebuilt mid-zoom.
+    globeRows: 26,
     lowPower: false,
   },
 };
@@ -73,7 +74,8 @@ function sizeForFullscreen(vw, vh) {
     padY,
     labelFont: Math.max(12, Math.min(16, Math.round(disc * 0.036))),
     homeFont: 20,
-    globeRows: Math.min(52, Math.max(34, Math.round(disc / 10))),
+    // Match idle desktop row count — scaling type is cheaper than remeshing.
+    globeRows: SIZE.desktop.globeRows,
     lowPower: false,
   };
 }
@@ -354,20 +356,26 @@ export default function SkillsPlanet({
     }
 
     let raf = 0;
+    let lastPaint = 0;
+    // Orbit labels don't need 60fps — saves main-thread time for the ASCII globe.
+    const interval = expanded ? 1000 / 30 : 1000 / 18;
     const start =
       performance.now() - (angleRef.current / (Math.PI * 2)) * ORBIT_PERIOD_MS;
 
     const tick = (now) => {
-      const turn = ((now - start) % ORBIT_PERIOD_MS) / ORBIT_PERIOD_MS;
-      const baseAngle = turn * Math.PI * 2 - Math.PI / 2;
-      angleRef.current = baseAngle + Math.PI / 2;
-      paint(baseAngle);
+      if (now - lastPaint >= interval) {
+        const turn = ((now - start) % ORBIT_PERIOD_MS) / ORBIT_PERIOD_MS;
+        const baseAngle = turn * Math.PI * 2 - Math.PI / 2;
+        angleRef.current = baseAngle + Math.PI / 2;
+        paint(baseAngle);
+        lastPaint = now;
+      }
       raf = requestAnimationFrame(tick);
     };
 
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [constellationOpen, reduceMotion, n, cx, cy, rx, ry, discR]);
+  }, [constellationOpen, reduceMotion, n, cx, cy, rx, ry, discR, expanded]);
 
   const ellipsePathOpacity = constellationOpen ? 0.55 : 0;
 
@@ -571,7 +579,8 @@ export default function SkillsPlanet({
           >
             <InteractiveAsciiGlobe
               rows={size.globeRows}
-              lowPower={size.lowPower}
+              // Corner float: lighter paint. Expanded: full quality but capped rows.
+              lowPower={size.lowPower || (!isMobile && !expanded)}
               fillScale={isMobile ? 1.1 : 1.06}
               ariaLabel="Interactive globe — drag to rotate; watch for a signal over SF"
               style={{ opacity: 0.96 }}

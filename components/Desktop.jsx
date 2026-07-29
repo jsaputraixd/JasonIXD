@@ -259,10 +259,14 @@ export default function Desktop() {
   useEffect(() => {
     if (!skillsFocused) return undefined;
     const onKey = (e) => {
-      if (e.key === "Escape") closeSkillsFocus();
+      if (e.key !== "Escape" && e.code !== "Escape") return;
+      e.preventDefault();
+      e.stopPropagation();
+      closeSkillsFocus();
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    // Capture so window/ESC handlers deeper in the tree don't swallow it.
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
   }, [skillsFocused, closeSkillsFocus]);
 
   const handleIconOffset = useCallback((id, offset) => {
@@ -433,6 +437,7 @@ export default function Desktop() {
 
   useEffect(() => {
     if (!viewport || viewport.w < 900 || phase !== "dashboard") return;
+    if (skillsFocused) return;
     const el = stageRef.current;
     if (!el) return;
 
@@ -463,7 +468,7 @@ export default function Desktop() {
       el.removeEventListener("mousemove", onMove);
       if (raf) cancelAnimationFrame(raf);
     };
-  }, [viewport, phase]);
+  }, [viewport, phase, skillsFocused]);
 
   const vwSafe = viewport?.w ?? 1280;
   const vhSafe = viewport?.h ?? 800;

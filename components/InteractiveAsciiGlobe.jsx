@@ -183,7 +183,9 @@ export default function InteractiveAsciiGlobe({
       if (d <= 0) return;
       const denom = Math.min((cols - 1) * wRatio, (rows - 1) * hRatio);
       const boost = Number.isFinite(fillScale) && fillScale > 0 ? fillScale : 1;
-      setFontSize(Math.max(6, (d * boost) / denom));
+      // Quantize so expand/resize animations don't rebuild the grid every frame.
+      const next = Math.max(6, Math.round((d * boost) / denom));
+      setFontSize((prev) => (Math.abs(prev - next) < 1 ? prev : next));
     };
     measure();
     const ro = new ResizeObserver(measure);
@@ -201,7 +203,7 @@ export default function InteractiveAsciiGlobe({
       if (cancelled) return;
       const srcW = img.naturalWidth;
       const srcH = img.naturalHeight;
-      const maxDim = prefersCoarsePointer() || lowPower ? 512 : 1024;
+      const maxDim = prefersCoarsePointer() || lowPower ? 512 : 768;
       const scale = Math.min(1, maxDim / Math.max(srcW, srcH));
       const w = Math.max(1, Math.round(srcW * scale));
       const h = Math.max(1, Math.round(srcH * scale));
@@ -392,8 +394,8 @@ export default function InteractiveAsciiGlobe({
       }
     };
 
-    const idleFps = useLowPower ? 18 : 30;
-    const dragFps = useLowPower ? 30 : 60;
+    const idleFps = useLowPower ? 16 : 22;
+    const dragFps = useLowPower ? 28 : 40;
     const idleInterval = 1000 / idleFps;
     const dragInterval = 1000 / dragFps;
 
