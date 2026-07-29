@@ -811,7 +811,7 @@ export default function Desktop() {
               variant="desktop"
               expanded={skillsFocused}
               glow={
-                skillsFocused ? "focus" : skillsHovered ? "hover" : "idle"
+                skillsFocused ? "idle" : skillsHovered ? "hover" : "idle"
               }
               viewportWidth={vwSafe}
               viewportHeight={vhSafe}
