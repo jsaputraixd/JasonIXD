@@ -96,7 +96,7 @@ function pulseSkill() {
   }
 }
 
-function OurHomeLabel({ fontSize, margin }) {
+function OurHomeLabel({ fontSize, margin, align = "center" }) {
   return (
     <button
       type="button"
@@ -108,7 +108,7 @@ function OurHomeLabel({ fontSize, margin }) {
         width: "100%",
         margin,
         padding: "2px 8px 4px",
-        textAlign: "center",
+        textAlign: align,
         fontFamily: "'Bonbon', cursive",
         fontSize,
         color: "rgba(255, 180, 140, 0.95)",
@@ -384,24 +384,30 @@ export default function SkillsPlanet({
       style={{
         position: "relative",
         width: "100%",
-        marginLeft: "auto",
-        marginRight: "auto",
+        marginLeft: isMobile ? 0 : "auto",
+        marginRight: isMobile ? 0 : "auto",
         paddingBottom: isMobile ? 6 : 2,
       }}
     >
       {isMobile ? (
         <OurHomeLabel
           fontSize={size.homeFont}
-          margin="0 6px 10px"
+          margin="0 18px 12px 0"
+          align="right"
         />
       ) : null}
 
       <div
+        className={isMobile ? "skills-planet-stage skills-planet-stage--peek-left" : undefined}
         style={{
           position: "relative",
           width: boxW * stageScale,
           height: boxH * stageScale,
-          margin: "0 auto",
+          // Peek from the left: keep globe size, clip ~1/3 of the disc off-screen.
+          // Offset accounts for orbit padding so the *disc* (not the whole stage) is cut.
+          margin: isMobile
+            ? `0 0 0 ${Math.round(stageScale * (size.disc / 6 - boxW / 2))}px`
+            : "0 auto",
           overflow: "visible",
         }}
       >
@@ -625,8 +631,8 @@ export default function SkillsPlanet({
       {isMobile ? (
         <p
           style={{
-            margin: "10px 8px 0",
-            textAlign: "center",
+            margin: "10px 18px 0 0",
+            textAlign: "right",
             fontFamily: "'VT323', monospace",
             fontSize: 11,
             letterSpacing: "0.16em",
