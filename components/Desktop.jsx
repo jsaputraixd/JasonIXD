@@ -69,6 +69,10 @@ const ACCENT = "#FF7A29";
 /** Brighter orange for small text — ~4.5:1 on dark window chrome. */
 const ACCENT_DIM = "#FFB570";
 const EASE = [0.16, 1, 0.3, 1];
+/** Stay above bringToFront window stacking while the globe is zoomed. */
+const SKILLS_FOCUS_BACKDROP_Z = 480;
+const SKILLS_FOCUS_GLOBE_Z = 481;
+const SKILLS_FOCUS_HINT_Z = 482;
 
 const WELCOME_HEIGHT_GUESS = 380;
 
@@ -237,6 +241,8 @@ export default function Desktop() {
   const [coffeeSnakeOpen, setCoffeeSnakeOpen] = useState(false);
   const [vaultBreachOpen, setVaultBreachOpen] = useState(false);
   const [skillsFocused, setSkillsFocused] = useState(false);
+  const skillsFocusedRef = useRef(false);
+  skillsFocusedRef.current = skillsFocused;
   const [skillsHovered, setSkillsHovered] = useState(false);
   const skillsPointerRef = useRef(null);
   const [minimizedIds, setMinimizedIds] = useState([]);
@@ -391,6 +397,8 @@ export default function Desktop() {
   );
 
   const bringToFront = useCallback((id) => {
+    // Don't let title-bar focus punch windows through the zoomed globe overlay.
+    if (skillsFocusedRef.current) return;
     setTopZ((z) => {
       const next = z + 1;
       setZMap((m) => ({ ...m, [id]: next }));
@@ -664,6 +672,7 @@ export default function Desktop() {
           playOpenSound={false}
           zIndex={zOf("welcome", 12)}
           onFocus={bringToFront}
+          interactive={!skillsFocused}
           minimized={isMinimized("welcome")}
           onMinimize={() => minimizeWindow("welcome")}
           dragConstraints={stageRef}
@@ -690,6 +699,7 @@ export default function Desktop() {
           delay={cascadeDelay(0.45)}
           zIndex={zOf("me", 13)}
           onFocus={bringToFront}
+          interactive={!skillsFocused}
           minimized={isMinimized("me")}
           onMinimize={() => minimizeWindow("me")}
           dragConstraints={stageRef}
@@ -716,7 +726,7 @@ export default function Desktop() {
                 style={{
                   position: "absolute",
                   inset: 0,
-                  zIndex: 40,
+                  zIndex: SKILLS_FOCUS_BACKDROP_Z,
                   margin: 0,
                   padding: 0,
                   border: "none",
@@ -739,7 +749,7 @@ export default function Desktop() {
                 left: "50%",
                 bottom: 28,
                 transform: "translateX(-50%)",
-                zIndex: 42,
+                zIndex: SKILLS_FOCUS_HINT_Z,
                 pointerEvents: "none",
                 fontFamily: "'VT323', monospace",
                 fontSize: 14,
@@ -797,7 +807,7 @@ export default function Desktop() {
             style={{
               position: "absolute",
               width: skillsFloatW,
-              zIndex: skillsFocused ? 41 : 8,
+              zIndex: skillsFocused ? SKILLS_FOCUS_GLOBE_Z : 8,
               pointerEvents: "auto",
               overflow: "visible",
               cursor: skillsFocused ? "default" : "pointer",
@@ -835,6 +845,7 @@ export default function Desktop() {
               delay={cascadeDelay(0.62 + projectIndex * 0.28)}
               zIndex={zOf(id, zBase)}
               onFocus={bringToFront}
+              interactive={!skillsFocused}
               minimized={isMinimized(id)}
               onMinimize={() => minimizeWindow(id)}
               dragConstraints={stageRef}
@@ -877,6 +888,7 @@ export default function Desktop() {
           }}
           parallaxShift={pShift.otherStuffIcon}
           selected={otherStuffOpen}
+          interactive={!skillsFocused}
         />
       )}
 
@@ -901,6 +913,7 @@ export default function Desktop() {
           }}
           parallaxShift={pShift.otherProjectsIcon}
           selected={otherProjectsOpen}
+          interactive={!skillsFocused}
         />
       )}
 
@@ -915,6 +928,7 @@ export default function Desktop() {
           delay={0}
           zIndex={zOf("otherStuff", 22)}
           onFocus={bringToFront}
+          interactive={!skillsFocused}
           minimized={isMinimized("otherStuff")}
           onMinimize={() => minimizeWindow("otherStuff")}
           dragConstraints={stageRef}
@@ -940,6 +954,7 @@ export default function Desktop() {
           delay={0}
           zIndex={zOf("otherProjects", 22)}
           onFocus={bringToFront}
+          interactive={!skillsFocused}
           minimized={isMinimized("otherProjects")}
           onMinimize={() => minimizeWindow("otherProjects")}
           dragConstraints={stageRef}
@@ -960,6 +975,7 @@ export default function Desktop() {
         delay={cascadeDelay(2.85)}
         zIndex={zOf("contact", 17)}
         onFocus={bringToFront}
+        interactive={!skillsFocused}
         minimized={isMinimized("contact")}
         onMinimize={() => minimizeWindow("contact")}
         dragConstraints={stageRef}
@@ -1074,8 +1090,9 @@ export default function Desktop() {
           top={Math.max(12, Math.round(vh / 2 - 230))}
           width={420}
           height={438}
-          zIndex={zOf("coffee-snake", 200)}
+          zIndex={zOf("coffee-snake", SKILLS_FOCUS_HINT_Z + 20)}
           onFocus={bringToFront}
+          interactive
           onMinimize={() => setCoffeeSnakeOpen(false)}
           dragConstraints={stageRef}
           uiScale={layoutScale}

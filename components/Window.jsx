@@ -34,8 +34,8 @@ export default function Window({
   titleBarExtra,
   /** When false, content may extend outside window bounds (e.g. hover scale on project cards). */
   clipContent = true,
-  /** Play a short whoosh when the window first appears (cascade delay respected). */
-  playOpenSound = true,
+  /** When false, ignore focus/drag so overlays (skills zoom) stay on top. */
+  interactive = true,
 }) {
   const canMinimize = minimizable ?? closable;
   const handleMinimizeCb = onMinimize ?? onClose;
@@ -72,6 +72,7 @@ export default function Window({
   };
 
   const startDrag = (event) => {
+    if (!interactive) return;
     onFocus?.(id);
     setIsHeld(true);
     setHasBeenHeld(true);
@@ -89,7 +90,10 @@ export default function Window({
           dragMomentum={false}
           dragElastic={0}
           dragConstraints={dragConstraints}
-          onPointerDown={() => onFocus?.(id)}
+          onPointerDown={() => {
+            if (!interactive) return;
+            onFocus?.(id);
+          }}
           initial={{ opacity: 0, scale: 0.94 }}
           exit={{ opacity: 0, scale: 0.94, transition: { duration: 0.22, ease: EASE } }}
           animate={
@@ -116,6 +120,7 @@ export default function Window({
             minWidth,
             zIndex,
             willChange: "transform",
+            pointerEvents: interactive ? "auto" : "none",
           }}
         >
           <div

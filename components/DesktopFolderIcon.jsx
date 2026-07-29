@@ -27,6 +27,7 @@ export default function DesktopFolderIcon({
   parallaxShift = { x: 0, y: 0 },
   delay = 0,
   selected = false,
+  interactive = true,
 }) {
   const iconH = Math.round(width * 0.82);
 
@@ -44,6 +45,7 @@ export default function DesktopFolderIcon({
   const parallax = drag.isDragging ? { x: 0, y: 0 } : parallaxShift;
 
   const activate = () => {
+    if (!interactive) return;
     playClick();
     onFocus?.();
     onOpen?.();
@@ -54,16 +56,19 @@ export default function DesktopFolderIcon({
       type="button"
       data-cursor="hover"
       aria-label={`Open ${label}`}
-      onPointerDown={drag.onPointerDown}
-      onPointerMove={drag.onPointerMove}
-      onPointerUp={drag.onPointerUp}
-      onPointerCancel={drag.onPointerCancel}
+      disabled={!interactive}
+      onPointerDown={interactive ? drag.onPointerDown : undefined}
+      onPointerMove={interactive ? drag.onPointerMove : undefined}
+      onPointerUp={interactive ? drag.onPointerUp : undefined}
+      onPointerCancel={interactive ? drag.onPointerCancel : undefined}
       onClick={() => {
+        if (!interactive) return;
         if (drag.consumeClickIfDragged()) return;
         activate();
       }}
       onDoubleClick={(e) => {
         e.preventDefault();
+        if (!interactive) return;
         if (drag.consumeClickIfDragged()) return;
         activate();
       }}
@@ -88,6 +93,7 @@ export default function DesktopFolderIcon({
           : drag.isDragging
             ? "rgba(255, 122, 41, 0.12)"
             : "transparent",
+        pointerEvents: interactive ? "auto" : "none",
         borderRadius: 2,
         cursor: drag.isDragging ? "grabbing" : "grab",
         display: "flex",
