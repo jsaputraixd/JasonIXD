@@ -17,17 +17,16 @@ const ACCENT = "#FF7A29";
 const EASE = [0.16, 1, 0.3, 1];
 
 const BOOT_LINES = [
-  "> BOOTING JS-OS v1.0...",
-  "> LOADING work.exe...",
-  "> MOUNTING /work/featured...",
-  "> LOC: SF // BALI",
-  "> SYNC OK",
+  "> BOOTING JS-OS v1.0…",
+  "> DISPENSING oatmeal latte…",
+  "> TOASTING croissant.dll…",
+  "> LOC: SF // BALI — ok",
   "> READY \u25A2",
 ];
 
-const CHAR_MS = 42;
-const LINE_GAP_MS = 300;
-const POST_BOOT_PAUSE = 580;
+const CHAR_MS = 26;
+const LINE_GAP_MS = 120;
+const POST_BOOT_PAUSE = 260;
 const WORD_DURATION_S = 1.2;
 const WORD_STAGGER_S = 0.58;
 const TAGLINE_HOLD_MS = 4400;
@@ -114,7 +113,7 @@ export default function LoadingOverlay() {
           return;
         }
 
-        await delay(220, signal);
+        await delay(100, signal);
 
         for (let lineIdx = 0; lineIdx < BOOT_LINES.length; lineIdx++) {
           const line = BOOT_LINES[lineIdx];
@@ -126,7 +125,7 @@ export default function LoadingOverlay() {
               next[lineIdx] = line.slice(0, i);
               return next;
             });
-            if (i % 3 === 0) playTypingClick();
+            if (i % 2 === 0) playTypingClick();
           }
           await delay(LINE_GAP_MS, signal);
         }
