@@ -952,7 +952,7 @@ function MobileDesktop() {
               sectionId="mobile-skills"
             >
               <MobileJourneySectionLabel scrollRoot={scrollRef} skipTyping={skipWelcomeTyping}>
-                ▢ Skills · tap a node
+                ▢ Skills
               </MobileJourneySectionLabel>
               <motion.div className="mobile-skills-wrap">
                 <SkillsPlanet variant="mobile" scrollRootSelector="[data-mobile-scroll]" />
