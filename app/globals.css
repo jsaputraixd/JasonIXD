@@ -1628,54 +1628,6 @@ video {
   animation: skills-orbit-counter-spin 75s linear infinite;
 }
 
-.skills-radar-sweep {
-  background: conic-gradient(
-    from 0deg,
-    transparent 0deg,
-    transparent 300deg,
-    rgba(255, 122, 41, 0.02) 320deg,
-    rgba(255, 122, 41, 0.16) 348deg,
-    rgba(255, 200, 140, 0.28) 358deg,
-    transparent 360deg
-  );
-  -webkit-mask-image: radial-gradient(
-    circle,
-    transparent 28%,
-    #000 32%,
-    #000 72%,
-    transparent 78%
-  );
-  mask-image: radial-gradient(
-    circle,
-    transparent 28%,
-    #000 32%,
-    #000 72%,
-    transparent 78%
-  );
-}
-
-.skills-constellation--live .skills-radar-sweep {
-  animation: skills-radar-spin 7.5s linear infinite;
-}
-
-.skills-radar-sweep--ellipse {
-  /* Already sized as an ellipse box; keep the conic wash matched to the ring. */
-  -webkit-mask-image: radial-gradient(
-    ellipse at center,
-    transparent 18%,
-    #000 28%,
-    #000 68%,
-    transparent 78%
-  );
-  mask-image: radial-gradient(
-    ellipse at center,
-    transparent 18%,
-    #000 28%,
-    #000 68%,
-    transparent 78%
-  );
-}
-
 /* Back-half tags read quieter; front-half stay crisp */
 .skills-constellation--orbit3d [data-depth="back"] .skills-orbit-label {
   filter: brightness(0.82);
@@ -1724,7 +1676,6 @@ video {
 @media (prefers-reduced-motion: reduce) {
   .skills-orbit-rotor--live,
   .skills-orbit-label-counter--live,
-  .skills-constellation--live .skills-radar-sweep,
   .skills-constellation--live .skills-spoke-flow,
   .skills-constellation--live .skills-spoke-packet,
   .skills-constellation--live .skills-node-ping,
