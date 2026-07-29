@@ -721,10 +721,11 @@ export default function Desktop() {
                   padding: 0,
                   border: "none",
                   cursor: "default",
-                  background: "rgba(6, 4, 3, 0.42)",
-                  // Blur is cheaper than dual drop-shadows on the live ASCII mesh.
-                  backdropFilter: "blur(10px)",
-                  WebkitBackdropFilter: "blur(10px)",
+                  // Soft vignette only — avoid a boxed modal plate behind the globe.
+                  background:
+                    "radial-gradient(ellipse at center, rgba(6, 4, 3, 0.18) 0%, rgba(6, 4, 3, 0.55) 55%, rgba(6, 4, 3, 0.72) 100%)",
+                  backdropFilter: "blur(6px)",
+                  WebkitBackdropFilter: "blur(6px)",
                 }}
               />
             ) : null}
@@ -800,18 +801,18 @@ export default function Desktop() {
               pointerEvents: "auto",
               overflow: "visible",
               cursor: skillsFocused ? "default" : "pointer",
-              // Avoid CSS filter drop-shadow on the live ASCII (major jank source).
-              boxShadow: skillsFocused
-                ? "0 0 0 1px rgba(255, 122, 41, 0.18)"
-                : skillsHovered
-                  ? "0 0 28px rgba(255, 122, 41, 0.28)"
-                  : "none",
-              transition: "box-shadow 0.28s ease, width 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+              // No rectangular container chrome — glow lives on the globe rim.
+              background: "transparent",
+              boxShadow: "none",
+              transition: "width 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
             }}
           >
             <SkillsPlanet
               variant="desktop"
               expanded={skillsFocused}
+              glow={
+                skillsFocused ? "focus" : skillsHovered ? "hover" : "idle"
+              }
               viewportWidth={vwSafe}
               viewportHeight={vhSafe}
             />

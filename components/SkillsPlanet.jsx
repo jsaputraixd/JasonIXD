@@ -158,6 +158,8 @@ export default function SkillsPlanet({
   variant = "desktop",
   scrollRootSelector,
   expanded = false,
+  /** idle | hover | focus — circumferential rim glow (desktop). */
+  glow = "idle",
   viewportWidth,
   viewportHeight,
 }) {
@@ -561,6 +563,28 @@ export default function SkillsPlanet({
               </div>
             );
           })}
+
+          <div
+            className={
+              glow === "focus"
+                ? "skills-globe-halo skills-globe-halo--focus"
+                : glow === "hover"
+                  ? "skills-globe-halo skills-globe-halo--hover"
+                  : "skills-globe-halo"
+            }
+            aria-hidden
+            style={{
+              position: "absolute",
+              left: "50%",
+              top: "50%",
+              transform: "translate(-50%, -50%)",
+              zIndex: GLOBE_Z - 1,
+              width: discR * 2,
+              height: discR * 2,
+              borderRadius: "50%",
+              pointerEvents: "none",
+            }}
+          />
 
           <div
             style={{
