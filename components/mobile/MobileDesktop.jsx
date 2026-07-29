@@ -1145,21 +1145,27 @@ function MobileWelcomeMorph({
     phase === "ready" || phase === "dashboard";
 
   return (
-    <div style={{ position: "relative", minHeight: 260 }}>
+    <div
+      className="mobile-welcome-banner"
+      style={{ position: "relative", minHeight: 280 }}
+    >
       {showWaiting && (
         <p
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            minHeight: 220,
+            minHeight: 240,
+            padding: "12px 10px",
+            boxSizing: "border-box",
             fontFamily: "'VT323', monospace",
             fontSize: 14,
-            letterSpacing: "0.35em",
+            letterSpacing: "0.22em",
             textTransform: "uppercase",
             color: ACCENT_DIM,
             textShadow: "0 0 8px rgba(255, 122, 41, 0.35)",
             margin: 0,
+            textAlign: "center",
           }}
         >
           ▢ Booting…
@@ -1169,6 +1175,7 @@ function MobileWelcomeMorph({
         {showIntro && (
           <motion.div
             key="welcome-intro"
+            className="mobile-welcome-intro"
             initial={{ opacity: 1, scale: 1 }}
             exit={{
               opacity: 0,
@@ -1179,13 +1186,20 @@ function MobileWelcomeMorph({
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              minHeight: 220,
+              width: "100%",
+              minHeight: 240,
+              padding: "20px 12px",
+              boxSizing: "border-box",
               fontFamily: "'Bonbon', cursive",
-              fontSize: "clamp(64px, 16vw, 120px)",
+              // Stay inside thin frames — old 64px floor was too wide for ~320px cards.
+              fontSize: "clamp(40px, 12.5vw, 96px)",
               color: "#ffffff",
               textShadow: "0 0 24px rgba(255, 122, 41, 0.42)",
-              lineHeight: 1,
+              lineHeight: 1.05,
+              letterSpacing: "0.02em",
               whiteSpace: "nowrap",
+              textAlign: "center",
+              overflow: "visible",
               willChange: "transform, opacity",
             }}
           >
@@ -1229,7 +1243,15 @@ function MobileWelcomeBody({
   }, [onTypingComplete]);
 
   return (
-    <div style={{ position: "relative" }}>
+    <div
+      className="mobile-welcome-body"
+      style={{
+        position: "relative",
+        // Room for the absolute keyhole in the top-right.
+        paddingRight: 28,
+        paddingTop: 2,
+      }}
+    >
       <MobileVaultKeyhole onUnlock={onVaultUnlock} />
       <TypedLine
         text="▢ Hello, my name is…"
@@ -1238,12 +1260,14 @@ function MobileWelcomeBody({
         skipTyping={skipTyping}
         style={{
           fontFamily: "'VT323', monospace",
-          fontSize: 14,
-          letterSpacing: "0.4em",
+          fontSize: "clamp(12px, 3.4vw, 14px)",
+          letterSpacing: "0.16em",
           textTransform: "uppercase",
           color: ACCENT,
           textShadow: "0 0 8px rgba(255, 122, 41, 0.5)",
           display: "block",
+          lineHeight: 1.35,
+          maxWidth: "100%",
         }}
       />
       <TypedLine
@@ -1254,12 +1278,14 @@ function MobileWelcomeBody({
         skipTyping={skipTyping}
         style={{
           fontFamily: "'Bonbon', cursive",
-          fontSize: "clamp(48px, 13vw, 72px)",
-          lineHeight: 0.92,
+          fontSize: "clamp(40px, 11vw, 68px)",
+          lineHeight: 1.05,
           color: "#ffffff",
           textShadow: "0 0 22px rgba(255, 122, 41, 0.22)",
-          margin: "8px 0 12px",
+          margin: "10px 0 14px",
           display: "block",
+          overflowWrap: "anywhere",
+          wordBreak: "normal",
         }}
       />
       <TypedLine
@@ -1270,13 +1296,15 @@ function MobileWelcomeBody({
         onComplete={skipTyping ? undefined : handleLinesComplete}
         style={{
           fontFamily: "'VT323', monospace",
-          fontSize: 14,
-          letterSpacing: "0.4em",
+          fontSize: "clamp(12px, 3.3vw, 14px)",
+          letterSpacing: "0.12em",
           textTransform: "uppercase",
           color: ACCENT,
           textShadow: "0 0 8px rgba(255, 122, 41, 0.45)",
           margin: "0 0 16px",
           display: "block",
+          lineHeight: 1.4,
+          maxWidth: "100%",
         }}
       />
       {typingDone ? (
@@ -1285,11 +1313,12 @@ function MobileWelcomeBody({
             <p
               style={{
                 fontFamily: "'VT323', monospace",
-                fontSize: 13,
-                letterSpacing: "0.45em",
+                fontSize: "clamp(11px, 3.1vw, 13px)",
+                letterSpacing: "0.14em",
                 textTransform: "uppercase",
                 color: ACCENT_DIM,
                 margin: "14px 0 0",
+                lineHeight: 1.45,
               }}
             >
               ─ Dream · Think · Build ─
@@ -1309,7 +1338,7 @@ function MobileWelcomeBody({
                 textAlign: "center",
                 fontFamily: "'VT323', monospace",
                 fontSize: 12,
-                letterSpacing: "0.35em",
+                letterSpacing: "0.22em",
                 textTransform: "uppercase",
                 color: "rgba(255, 180, 112, 0.55)",
               }}

@@ -165,6 +165,27 @@ body {
   padding: 10px 8px 12px;
 }
 
+/* Welcome banner — keep intro type + body lines inside thin cards */
+.mobile-welcome-intro {
+  max-width: 100%;
+}
+
+@media (max-width: 380px) {
+  .mobile-window-body {
+    padding: 14px 12px 16px;
+  }
+
+  .mobile-welcome-intro {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+    font-size: clamp(36px, 11vw, 72px) !important;
+  }
+
+  .mobile-welcome-body {
+    padding-right: 24px;
+  }
+}
+
 .mobile-skills-wrap {
   display: flex;
   justify-content: center;
