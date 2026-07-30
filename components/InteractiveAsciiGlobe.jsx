@@ -178,14 +178,16 @@ export default function InteractiveAsciiGlobe({
     if (!el) return;
     const { wRatio, hRatio } = cellMetrics;
     const measure = () => {
-      const rect = el.getBoundingClientRect();
-      const d = Math.min(rect.width, rect.height);
+      // Use layout size (not getBoundingClientRect) so a parent CSS scale
+      // doesn't double-apply and shrink/grow the ASCII vs its rim.
+      const d = Math.min(el.clientWidth, el.clientHeight);
       if (d <= 0) return;
       const denom = Math.min((cols - 1) * wRatio, (rows - 1) * hRatio);
+      if (denom <= 0) return;
       const boost = Number.isFinite(fillScale) && fillScale > 0 ? fillScale : 1;
-      // Quantize so expand/resize animations don't rebuild the grid every frame.
-      const next = Math.max(6, Math.round((d * boost) / denom));
-      setFontSize((prev) => (Math.abs(prev - next) < 1 ? prev : next));
+      // Slight sub-pixel precision; avoid coarse rounding that leaves a dark rim gap.
+      const next = Math.max(6, Math.round(((d * boost) / denom) * 100) / 100);
+      setFontSize((prev) => (Math.abs(prev - next) < 0.08 ? prev : next));
     };
     measure();
     const ro = new ResizeObserver(measure);

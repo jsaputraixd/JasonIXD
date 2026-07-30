@@ -202,9 +202,13 @@ body {
 }
 
 /* Circumferential glow on the ASCII globe disc (not a rectangular container). */
+.skills-globe-disc {
+  box-sizing: border-box;
+}
+
 .skills-globe-halo {
   box-shadow:
-    0 0 0 1px rgba(255, 122, 41, 0.12),
+    0 0 0 1px rgba(255, 122, 41, 0.45),
     0 0 18px rgba(255, 122, 41, 0.14);
   transition: box-shadow 0.35s ease;
 }
@@ -215,7 +219,7 @@ body {
 
 .skills-globe-halo--hover {
   box-shadow:
-    0 0 0 1px rgba(255, 122, 41, 0.4),
+    0 0 0 1px rgba(255, 122, 41, 0.55),
     0 0 22px rgba(255, 122, 41, 0.42),
     0 0 48px rgba(255, 122, 41, 0.28),
     0 0 80px rgba(255, 122, 41, 0.14);

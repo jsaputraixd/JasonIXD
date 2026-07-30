@@ -567,28 +567,13 @@ export default function SkillsPlanet({
           <div
             className={
               glow === "none"
-                ? "skills-globe-halo skills-globe-halo--none"
+                ? "skills-globe-disc skills-globe-halo skills-globe-halo--none"
                 : glow === "focus"
-                  ? "skills-globe-halo skills-globe-halo--focus"
+                  ? "skills-globe-disc skills-globe-halo skills-globe-halo--focus"
                   : glow === "hover"
-                    ? "skills-globe-halo skills-globe-halo--hover"
-                    : "skills-globe-halo"
+                    ? "skills-globe-disc skills-globe-halo skills-globe-halo--hover"
+                    : "skills-globe-disc skills-globe-halo"
             }
-            aria-hidden
-            style={{
-              position: "absolute",
-              left: "50%",
-              top: "50%",
-              transform: "translate(-50%, -50%)",
-              zIndex: GLOBE_Z - 1,
-              width: discR * 2,
-              height: discR * 2,
-              borderRadius: "50%",
-              pointerEvents: "none",
-            }}
-          />
-
-          <div
             style={{
               position: "absolute",
               left: "50%",
@@ -597,9 +582,10 @@ export default function SkillsPlanet({
               zIndex: GLOBE_Z,
               width: discR * 2,
               height: discR * 2,
-              // No opaque disc / circular plate — ASCII globe floats on its own.
+              borderRadius: "50%",
+              // Clip ASCII to the rim so it can’t overshoot the orange circle.
+              overflow: "hidden",
               background: "transparent",
-              overflow: "visible",
               pointerEvents: "auto",
             }}
           >
@@ -607,7 +593,8 @@ export default function SkillsPlanet({
               rows={size.globeRows}
               // Corner float: lighter paint. Expanded: full quality but capped rows.
               lowPower={size.lowPower || (!isMobile && !expanded)}
-              fillScale={isMobile ? 1.1 : 1.06}
+              // 1 = orthographic disc diameter matches the circular frame exactly.
+              fillScale={1}
               ariaLabel="Interactive globe — drag to rotate; watch for a signal over SF"
               style={{ opacity: 0.96 }}
               surfacePin={surfacePin}
