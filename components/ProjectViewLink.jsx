@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { withViewTransition } from "@/lib/viewTransition";
+import { playClick } from "@/lib/typingSound";
 
 /** Project links with View Transitions on supported browsers (hero/title morph). */
 export default function ProjectViewLink({
@@ -20,6 +21,7 @@ export default function ProjectViewLink({
       prefetch={prefetch}
       {...rest}
       onClick={(e) => {
+        playClick();
         onClick?.(e);
         if (e.defaultPrevented) return;
         if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) {

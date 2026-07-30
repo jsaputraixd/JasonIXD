@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, useDragControls } from "framer-motion";
-import { playClick, playWindowWhoosh } from "@/lib/typingSound";
+import { playClick, playWindowWhoosh, playWindowPickup, playWindowDrop, playWindowClose } from "@/lib/typingSound";
 
 const ACCENT = "#FF7A29";
 const EASE = [0.16, 1, 0.3, 1];
@@ -56,7 +56,10 @@ export default function Window({
 
   useEffect(() => {
     if (!isHeld) return;
-    const release = () => setIsHeld(false);
+    const release = () => {
+      setIsHeld(false);
+      playWindowDrop();
+    };
     window.addEventListener("pointerup", release);
     window.addEventListener("pointercancel", release);
     window.addEventListener("blur", release);
@@ -69,12 +72,14 @@ export default function Window({
 
   const handleMinimize = (e) => {
     e.stopPropagation();
-    playClick();
+    playWindowClose();
     handleMinimizeCb?.();
   };
 
   const startDrag = (event) => {
     if (!interactive) return;
+    event.stopPropagation();
+    playWindowPickup();
     onFocus?.(id);
     setIsHeld(true);
     setHasBeenHeld(true);
@@ -94,6 +99,7 @@ export default function Window({
           dragConstraints={dragConstraints}
           onPointerDown={() => {
             if (!interactive) return;
+            playClick();
             onFocus?.(id);
           }}
           initial={{ opacity: 0, scale: 0.94 }}

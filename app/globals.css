@@ -420,6 +420,10 @@ body {
     z-index: 4;
   }
 
+  .project-card-shell:active {
+    transform: scale(0.985);
+  }
+
   .project-card-shell:hover .project-card-caption {
     padding-top: 44px;
     padding-bottom: 11px;

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { projectCardThumbSrc, projectCarouselThumbSrc } from "@/lib/projectMedia";
 import { DESKTOP_PROJECT_CARD_ASPECT } from "@/lib/projectDesktopCards";
 import { projectCardMeta, projectCardRoleSummary } from "@/lib/projectCardMeta";
+import { playClick } from "@/lib/typingSound";
 
 export const PROJECT_CARD_GRADIENTS = [
   "linear-gradient(135deg, #4a1f0a 0%, #1a0a05 60%, #0a0505 100%)",
@@ -78,6 +79,7 @@ export default function ProjectFlipCard({
       aria-label={`Open ${project.title} case study`}
       onMouseEnter={() => onRequestFocus?.()}
       onFocus={() => onRequestFocus?.()}
+      onPointerDown={() => playClick()}
       style={{
         display: "block",
         position: "relative",
