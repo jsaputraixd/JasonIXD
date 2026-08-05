@@ -10,7 +10,7 @@ import {
 } from "@/lib/mobileVaultKey";
 import { playClick } from "@/lib/typingSound";
 
-const BREACH_EYEBROW = "> keyhole.exe — auth OK";
+const BREACH_EYEBROW = "> keyhole.exe · auth OK";
 const BREACH_LINES = [
   "ERROR",
   "ERROR",
@@ -74,7 +74,7 @@ export function MobileVaultKeyhole({ onUnlock }) {
       aria-label={
         hasKey
           ? "Open sealed vault"
-          : "Locked keyhole — find a key somewhere nearby"
+          : "Locked. Find a key nearby first."
       }
       title={hasKey ? "unlocked?" : "…"}
       onClick={handleClick}
@@ -122,7 +122,7 @@ export function MobileVaultToast({ open, onDone }) {
           <div>
             <p className="mobile-vault-toast__title">Key acquired</p>
             <p className="mobile-vault-toast__body">
-              You got a key to somewhere.
+              Key acquired. Something just unlocked.
             </p>
           </div>
         </motion.div>

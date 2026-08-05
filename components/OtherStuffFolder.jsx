@@ -280,7 +280,7 @@ function EmptyCategoryNote({
           color: ACCENT_DIM,
         }}
       >
-        ▢ {categoryLabel} — ready for files
+        ▢ {categoryLabel} · drop files here
       </p>
       <p
         style={{

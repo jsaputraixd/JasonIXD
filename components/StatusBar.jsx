@@ -223,7 +223,7 @@ export default function StatusBar({
               Quote ·
             </span>
             &ldquo;{quote.text}&rdquo;
-            <span style={{ opacity: 0.72 }}> — {quote.author}</span>
+            <span style={{ opacity: 0.72 }}> · {quote.author}</span>
           </p>
         </motion.div>
       ) : null}

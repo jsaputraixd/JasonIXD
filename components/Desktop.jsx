@@ -66,7 +66,7 @@ import {
 } from "@/components/mobile/MobileVaultEasterEgg";
 
 const ACCENT = "#FF7A29";
-/** Brighter orange for small text — ~4.5:1 on dark window chrome. */
+/** Brighter orange for small text, ~4.5:1 on dark window chrome. */
 const ACCENT_DIM = "#FFB570";
 const EASE = [0.16, 1, 0.3, 1];
 /** Stay above bringToFront window stacking while the globe is zoomed. */
@@ -643,7 +643,7 @@ export default function Desktop() {
         </div>
       )}
 
-      {/* WELCOME! intro card — types in, holds, then flies into welcome.exe slot */}
+      {/* WELCOME! intro card, types in, holds, then flies into welcome.exe slot */}
       <AnimatePresence>
         {showIntroCard && (
           <WelcomeIntroMorph
@@ -731,7 +731,7 @@ export default function Desktop() {
                   padding: 0,
                   border: "none",
                   cursor: "default",
-                  // Soft vignette only — avoid a boxed modal plate behind the globe.
+                  // Soft vignette only, avoid a boxed modal plate behind the globe.
                   background:
                     "radial-gradient(ellipse at center, rgba(6, 4, 3, 0.18) 0%, rgba(6, 4, 3, 0.55) 55%, rgba(6, 4, 3, 0.72) 100%)",
                   backdropFilter: "blur(6px)",
@@ -766,8 +766,8 @@ export default function Desktop() {
           <motion.div
             aria-label={
               skillsFocused
-                ? "Skills globe — expanded — press Escape to close"
-                : "Skills globe — click to expand"
+                ? "Skills globe expanded. Press Escape to close."
+                : "Skills globe. Click to expand."
             }
             initial={{ opacity: 0, scale: 0.92 }}
             animate={{
@@ -788,7 +788,7 @@ export default function Desktop() {
             }}
             onClickCapture={(e) => {
               if (skillsFocused) return;
-              // Don't steal the SF vault pin — let it collect before expand.
+              // Don't steal the SF vault pin, let it collect before expand.
               if (
                 e.target instanceof Element &&
                 e.target.closest(".globe-surface-pin")
@@ -811,7 +811,7 @@ export default function Desktop() {
               pointerEvents: "auto",
               overflow: "visible",
               cursor: skillsFocused ? "default" : "pointer",
-              // No rectangular container chrome — glow lives on the globe rim.
+              // No rectangular container chrome, glow lives on the globe rim.
               background: "transparent",
               boxShadow: "none",
               transition: "width 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
@@ -997,7 +997,7 @@ export default function Desktop() {
               marginBottom: 4,
             }}
           >
-            ▢ Get in touch
+            ▢ Say hi
           </p>
           <a
             href={`mailto:${about.email}`}
@@ -1119,7 +1119,7 @@ export default function Desktop() {
 function WelcomeIntroMorph({ phase, typed, targetOffset }) {
   // Single element that lives through all three intro phases. Always rendered
   // via a flex-centered wrapper so it starts at viewport center, and animates
-  // to its target via transform-only (x, y, scale) — never reflows.
+  // to its target via transform-only (x, y, scale), never reflows.
   const isTyping = phase === "intro-typing";
   const isFlying = phase === "expanding";
 
@@ -1356,8 +1356,8 @@ function NomineeTab() {
       target="_blank"
       rel="noopener noreferrer"
       data-cursor="hover"
-      title="Let's connect — view LinkedIn profile"
-      aria-label="Let's connect — view LinkedIn profile"
+      title="LinkedIn · Jason Saputra"
+      aria-label="Open Jason Saputra on LinkedIn"
       style={{
         position: "absolute",
         right: 0,

@@ -88,7 +88,7 @@ export default function IdleScreensaver({ active }) {
         <motion.div
           key="idle-screensaver"
           role="dialog"
-          aria-label="Screensaver — move pointer or press a key to continue"
+          aria-label="Screensaver. Move or press a key to wake."
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}

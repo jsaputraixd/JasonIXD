@@ -55,7 +55,7 @@ function easeOutCubic(t) {
 }
 
 /**
- * Cards sit on a 3D ring — they orbit around the center instead of
+ * Cards sit on a 3D ring, they orbit around the center instead of
  * sliding through each other on a flat plane.
  */
 function layoutFromRel(rel, metrics) {
@@ -157,7 +157,7 @@ const CarouselCard = memo(function CarouselCard({
         zIndex: layout.zIndex,
         pointerEvents: "auto",
         cursor: isCenter ? "grab" : "pointer",
-        // RAF drives motion — avoid CSS fighting the glide
+        // RAF drives motion, avoid CSS fighting the glide
         transition: "none",
         willChange: "transform, opacity",
       }}
@@ -488,7 +488,7 @@ export default function MobileOrbitCarousel({
         }
         role="region"
         aria-roledescription="carousel"
-        aria-label="Selected projects — swipe, tap a side card, or use arrows"
+        aria-label="Selected projects. Swipe, tap a side card, or use arrows."
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={endDrag}

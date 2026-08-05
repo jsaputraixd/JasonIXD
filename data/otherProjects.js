@@ -5,6 +5,6 @@ export const otherProjects = {
   windowTitle: "Other projects",
   icon: "/images/junk-folder-icon.png",
   blurb:
-    "More UX case studies — same full write-ups as featured work. Pick a project to open its case study.",
+    "More case studies parked back here. Same deep dives as the featured ones. Tap in.",
   projects: archiveProjects,
 };

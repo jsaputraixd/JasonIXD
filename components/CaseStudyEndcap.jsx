@@ -85,8 +85,8 @@ export default function CaseStudyEndcap({ nextProject, hasRichCaseStudy }) {
 
             <p className="case-study-contact-window__lead">
               {hasRichCaseStudy
-                ? "Collaborations, freelance, or a quick hello — send a line and tell me what you're making."
-                : "Full write-ups are still loading in. Meanwhile, say hi — I'm open to new work."}
+                ? "Got a wild brief, a half-baked idea, or just want to talk shop? Slide into my inbox."
+                : "Some write-ups are still baking. Ping me anyway. I answer humans faster than forms."}
             </p>
 
             <ul className="case-study-contact-window__list">

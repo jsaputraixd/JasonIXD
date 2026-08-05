@@ -362,8 +362,8 @@ function CaseStudyRichLayout({ project, frameStyle }) {
             }}
           >
             {showDeckEmbed
-              ? "Complete presentation in one file — scroll or download below."
-              : "Full slide deck — download for the complete presentation."}
+              ? "Whole deck in one file. Scroll it here or download and hog the projector."
+              : "Full slide deck. Download it if you want the complete ride."}
           </p>
           <a
             href={encodeURI(project.caseStudyDeckPdf.href)}
@@ -459,9 +459,9 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   const project = projects.find((p) => p.slug === slug);
-  if (!project) return { title: "Work — Jason Saputra" };
+  if (!project) return { title: "Work · Jason Saputra" };
   return {
-    title: `${project.title} — Jason Saputra`,
+    title: `${project.title} · Jason Saputra`,
     description: project.description,
   };
 }
@@ -585,7 +585,7 @@ export default async function ProjectPage({ params }) {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={encodeURI(src)}
-                  alt={`${project.title} — frame ${i + 1}`}
+                  alt={`${project.title}, frame ${i + 1}`}
                   style={{
                     width: "100%",
                     height: "auto",

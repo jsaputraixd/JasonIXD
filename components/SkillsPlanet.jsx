@@ -74,7 +74,7 @@ function sizeForFullscreen(vw, vh) {
     padY,
     labelFont: Math.max(12, Math.min(16, Math.round(disc * 0.036))),
     homeFont: 20,
-    // Match idle desktop row count — scaling type is cheaper than remeshing.
+    // Match idle desktop row count, scaling type is cheaper than remeshing.
     globeRows: SIZE.desktop.globeRows,
     lowPower: false,
   };
@@ -158,7 +158,7 @@ export default function SkillsPlanet({
   variant = "desktop",
   scrollRootSelector,
   expanded = false,
-  /** idle | hover | focus — circumferential rim glow (desktop). */
+  /** idle | hover | focus, circumferential rim glow (desktop). */
   glow = "idle",
   viewportWidth,
   viewportHeight,
@@ -255,7 +255,7 @@ export default function SkillsPlanet({
 
   useLayoutEffect(() => {
     // Expanded desktop: always render at native size (parent grows to fit).
-    // Fitting-to-container here undoes the expand — width animates up from the corner.
+    // Fitting-to-container here undoes the expand, width animates up from the corner.
     if (!isMobile && expanded) {
       setStageScale(1);
       return undefined;
@@ -282,7 +282,7 @@ export default function SkillsPlanet({
     return () => mq.removeEventListener?.("change", onChange);
   }, []);
 
-  // Drive elliptical 3D orbit via RAF (DOM writes — no React re-render per frame).
+  // Drive elliptical 3D orbit via RAF (DOM writes, no React re-render per frame).
   useEffect(() => {
     const paint = (baseAngle) => {
       for (let i = 0; i < n; i++) {
@@ -359,7 +359,7 @@ export default function SkillsPlanet({
 
     let raf = 0;
     let lastPaint = 0;
-    // Orbit labels don't need 60fps — saves main-thread time for the ASCII globe.
+    // Orbit labels don't need 60fps, saves main-thread time for the ASCII globe.
     const interval = expanded ? 1000 / 30 : 1000 / 18;
     const start =
       performance.now() - (angleRef.current / (Math.PI * 2)) * ORBIT_PERIOD_MS;
@@ -595,7 +595,7 @@ export default function SkillsPlanet({
               lowPower={size.lowPower || (!isMobile && !expanded)}
               // 1 = orthographic disc diameter matches the circular frame exactly.
               fillScale={1}
-              ariaLabel="Interactive globe — drag to rotate; watch for a signal over SF"
+              ariaLabel="Interactive globe. Drag to rotate. Watch for a signal over SF."
               style={{ opacity: 0.96 }}
               surfacePin={surfacePin}
             />

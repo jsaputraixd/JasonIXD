@@ -1,5 +1,5 @@
 /**
- * "Other stuff" — misc work outside case studies.
+ * "Other stuff": misc work outside case studies.
  * Files live in public/images/other-stuff/<category-id>/
  */
 
@@ -8,7 +8,7 @@ export const otherStuff = {
   windowTitle: "Other stuff",
   icon: "/images/junk-folder-icon.png",
   blurb:
-    "Photographs, illustrations, drawings, sculptures, and motion — open a folder to browse.",
+    "Photos, drawings, sculptures, motion experiments. The stuff that doesn't fit a case study but still lives rent-free in my hard drive. Pop a folder.",
   categories: [
     {
       id: "photography",

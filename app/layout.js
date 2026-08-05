@@ -9,18 +9,18 @@ import { getSiteUrl } from "@/lib/siteUrl";
 const siteUrl = getSiteUrl();
 
 export const metadata = {
-  title: "Jason Saputra — Interaction & Visual Designer",
+  title: "Jason Saputra · Interaction & Visual Designer",
   description:
-    "Designer based in San Francisco, originally from Bali. Interaction & visual design portfolio.",
+    "Bali-born, SF-based. Interaction and visual design that feels a little alive. Running on oat-milk lattes.",
   metadataBase: new URL(siteUrl),
   icons: {
     icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
     shortcut: "/favicon.svg",
   },
   openGraph: {
-    title: "Jason Saputra — Interaction & Visual Designer",
+    title: "Jason Saputra · Interaction & Visual Designer",
     description:
-      "Dream, think, build. An interaction & visual design portfolio.",
+      "Dream. Think. Build. Then maybe another latte. Portfolio by Jason Saputra.",
     url: siteUrl,
     siteName: "Jason Saputra",
     type: "website",

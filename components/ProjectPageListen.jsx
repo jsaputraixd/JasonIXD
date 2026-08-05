@@ -77,7 +77,7 @@ export default function ProjectPageListen({ project }) {
               data-cursor="hover"
               aria-label={
                 busy
-                  ? "Reading aloud — open stop window at corner"
+                  ? "Reading aloud. Stop window is in the corner."
                   : "Read this page aloud"
               }
               aria-busy={busy}

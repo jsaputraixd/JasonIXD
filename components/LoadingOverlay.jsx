@@ -20,7 +20,7 @@ const BOOT_LINES = [
   "> BOOTING JS-OS v1.0…",
   "> DISPENSING oatmeal latte…",
   "> TOASTING croissant.dll…",
-  "> LOC: SF // BALI — ok",
+  "> LOC: SF // BALI · synced",
   "> READY \u25A2",
 ];
 
@@ -140,7 +140,7 @@ export default function LoadingOverlay() {
         setVisible(false);
         signalBootComplete();
       } catch {
-        /* aborted — Strict Mode remount will start a fresh run */
+        /* aborted. Strict Mode remount will start a fresh run */
       }
     })();
 
@@ -209,7 +209,7 @@ export default function LoadingOverlay() {
             }}
           />
 
-          {/* Boot terminal block — fades out as tagline rises */}
+          {/* Boot terminal block, fades out as tagline rises */}
           <motion.div
             animate={{
               opacity: showTagline ? 0 : 1,

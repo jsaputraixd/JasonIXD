@@ -35,7 +35,7 @@ export default function WelcomeReadAloud({ compact = false }) {
         data-cursor="hover"
         aria-label={
           busy
-            ? "Reading aloud — use the stop window"
+            ? "Reading aloud. Hit stop in the corner when you're done."
             : "Read welcome message aloud"
         }
         aria-busy={busy}

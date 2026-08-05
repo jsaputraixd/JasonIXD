@@ -1,4 +1,4 @@
-/** Quote pool for the status bar — one per calendar day (local time). */
+/** Quote pool for the status bar, one per calendar day (local time). */
 export const quotes = [
   {
     text: "Design is thinking made visual.",
@@ -13,7 +13,7 @@ export const quotes = [
     author: "Leonardo da Vinci",
   },
   {
-    text: "Have no fear of perfection — you'll never reach it.",
+    text: "Have no fear of perfection. You'll never reach it.",
     author: "Salvador Dalí",
   },
   {
@@ -49,7 +49,7 @@ export const quotes = [
     author: "Ralf Speth",
   },
   {
-    text: "Design is not just what it looks like — design is how it works.",
+    text: "Design is not just what it looks like. Design is how it works.",
     author: "Steve Jobs",
   },
   {
@@ -89,12 +89,12 @@ export const quotes = [
     author: "Dieter Rams",
   },
   {
-    text: "Move fast and break things — then fix them with better typography.",
+    text: "Move fast and break things. Then fix them with better typography.",
     author: "Jason Saputra",
   },
   {
-    text: "Accessibility is not a feature — it's a baseline.",
-    author: "Unknown",
+    text: "Accessibility is not a feature. It's the floor.",
+    author: "Jason Saputra",
   },
   {
     text: "Every great design begins with an even better story.",

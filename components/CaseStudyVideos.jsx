@@ -81,7 +81,7 @@ export default function CaseStudyVideos({
   };
 
   const isMulti = fileItems.length >= 2;
-  /** Portrait app demos — wide enough to read UI, height capped to one viewport. */
+  /** Portrait app demos, wide enough to read UI, height capped to one viewport. */
   const fileMaxWidth = isMulti ? "min(100%, 380px)" : "min(100%, 400px)";
   const fileMaxHeight = isMulti
     ? "min(48vh, 500px)"
@@ -130,7 +130,7 @@ export default function CaseStudyVideos({
                 lineHeight: 1.5,
               }}
             >
-              Autoplays muted when in view — use controls to unmute or scrub.
+              Autoplays muted when visible. Unmute or scrub with the controls.
             </p>
           ) : null}
           <div

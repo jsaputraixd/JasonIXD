@@ -1402,7 +1402,7 @@ function MobileContact({ scrollRoot, skipTyping = false }) {
       <ScrollTypedLine
         scrollRoot={scrollRoot}
         skipTyping={skipTyping}
-        text="▢ Get in touch"
+        text="▢ Say hi"
         charMs={28}
         delay={100}
         amount={0.4}

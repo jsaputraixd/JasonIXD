@@ -82,7 +82,7 @@ function prefersCoarsePointer() {
  * Perf: static cell geometry is precomputed; RAF pauses off-screen / when the
  * tab is hidden; frame rate is throttled (especially on lowPower / mobile).
  */
-/** San Francisco — default vault-key pin on the mobile Skills globe. */
+/** San Francisco, default vault-key pin on the mobile Skills globe. */
 export const SF_VAULT_KEY = { lat: 37.7749, lon: -122.4194 };
 
 /**
@@ -109,7 +109,7 @@ export default function InteractiveAsciiGlobe({
   className = "",
   style = {},
   interactive = true,
-  ariaLabel = "Interactive globe — drag to rotate",
+  ariaLabel = "Interactive globe. Drag to rotate.",
   /** Prefer lower FPS + lighter paint (mobile Skills, etc.). */
   lowPower = false,
   /** >1 grows the ASCII disc to fill its circular frame (closes the dark rim gap). */
@@ -234,7 +234,7 @@ export default function InteractiveAsciiGlobe({
       setMaskReady(true);
     };
     img.onerror = () => {
-      /* leave maskReady false — component renders empty rather than crashing */
+      /* leave maskReady false, component renders empty rather than crashing */
     };
     return () => {
       cancelled = true;
@@ -378,7 +378,7 @@ export default function InteractiveAsciiGlobe({
       }
       pre.textContent = chars.join("");
 
-      // Orange surface pin overlay — track via DOM only (don't fight React styles).
+      // Orange surface pin overlay, track via DOM only (don't fight React styles).
       const pinEl = pinRef.current;
       if (pinEl) {
         const proj =
@@ -586,7 +586,7 @@ export default function InteractiveAsciiGlobe({
           lineHeight: 1,
           letterSpacing: 0,
           color: "rgba(212, 210, 200, 0.94)",
-          // text-shadow is expensive on mobile GPUs — keep glow on desktop only
+          // text-shadow is expensive on mobile GPUs, keep glow on desktop only
           textShadow: useLowPower
             ? "none"
             : "0 0 10px rgba(255, 122, 41, 0.22), 0 0 2px rgba(0,0,0,0.85)",

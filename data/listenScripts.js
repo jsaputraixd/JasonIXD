@@ -2,7 +2,7 @@ import { createHash } from "crypto";
 import { about } from "./about.js";
 import { projects } from "./projects.js";
 
-/** Stable hash — regenerate audio when script copy changes. */
+/** Stable hash: regenerate audio when script copy changes. */
 export function hashListenText(text) {
   return createHash("sha256")
     .update(String(text).trim())
@@ -30,7 +30,7 @@ export function buildWelcomeListenText() {
   ]);
 }
 
-/** Short case-study summary for listen.exe (~45–90s). Override with project.listenScript. */
+/** Short case-study summary for listen.exe (~45 to 90s). Override with project.listenScript. */
 export function buildProjectListenText(project) {
   if (project.listenScript) return project.listenScript.trim();
   const tags = project.tags?.length ? project.tags.join(", ") : "";
