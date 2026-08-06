@@ -2,13 +2,16 @@
 
 import { useEffect, useRef } from "react";
 
-const PARTICLE_COUNT = 90;
-const REPEL_RADIUS = 140;
-const REPEL_STRENGTH = 1.4;
+const PARTICLE_COUNT = 36;
+const REPEL_RADIUS = 120;
+const REPEL_STRENGTH = 1.2;
 const FRICTION = 0.93;
-const MAX_METEORS = 2;
-const METEOR_GAP_MIN_MS = 4200;
-const METEOR_GAP_MAX_MS = 12000;
+const MAX_METEORS = 1;
+const METEOR_GAP_MIN_MS = 7000;
+const METEOR_GAP_MAX_MS = 16000;
+/** Cap the wallpaper loop — full 60fps was eating main-thread time under CRT + globe. */
+const TARGET_FPS = 30;
+const FRAME_MS = 1000 / TARGET_FPS;
 
 const GRADIENT =
   "radial-gradient(ellipse at 50% 35%, #1f1a2e 0%, #0e0c14 70%, #050405 100%)";
@@ -18,7 +21,6 @@ function nextMeteorDelay() {
 }
 
 function spawnMeteor(w, h) {
-  // Mostly down-right streaks; occasional down-left for variety.
   const downRight = Math.random() < 0.72;
   const angle = downRight
     ? Math.PI * (0.18 + Math.random() * 0.22)
@@ -58,8 +60,9 @@ export default function GlobalBackground() {
 
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const ctx = canvas.getContext("2d", { alpha: true });
+    // 1× backing store: Retina 2× was 4× the fill cost for a soft wallpaper.
+    const dpr = 1;
 
     const resize = () => {
       const w = window.innerWidth;
@@ -98,6 +101,8 @@ export default function GlobalBackground() {
     /** @type {ReturnType<typeof spawnMeteor>[]} */
     let meteors = [];
     let nextMeteorAt = performance.now() + nextMeteorDelay() * 0.45;
+    let lastPaint = 0;
+    let running = false;
 
     const onResize = () => {
       resize();
@@ -117,6 +122,19 @@ export default function GlobalBackground() {
     window.addEventListener("mouseleave", onMouseLeave);
 
     const draw = (now) => {
+      if (!running) return;
+
+      if (document.hidden) {
+        running = false;
+        rafRef.current = 0;
+        return;
+      }
+
+      rafRef.current = requestAnimationFrame(draw);
+
+      if (now - lastPaint < FRAME_MS) return;
+      lastPaint = now;
+
       const w = window.innerWidth;
       const h = window.innerHeight;
       ctx.clearRect(0, 0, w, h);
@@ -217,14 +235,32 @@ export default function GlobalBackground() {
         }
         meteors = alive;
       }
+    };
 
+    const start = () => {
+      if (running || document.hidden) return;
+      running = true;
+      lastPaint = 0;
       rafRef.current = requestAnimationFrame(draw);
     };
 
-    rafRef.current = requestAnimationFrame(draw);
+    const stop = () => {
+      running = false;
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = 0;
+    };
+
+    const onVisibility = () => {
+      if (document.hidden) stop();
+      else start();
+    };
+
+    document.addEventListener("visibilitychange", onVisibility);
+    start();
 
     return () => {
-      cancelAnimationFrame(rafRef.current);
+      stop();
+      document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener("resize", onResize);
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseleave", onMouseLeave);

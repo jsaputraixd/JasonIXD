@@ -359,12 +359,19 @@ export default function SkillsPlanet({
 
     let raf = 0;
     let lastPaint = 0;
+    let running = false;
     // Orbit labels don't need 60fps, saves main-thread time for the ASCII globe.
-    const interval = expanded ? 1000 / 30 : 1000 / 18;
+    const interval = expanded ? 1000 / 20 : 1000 / 12;
     const start =
       performance.now() - (angleRef.current / (Math.PI * 2)) * ORBIT_PERIOD_MS;
 
     const tick = (now) => {
+      if (!running) return;
+      if (document.hidden) {
+        running = false;
+        raf = 0;
+        return;
+      }
       if (now - lastPaint >= interval) {
         const turn = ((now - start) % ORBIT_PERIOD_MS) / ORBIT_PERIOD_MS;
         const baseAngle = turn * Math.PI * 2 - Math.PI / 2;
@@ -375,8 +382,27 @@ export default function SkillsPlanet({
       raf = requestAnimationFrame(tick);
     };
 
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
+    const begin = () => {
+      if (running || document.hidden) return;
+      running = true;
+      raf = requestAnimationFrame(tick);
+    };
+    const halt = () => {
+      running = false;
+      if (raf) cancelAnimationFrame(raf);
+      raf = 0;
+    };
+    const onVisibility = () => {
+      if (document.hidden) halt();
+      else begin();
+    };
+
+    document.addEventListener("visibilitychange", onVisibility);
+    begin();
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibility);
+      halt();
+    };
   }, [constellationOpen, reduceMotion, n, cx, cy, rx, ry, discR, expanded]);
 
   const ellipsePathOpacity = constellationOpen ? 0.55 : 0;

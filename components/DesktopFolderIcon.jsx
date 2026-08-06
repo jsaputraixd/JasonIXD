@@ -24,7 +24,9 @@ export default function DesktopFolderIcon({
   onFocus,
   onOffsetChange,
   zIndex = 14,
-  parallaxShift = { x: 0, y: 0 },
+  parallaxDepth = 0,
+  /** @deprecated Prefer parallaxDepth. */
+  parallaxShift,
   delay = 0,
   selected = false,
   interactive = true,
@@ -41,8 +43,6 @@ export default function DesktopFolderIcon({
     onFocus,
     onOffsetChange,
   });
-
-  const parallax = drag.isDragging ? { x: 0, y: 0 } : parallaxShift;
 
   const activate = () => {
     if (!interactive) return;
@@ -100,7 +100,13 @@ export default function DesktopFolderIcon({
         flexDirection: "column",
         alignItems: "center",
         gap: 4,
-        transform: `translate3d(${parallax.x}px, ${parallax.y}px, 0)`,
+        transform: drag.isDragging
+          ? undefined
+          : parallaxShift
+            ? `translate3d(${parallaxShift.x}px, ${parallaxShift.y}px, 0)`
+            : parallaxDepth
+              ? `translate3d(calc(var(--desk-px, 0) * ${-parallaxDepth} * 1px), calc(var(--desk-py, 0) * ${-parallaxDepth * 0.78} * 1px), 0)`
+              : undefined,
         transition: "background 140ms ease",
         boxShadow: drag.isDragging
           ? "0 10px 28px rgba(0,0,0,0.45)"

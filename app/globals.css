@@ -71,7 +71,8 @@ body {
   z-index: 1;
   width: 100%;
   min-height: 100vh;
-  perspective: 2400px;
+  /* Lighter perspective — deep 3D on the whole desktop was a compositor tax. */
+  perspective: 3200px;
   perspective-origin: 50% 50%;
 }
 
@@ -85,7 +86,7 @@ body {
 
 /* Desktop home only — slight tilt; tall pages (e.g. work) must stay untilted or layout “sinks” */
 .crt-stage > .crt-tilt {
-  transform: rotateX(1.2deg);
+  transform: rotateX(0.7deg);
   transform-origin: center 80%;
 }
 

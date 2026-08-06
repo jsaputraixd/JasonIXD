@@ -10,7 +10,6 @@ import {
   useMemo,
   useRef,
   useState,
-  startTransition,
 } from "react";
 import {
   AnimatePresence,
@@ -247,7 +246,6 @@ export default function Desktop() {
   const skillsPointerRef = useRef(null);
   const [minimizedIds, setMinimizedIds] = useState([]);
   const welcomeDoneTimerRef = useRef(null);
-  const [parallax, setParallax] = useState({ x: 0, y: 0 });
   const [iconOffsets, setIconOffsets] = useState(() => ({}));
   const { toastOpen, dismissToast } = useVaultKeyState();
 
@@ -449,25 +447,38 @@ export default function Desktop() {
     const el = stageRef.current;
     if (!el) return;
 
+    // CSS-var parallax: update the stage without re-rendering every window.
+    el.style.setProperty("--desk-px", "0");
+    el.style.setProperty("--desk-py", "0");
+
     let raf = 0;
     let lastX = 0;
     let lastY = 0;
+    let pendingX = 0;
+    let pendingY = 0;
 
     const onMove = (e) => {
       const r = el.getBoundingClientRect();
-      const nx = Math.max(-1, Math.min(1, ((e.clientX - r.left) / r.width - 0.5) * 2));
-      const ny = Math.max(-1, Math.min(1, ((e.clientY - r.top) / r.height - 0.5) * 2));
+      pendingX = Math.max(
+        -1,
+        Math.min(1, ((e.clientX - r.left) / r.width - 0.5) * 2)
+      );
+      pendingY = Math.max(
+        -1,
+        Math.min(1, ((e.clientY - r.top) / r.height - 0.5) * 2)
+      );
 
-      if (Math.abs(nx - lastX) < 0.028 && Math.abs(ny - lastY) < 0.028) return;
+      if (Math.abs(pendingX - lastX) < 0.028 && Math.abs(pendingY - lastY) < 0.028) {
+        return;
+      }
 
       if (raf) return;
       raf = requestAnimationFrame(() => {
         raf = 0;
-        lastX = nx;
-        lastY = ny;
-        startTransition(() => {
-          setParallax({ x: nx, y: ny });
-        });
+        lastX = pendingX;
+        lastY = pendingY;
+        el.style.setProperty("--desk-px", String(pendingX));
+        el.style.setProperty("--desk-py", String(pendingY));
       });
     };
 
@@ -475,6 +486,8 @@ export default function Desktop() {
     return () => {
       el.removeEventListener("mousemove", onMove);
       if (raf) cancelAnimationFrame(raf);
+      el.style.setProperty("--desk-px", "0");
+      el.style.setProperty("--desk-py", "0");
     };
   }, [viewport, phase, skillsFocused]);
 
@@ -551,12 +564,7 @@ export default function Desktop() {
 
   const { w: vw, h: vh } = viewport;
 
-  const px = parallax.x;
-  const py = parallax.y;
-
-  // One convention for every window: pointer right/down → pane shifts left/up
-  // (recessed plane / “looking past the glass”). Only depth (amount) differs.
-  const yz = 0.78;
+  // Parallax depth (px). Actual shift is applied via --desk-px / --desk-py CSS vars.
   const depth = {
     welcome: 8,
     me: 8,
@@ -567,23 +575,6 @@ export default function Desktop() {
     otherProjects: 9,
     otherProjectsIcon: 7,
     contact: 9,
-  };
-  const pShift = {
-    welcome: { x: -px * depth.welcome, y: -py * depth.welcome * yz },
-    me: { x: -px * depth.me, y: -py * depth.me * yz },
-    proj: { x: -px * depth.proj, y: -py * depth.proj * yz },
-    skills: { x: -px * depth.skills, y: -py * depth.skills * yz },
-    otherStuff: { x: -px * depth.otherStuff, y: -py * depth.otherStuff * yz },
-    otherStuffIcon: {
-      x: -px * depth.otherStuffIcon,
-      y: -py * depth.otherStuffIcon * yz,
-    },
-    otherProjects: { x: -px * depth.otherProjects, y: -py * depth.otherProjects * yz },
-    otherProjectsIcon: {
-      x: -px * depth.otherProjectsIcon,
-      y: -py * depth.otherProjectsIcon * yz,
-    },
-    contact: { x: -px * depth.contact, y: -py * depth.contact * yz },
   };
 
   const showIntroCard =
@@ -676,7 +667,7 @@ export default function Desktop() {
           minimized={isMinimized("welcome")}
           onMinimize={() => minimizeWindow("welcome")}
           dragConstraints={stageRef}
-          parallaxShift={pShift.welcome}
+          parallaxDepth={depth.welcome}
           uiScale={layoutScale}
         >
           <WelcomeBody
@@ -703,7 +694,7 @@ export default function Desktop() {
           minimized={isMinimized("me")}
           onMinimize={() => minimizeWindow("me")}
           dragConstraints={stageRef}
-          parallaxShift={pShift.me}
+          parallaxDepth={depth.me}
           uiScale={layoutScale}
         >
           <MeTxtBody frameWidth={W.me} layoutScale={layoutScale} />
@@ -731,11 +722,9 @@ export default function Desktop() {
                   padding: 0,
                   border: "none",
                   cursor: "default",
-                  // Soft vignette only, avoid a boxed modal plate behind the globe.
+                  // Soft vignette only — solid fill, no backdrop-filter (expensive over CRT).
                   background:
-                    "radial-gradient(ellipse at center, rgba(6, 4, 3, 0.18) 0%, rgba(6, 4, 3, 0.55) 55%, rgba(6, 4, 3, 0.72) 100%)",
-                  backdropFilter: "blur(6px)",
-                  WebkitBackdropFilter: "blur(6px)",
+                    "radial-gradient(ellipse at center, rgba(6, 4, 3, 0.22) 0%, rgba(6, 4, 3, 0.62) 55%, rgba(6, 4, 3, 0.78) 100%)",
                 }}
               />
             ) : null}
@@ -775,8 +764,6 @@ export default function Desktop() {
               scale: skillsFocused ? 1 : skillsHovered ? 1.03 : 1,
               left: skillsFloatLeft,
               top: skillsFloatTop,
-              x: skillsFocused ? 0 : pShift.skills.x,
-              y: skillsFocused ? 0 : pShift.skills.y,
             }}
             transition={{ duration: 0.4, ease: EASE }}
             onHoverStart={() => {
@@ -817,13 +804,21 @@ export default function Desktop() {
               transition: "width 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
             }}
           >
-            <SkillsPlanet
-              variant="desktop"
-              expanded={skillsFocused}
-              glow={skillsFocused ? "none" : skillsHovered ? "hover" : "idle"}
-              viewportWidth={vwSafe}
-              viewportHeight={vhSafe}
-            />
+            <div
+              style={{
+                transform: skillsFocused
+                  ? undefined
+                  : `translate3d(calc(var(--desk-px, 0) * ${-depth.skills} * 1px), calc(var(--desk-py, 0) * ${-depth.skills * 0.78} * 1px), 0)`,
+              }}
+            >
+              <SkillsPlanet
+                variant="desktop"
+                expanded={skillsFocused}
+                glow={skillsFocused ? "none" : skillsHovered ? "hover" : "idle"}
+                viewportWidth={vwSafe}
+                viewportHeight={vhSafe}
+              />
+            </div>
           </motion.div>
         </>
       )}
@@ -849,7 +844,7 @@ export default function Desktop() {
               minimized={isMinimized(id)}
               onMinimize={() => minimizeWindow(id)}
               dragConstraints={stageRef}
-              parallaxShift={pShift.proj}
+              parallaxDepth={depth.proj}
               uiScale={layoutScale}
               clipContent={false}
             >
@@ -886,7 +881,7 @@ export default function Desktop() {
             bringToFront("otherStuff");
             setOtherStuffOpen(true);
           }}
-          parallaxShift={pShift.otherStuffIcon}
+          parallaxDepth={depth.otherStuffIcon}
           selected={otherStuffOpen}
           interactive={!skillsFocused}
         />
@@ -911,7 +906,7 @@ export default function Desktop() {
             bringToFront("otherProjects");
             setOtherProjectsOpen(true);
           }}
-          parallaxShift={pShift.otherProjectsIcon}
+          parallaxDepth={depth.otherProjectsIcon}
           selected={otherProjectsOpen}
           interactive={!skillsFocused}
         />
@@ -932,7 +927,7 @@ export default function Desktop() {
           minimized={isMinimized("otherStuff")}
           onMinimize={() => minimizeWindow("otherStuff")}
           dragConstraints={stageRef}
-          parallaxShift={pShift.otherStuff}
+          parallaxDepth={depth.otherStuff}
           uiScale={layoutScale}
         >
           <OtherStuffFolder
@@ -958,7 +953,7 @@ export default function Desktop() {
           minimized={isMinimized("otherProjects")}
           onMinimize={() => minimizeWindow("otherProjects")}
           dragConstraints={stageRef}
-          parallaxShift={pShift.otherProjects}
+          parallaxDepth={depth.otherProjects}
           uiScale={layoutScale}
         >
           <OtherProjectsFolder variant="desktop" layoutScale={layoutScale} />
@@ -979,7 +974,7 @@ export default function Desktop() {
         minimized={isMinimized("contact")}
         onMinimize={() => minimizeWindow("contact")}
         dragConstraints={stageRef}
-        parallaxShift={pShift.contact}
+        parallaxDepth={depth.contact}
         uiScale={layoutScale}
       >
         <div

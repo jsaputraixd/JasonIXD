@@ -396,8 +396,9 @@ export default function InteractiveAsciiGlobe({
       }
     };
 
-    const idleFps = useLowPower ? 16 : 22;
-    const dragFps = useLowPower ? 28 : 40;
+    // Idle globe is decorative — keep drag snappy, idle cheap.
+    const idleFps = useLowPower ? 10 : 12;
+    const dragFps = useLowPower ? 24 : 30;
     const idleInterval = 1000 / idleFps;
     const dragInterval = 1000 / dragFps;
 

@@ -28,7 +28,10 @@ export default function Window({
   delay = 0,
   dragConstraints,
   children,
-  parallaxShift = { x: 0, y: 0 },
+  /** Depth in px for CSS-var parallax (`--desk-px` / `--desk-py` on the stage). */
+  parallaxDepth = 0,
+  /** @deprecated Prefer parallaxDepth (avoids React re-renders on mouse move). */
+  parallaxShift,
   titleUppercase = true,
   uiScale = 1,
   titleBarExtra,
@@ -142,7 +145,11 @@ export default function Window({
               color: "#ffffff",
               userSelect: "none",
               overflow: clipContent ? "hidden" : "visible",
-              transform: `translate3d(${parallaxShift.x}px, ${parallaxShift.y}px, 0)`,
+              transform: parallaxShift
+                ? `translate3d(${parallaxShift.x}px, ${parallaxShift.y}px, 0)`
+                : parallaxDepth
+                  ? `translate3d(calc(var(--desk-px, 0) * ${-parallaxDepth} * 1px), calc(var(--desk-py, 0) * ${-parallaxDepth * 0.78} * 1px), 0)`
+                  : undefined,
             }}
           >
             {/* Title bar — only drag handle */}
