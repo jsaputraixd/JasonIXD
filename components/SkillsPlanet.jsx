@@ -44,8 +44,8 @@ const SIZE = {
     labelFont: 12,
     homeFont: 18,
     // Keep rows stable when expanding so the ASCII grid isn't rebuilt mid-zoom.
-    globeRows: 26,
-    lowPower: false,
+    globeRows: 22,
+    lowPower: true,
   },
 };
 
@@ -76,7 +76,7 @@ function sizeForFullscreen(vw, vh) {
     homeFont: 20,
     // Match idle desktop row count, scaling type is cheaper than remeshing.
     globeRows: SIZE.desktop.globeRows,
-    lowPower: false,
+    lowPower: false, // expanded: allow idle spin again
   };
 }
 
@@ -231,6 +231,12 @@ export default function SkillsPlanet({
   const cy = boxH / 2;
   const n = skills.length;
   const pingGradId = `skills-ping-grad-${variant}`;
+  // Desktop corner float: freeze motion until hover/expand. Mobile keeps scroll-gated live.
+  const motionLive =
+    isMobile
+      ? constellationOpen
+      : expanded || glow === "hover" || glow === "focus";
+  const globeAnimateIdle = isMobile ? constellationOpen : expanded;
 
   useLayoutEffect(() => {
     if (!isMobile || !scrollRootSelector) return;
@@ -352,7 +358,7 @@ export default function SkillsPlanet({
       }
     };
 
-    if (!constellationOpen || reduceMotion) {
+    if (!constellationOpen || reduceMotion || !motionLive) {
       paint(angleRef.current || -Math.PI / 2);
       return undefined;
     }
@@ -361,7 +367,7 @@ export default function SkillsPlanet({
     let lastPaint = 0;
     let running = false;
     // Orbit labels don't need 60fps, saves main-thread time for the ASCII globe.
-    const interval = expanded ? 1000 / 20 : 1000 / 12;
+    const interval = expanded ? 1000 / 18 : 1000 / 10;
     const start =
       performance.now() - (angleRef.current / (Math.PI * 2)) * ORBIT_PERIOD_MS;
 
@@ -403,18 +409,32 @@ export default function SkillsPlanet({
       document.removeEventListener("visibilitychange", onVisibility);
       halt();
     };
-  }, [constellationOpen, reduceMotion, n, cx, cy, rx, ry, discR, expanded]);
+  }, [
+    constellationOpen,
+    reduceMotion,
+    motionLive,
+    n,
+    cx,
+    cy,
+    rx,
+    ry,
+    discR,
+    expanded,
+  ]);
 
   const ellipsePathOpacity = constellationOpen ? 0.55 : 0;
 
   return (
     <div
       ref={wrapRef}
-      className={
-        constellationOpen
-          ? "skills-constellation skills-constellation--live skills-constellation--orbit3d"
-          : "skills-constellation skills-constellation--orbit3d"
-      }
+      className={[
+        "skills-constellation",
+        "skills-constellation--orbit3d",
+        constellationOpen ? "skills-constellation--live" : "",
+        motionLive ? "skills-constellation--fx" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
       style={{
         position: "relative",
         width: "100%",
@@ -619,6 +639,8 @@ export default function SkillsPlanet({
               rows={size.globeRows}
               // Corner float: lighter paint. Expanded: full quality but capped rows.
               lowPower={size.lowPower || (!isMobile && !expanded)}
+              // Desktop corner: static until expanded. Drag still works.
+              animateIdle={globeAnimateIdle}
               // 1 = orthographic disc diameter matches the circular frame exactly.
               fillScale={1}
               ariaLabel="Interactive globe. Drag to rotate. Watch for a signal over SF."

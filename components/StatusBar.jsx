@@ -47,11 +47,10 @@ export default function StatusBar({
       const d = new Date();
       const hh = String(d.getHours()).padStart(2, "0");
       const mm = String(d.getMinutes()).padStart(2, "0");
-      const ss = String(d.getSeconds()).padStart(2, "0");
-      setTime(`${hh}:${mm}:${ss}`);
+      setTime(`${hh}:${mm}`);
     };
     tick();
-    const id = setInterval(tick, 1000);
+    const id = setInterval(tick, 30000);
     return () => clearInterval(id);
   }, []);
 
@@ -95,12 +94,11 @@ export default function StatusBar({
           "linear-gradient(to top, rgba(10,6,4,0.95), rgba(10,6,4,0.6))",
         border: "1px solid rgba(255, 122, 41, 0.25)",
         borderRadius: isMobile ? 2 : desktopFooterRadius,
-        backdropFilter: "blur(2px)",
         overflow: "hidden",
         pointerEvents: "none",
       }}
     >
-      <motion.div
+      <div
         style={{
           padding: isMobile ? "3px 0" : "4px 0",
           overflow: "hidden",
@@ -111,9 +109,10 @@ export default function StatusBar({
           background: "rgba(0, 0, 0, 0.25)",
         }}
       >
-        <motion.div
-          animate={reduceMotion ? undefined : { x: ["0%", "-33.333%"] }}
-          transition={{ duration: isMobile ? 28 : 32, repeat: Infinity, ease: "linear" }}
+        <div
+          className={
+            reduceMotion ? "status-bar-marquee" : "status-bar-marquee status-bar-marquee--run"
+          }
           style={{
             display: "inline-block",
             fontFamily: "'VT323', monospace",
@@ -122,6 +121,7 @@ export default function StatusBar({
             color: ACCENT,
             textShadow: "0 0 6px rgba(255, 122, 41, 0.45)",
             textTransform: "uppercase",
+            ["--marquee-duration"]: isMobile ? "28s" : "32s",
           }}
         >
           {stream.map((s, i) => (
@@ -129,8 +129,8 @@ export default function StatusBar({
               {s}
             </span>
           ))}
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
 
       {minimizedWindows.length > 0 ? (
         <motion.div

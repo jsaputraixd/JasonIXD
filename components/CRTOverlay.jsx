@@ -90,41 +90,28 @@ export default function CRTOverlay() {
         }}
       />
 
-      {/* ─── SCANLINES ─── */}
+      {/* ─── SCANLINES (static — no rolling band) ─── */}
       <div
         style={{
           position: "absolute",
           inset: 0,
           backgroundImage:
-            "repeating-linear-gradient(0deg, rgba(0,0,0,0.25) 0px, rgba(0,0,0,0.25) 1px, transparent 2px, transparent 3px)",
-          opacity: 0.5,
+            "repeating-linear-gradient(0deg, rgba(0,0,0,0.22) 0px, rgba(0,0,0,0.22) 1px, transparent 2px, transparent 4px)",
+          opacity: 0.38,
         }}
       />
 
-      {/* ─── TOP GLASS REFLECTION — no mix-blend (was a full-screen compositor tax) ─── */}
+      {/* ─── TOP GLASS REFLECTION ─── */}
       <div
         style={{
           position: "absolute",
           top: 0,
           left: "5%",
           right: "5%",
-          height: "22%",
+          height: "18%",
           background:
-            "linear-gradient(to bottom, rgba(255,255,255,0.045) 0%, transparent 100%)",
+            "linear-gradient(to bottom, rgba(255,255,255,0.035) 0%, transparent 100%)",
           borderRadius: "0 0 50% 50% / 0 0 100% 100%",
-        }}
-      />
-
-      {/* ─── ROLLING TRACKING BAND — every ~14s, very subtle ─── */}
-      <div
-        className="crt-roll-band"
-        style={{
-          position: "absolute",
-          left: 0,
-          right: 0,
-          height: 80,
-          background:
-            "linear-gradient(to bottom, transparent 0%, rgba(255,255,255,0.02) 50%, transparent 100%)",
         }}
       />
     </div>

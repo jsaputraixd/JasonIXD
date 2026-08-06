@@ -112,6 +112,11 @@ export default function InteractiveAsciiGlobe({
   ariaLabel = "Interactive globe. Drag to rotate.",
   /** Prefer lower FPS + lighter paint (mobile Skills, etc.). */
   lowPower = false,
+  /**
+   * When false, paint once and only re-render while the user is dragging.
+   * Desktop corner float uses this so the globe isn't a permanent rAF tax.
+   */
+  animateIdle = true,
   /** >1 grows the ASCII disc to fill its circular frame (closes the dark rim gap). */
   fillScale = 1,
   /**
@@ -125,6 +130,11 @@ export default function InteractiveAsciiGlobe({
   const pinRef = useRef(null);
   const pinCollectedRef = useRef(false);
   const surfacePinRef = useRef(surfacePin);
+  const loopApiRef = useRef({
+    start: () => {},
+    stop: () => {},
+    render: () => {},
+  });
 
   // Start with California roughly facing the camera so the SF pin is findable.
   const rotRef = useRef({ spin: -2.12, tilt: 0.18 });
@@ -133,6 +143,8 @@ export default function InteractiveAsciiGlobe({
   const resumeAtRef = useRef(0);
   const visibleRef = useRef(true);
   const pinDragRef = useRef(null);
+  const animateIdleRef = useRef(animateIdle);
+  animateIdleRef.current = animateIdle;
 
   pinCollectedRef.current = Boolean(surfacePin?.collected);
   surfacePinRef.current = surfacePin;
@@ -396,9 +408,9 @@ export default function InteractiveAsciiGlobe({
       }
     };
 
-    // Idle globe is decorative — keep drag snappy, idle cheap.
-    const idleFps = useLowPower ? 10 : 12;
-    const dragFps = useLowPower ? 24 : 30;
+    // Idle globe is decorative — keep drag snappy, idle cheap / frozen.
+    const idleFps = useLowPower ? 8 : 10;
+    const dragFps = useLowPower ? 22 : 28;
     const idleInterval = 1000 / idleFps;
     const dragInterval = 1000 / dragFps;
 
@@ -407,12 +419,19 @@ export default function InteractiveAsciiGlobe({
     let lastTs = 0;
     let lastPaint = 0;
 
+    const shouldLoop = () => {
+      if (!visibleRef.current || document.hidden) return false;
+      if (draggingRef.current) return true;
+      return animateIdleRef.current && !reduceMotion;
+    };
+
     const tick = (now) => {
       if (!running) return;
 
-      if (!visibleRef.current || document.hidden) {
+      if (!shouldLoop()) {
         running = false;
         raf = 0;
+        render();
         return;
       }
 
@@ -420,6 +439,7 @@ export default function InteractiveAsciiGlobe({
       lastTs = now;
 
       if (
+        animateIdleRef.current &&
         !draggingRef.current &&
         !reduceMotion &&
         now >= resumeAtRef.current
@@ -438,7 +458,7 @@ export default function InteractiveAsciiGlobe({
 
     const start = () => {
       if (running) return;
-      if (!visibleRef.current || document.hidden) return;
+      if (!shouldLoop()) return;
       running = true;
       lastTs = 0;
       lastSpin = NaN;
@@ -454,14 +474,14 @@ export default function InteractiveAsciiGlobe({
 
     const onVisibility = () => {
       if (document.hidden) stop();
-      else start();
+      else if (shouldLoop()) start();
     };
 
     const io = new IntersectionObserver(
       ([entry]) => {
         visibleRef.current =
           entry.isIntersecting && entry.intersectionRatio > 0.02;
-        if (visibleRef.current) start();
+        if (visibleRef.current && shouldLoop()) start();
         else stop();
       },
       { threshold: [0, 0.02, 0.1, 0.25] }
@@ -469,13 +489,20 @@ export default function InteractiveAsciiGlobe({
     io.observe(container);
     document.addEventListener("visibilitychange", onVisibility);
 
-    render();
-    start();
+    loopApiRef.current = {
+      start,
+      stop,
+      render: () => render(true),
+    };
+
+    render(true);
+    if (shouldLoop()) start();
 
     return () => {
       stop();
       io.disconnect();
       document.removeEventListener("visibilitychange", onVisibility);
+      loopApiRef.current = { start: () => {}, stop: () => {}, render: () => {} };
     };
   }, [
     maskReady,
@@ -485,6 +512,7 @@ export default function InteractiveAsciiGlobe({
     reduceMotion,
     cellMetrics,
     useLowPower,
+    animateIdle,
   ]);
 
   const onPointerDown = (e) => {
@@ -494,6 +522,7 @@ export default function InteractiveAsciiGlobe({
       x: e.clientX,
       y: e.clientY,
     };
+    loopApiRef.current.start();
     try {
       e.currentTarget.setPointerCapture(e.pointerId);
     } catch {
@@ -513,6 +542,8 @@ export default function InteractiveAsciiGlobe({
       -TILT_LIMIT,
       TILT_LIMIT
     );
+    // Frozen-idle path: paint immediately so drag still feels live.
+    if (!animateIdleRef.current) loopApiRef.current.render();
   };
 
   const endDrag = (e) => {
@@ -520,6 +551,10 @@ export default function InteractiveAsciiGlobe({
     draggingRef.current = false;
     dragRef.current = null;
     resumeAtRef.current = performance.now() + RESUME_DELAY_MS;
+    if (!animateIdleRef.current) {
+      loopApiRef.current.stop();
+      loopApiRef.current.render();
+    }
     try {
       e.currentTarget.releasePointerCapture(e.pointerId);
     } catch {
