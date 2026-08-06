@@ -15,29 +15,45 @@ function simpleGalleryCaseStudy({
   imageFiles,
   blockParagraphs,
   conclusion,
+  sections,
+  videos,
+  videosPlacement,
+  videosAfterSection,
+  videosTitle,
+  videosIntro,
+  showJumpNav = false,
 }) {
+  const processSections =
+    sections?.length > 0
+      ? sections
+      : [
+          {
+            title: "Work",
+            blocks: [
+              {
+                title: "Visual overview",
+                paragraphs: blockParagraphs,
+                images: projectImages(base, imageFiles),
+              },
+            ],
+          },
+        ];
+
   return {
     overview,
     introParagraphs,
     highlights: highlights ?? [],
     heroFirst: true,
     imagesBeforeText: true,
-    showJumpNav: false,
+    showJumpNav,
     showDeckEmbed: false,
-    videos: [],
+    videos: videos ?? [],
+    videosPlacement: videosPlacement ?? "afterIntro",
+    videosAfterSection,
+    videosTitle,
+    videosIntro,
     processWork: {
-      sections: [
-        {
-          title: "Work",
-          blocks: [
-            {
-              title: "Visual overview",
-              paragraphs: blockParagraphs,
-              images: projectImages(base, imageFiles),
-            },
-          ],
-        },
-      ],
+      sections: processSections,
     },
     conclusionTitle: "Reflection",
     conclusion,
@@ -1224,6 +1240,406 @@ const ccaPathfindingCaseStudyRich = simpleGalleryCaseStudy({
     "WIP. Pathfinding lives where education design meets career panic. Full story lands once the layout doc stops moving."
 });
 
+/** A Fowl Play (AR) */
+const AFP = `${P}/AR Project A Fowl Play`;
+const aFowlPlayHero = `${AFP}/355a7d22-b1c8-4402-9d86-dc0a92061da8.png`;
+
+const aFowlPlayCaseStudyRich = simpleGalleryCaseStudy({
+  overview: {
+    client: "Concept · AR Narrative (Academic)",
+    industry: "AR / XR · Interactive Storytelling",
+    timeline: "Studio project · Solo",
+    role: "Narrative, 3D, AR interaction design",
+  },
+  introParagraphs: [
+    "A Fowl Play turns an iPad into a detective kit. Scan the world, step into a mystery, and follow audio, light, and geometry cues like you're inside Half-Life: Alyx, just with more poultry and less gravity gloves.",
+    "Built in Reality Composer with RealityScan assets and Blender cleanup. The story does the navigating. The UI stays quiet.",
+  ],
+  highlights: [
+    {
+      label: "Mechanic",
+      value: "Image-anchored AR scenes with invisible triggers between rooms.",
+    },
+    {
+      label: "Wayfinding",
+      value: "Audio, visual, and spatial cues, borrowed from game design, not UI chrome.",
+    },
+    {
+      label: "Tools",
+      value: "Reality Composer, RealityScan, Blender, ElevenLabs VO.",
+    },
+  ],
+  showJumpNav: true,
+  sections: [
+    {
+      title: "Inspiration",
+      blocks: [
+        {
+          title: "Navigation as storytelling",
+          paragraphs: [
+            "Before any scan, I studied how games push you forward without a giant arrow. Alyx won: environment, sound, and geometry do the pointing.",
+          ],
+          images: projectImages(AFP, [
+            "Half-Life_Alyx_Navigational_Cues_Screenshot.png",
+            "Half-Life_Alyx_Navigational_Cues.webp",
+            "Half-Life_Alyx_Navigational_Cues_(1).webp",
+          ]),
+        },
+      ],
+    },
+    {
+      title: "World build",
+      blocks: [
+        {
+          title: "Scan, clean, place",
+          paragraphs: [
+            "Sketchfab filled gaps. RealityScan pulled real props into the scene. Blender kept the polycount from melting the iPad.",
+          ],
+          images: projectImages(AFP, [
+            "image.png",
+            "image 1.png",
+            "Screenshot_20251209_215456_RealityScan.jpg",
+            "ba6bf4e6-6e4d-4f4d-b6a1-27e889781125.png",
+          ]),
+        },
+      ],
+    },
+    {
+      title: "Scenes",
+      blocks: [
+        {
+          title: "Detective's office",
+          paragraphs: [
+            "Tone-setter. Look around, hear the monologue, walk to the door. Invisible trigger, next scene. No menu required.",
+          ],
+          images: projectImages(AFP, [
+            "355a7d22-b1c8-4402-9d86-dc0a92061da8.png",
+            "IMG_0182_from_Notion.jpg",
+          ]),
+        },
+        {
+          title: "Restaurant of suspicion",
+          paragraphs: [
+            "Three spaces, three cue types. Players stretch their legs and solve with instinct, not a checklist.",
+          ],
+          images: projectImages(AFP, [
+            "7b6affab-7070-469b-bed3-d1cc959b25d6.png",
+            "a607895c-bc9b-44a8-9cd5-d1ae70aebfaa.png",
+          ]),
+        },
+      ],
+    },
+    {
+      title: "Anchor",
+      blocks: [
+        {
+          title: "Make the marker part of the joke",
+          paragraphs: [
+            "Horizontal plane anchors fought crowded rooms. An image anchor locked the scene, and version 2 swapped a wall of text for a face doodle Reality Composer could actually see.",
+          ],
+          images: projectImages(AFP, ["Untitled-1.jpg", "Ver2.jpg"]),
+        },
+      ],
+    },
+  ],
+  videos: [
+    {
+      kind: "youtube",
+      url: "https://youtu.be/ceq7c4e2jvw",
+      label: "Restaurant exploration",
+    },
+    {
+      kind: "youtube",
+      url: "https://youtu.be/X1klMHiKSDA",
+      label: "Full scene pass",
+    },
+    {
+      kind: "youtube",
+      url: "https://youtu.be/mMD_lQbTbmo",
+      label: "Scene walkthrough",
+    },
+    {
+      kind: "youtube",
+      url: "https://youtu.be/NeM5pf2HrwE",
+      label: "In-person testing",
+    },
+  ],
+  videosPlacement: "afterSection",
+  videosAfterSection: "Scenes",
+  videosTitle: "Playthroughs",
+  videosIntro: "Scenes, anchors, and live playtests. Watch the mystery before reading more about it.",
+  conclusion:
+    "Simple tools plus clear cues beat complicated systems. Watching people solve the mystery with only intuition was the whole point. AR works when the world does the explaining.",
+});
+
+/** The Adherence Project */
+const ADH = `${P}/The Adherence Project`;
+const adherenceHero = `${ADH}/20251130_122322.jpg`;
+
+const adherenceCaseStudyRich = simpleGalleryCaseStudy({
+  overview: {
+    client: "Concept · Health Hardware (Academic)",
+    industry: "Health · Physical Computing · Accessibility",
+    timeline: "Studio project · Solo",
+    role: "Product, interaction, physical prototype",
+  },
+  introParagraphs: [
+    "Half of people with chronic conditions miss doses. Adherence is not a willpower poster. It is a system problem.",
+    "This project pairs a soft digital companion with a physical pill dispenser: voice, screen, LEDs, and a door that hands you the dose instead of lecturing you about it.",
+  ],
+  highlights: [
+    {
+      label: "Insight",
+      value: "Flexibility beats rigid schedules for messy real routines.",
+    },
+    {
+      label: "Build",
+      value: "ProtoPie + Blokdots bridging app logic to Arduino hardware.",
+    },
+    {
+      label: "Form",
+      value: "Funnel refill, swinging door dispense, status through an LED window.",
+    },
+  ],
+  showJumpNav: true,
+  sections: [
+    {
+      title: "Problem",
+      blocks: [
+        {
+          title: "Missed doses, real cost",
+          paragraphs: [
+            "~125,000 preventable deaths a year in the US alone. The brief: soft reminders and an accessible path from refill to dispense.",
+          ],
+          images: projectImages(ADH, [
+            "aa8e76d0-0dca-4b3d-9e7f-abf760410230.png",
+            "persona-letter.png",
+          ]),
+        },
+      ],
+    },
+    {
+      title: "Flow",
+      blocks: [
+        {
+          title: "Map the ritual",
+          paragraphs: [
+            "User flows clarified where voice helps and where it just slows people down. Clarity over speed. Fewer back-and-forths.",
+          ],
+          images: projectImages(ADH, ["flowchart.png"]),
+        },
+      ],
+    },
+    {
+      title: "Prototype",
+      blocks: [
+        {
+          title: "Digital meets door servo",
+          paragraphs: [
+            "ProtoPie talked to Blokdots. Loose wires lied. Wi-Fi lagged. Three hardware iterations later, the funnel angle and cable routing finally behaved.",
+          ],
+          images: projectImages(ADH, [
+            "2865bf62-a8ff-4e12-a53d-a0ca5a1369cc.png",
+            "image.png",
+            "image 1.png",
+            "20251130_122322.jpg",
+          ]),
+        },
+      ],
+    },
+  ],
+  videos: [
+    {
+      kind: "file",
+      src: `${ADH}/20251126_151448.mp4`,
+      label: "Physical prototype",
+    },
+    {
+      kind: "youtube",
+      url: "https://youtu.be/tKnbTC_pZX4",
+      label: "Finished design",
+    },
+    {
+      kind: "youtube",
+      url: "https://youtu.be/W66TewjqzSI",
+      label: "Interaction demo",
+    },
+    {
+      kind: "youtube",
+      url: "https://youtu.be/WD1f59lN5vE",
+      label: "System walkthrough",
+    },
+    {
+      kind: "youtube",
+      url: "https://youtu.be/oWKellnhqRs",
+      label: "Full demo",
+    },
+  ],
+  videosPlacement: "afterSection",
+  videosAfterSection: "Prototype",
+  videosTitle: "Prototype in motion",
+  videosIntro: "Hardware dispense, voice loops, and the finished companion flow.",
+  conclusion:
+    "Multi-sensory beats app-only nagging. Voice wants patience. Hardware wants cable management. Next: a tighter industrial design pass once the interaction model stops surprising the servos.",
+});
+
+/** Concrete — The Price for Concrete */
+const CN = `${P}/Concrete`;
+const concreteHero = `${CN}/slides/concrete-slide-02.png`;
+const concreteSlides = [
+  "slides/concrete-slide-02.png", // title
+  "slides/concrete-slide-01.png", // Raquel Nelson
+  "slides/concrete-slide-03.png",
+  "slides/concrete-slide-04.png",
+  "slides/concrete-slide-05.png", // iceberg / the System
+  "slides/concrete-slide-06.png",
+  "slides/concrete-slide-07.png",
+  "slides/concrete-slide-08.png",
+  "slides/concrete-slide-09.png",
+  "slides/concrete-slide-10.png",
+  "slides/concrete-slide-11.png", // Changing the Goal
+];
+
+const concreteCaseStudyRich = simpleGalleryCaseStudy({
+  overview: {
+    client: "IXD · Systems Thinking (Academic)",
+    industry: "Urban Systems · Mobility · Policy Design",
+    timeline: "Unit 4 · Solo · May 2026",
+    role: "Systems research · visual narrative",
+  },
+  introParagraphs: [
+    "The Price for Concrete asks what we actually pay when streets are engineered for cars first and people second. Not the asphalt invoice. The human one.",
+    "A systems-thinking deck: iceberg models, mental models, and leverage points. Boards first. The argument is in the sequence.",
+  ],
+  highlights: [
+    {
+      label: "Spark",
+      value: "Raquel Nelson's case: a family crossing after dark, and a system that criminalized the pedestrian.",
+    },
+    {
+      label: "Lens",
+      value: "Pattern → structure → mental model. Cars as 'normal' is the deepest layer.",
+    },
+    {
+      label: "Leverage",
+      value: "Rewrite the rules: safe human access over maximum throughput.",
+    },
+  ],
+  base: CN,
+  imageFiles: concreteSlides,
+  blockParagraphs: [
+    "Full board sequence from The Price for Concrete. Scroll the argument before you skim the labels.",
+  ],
+  conclusion:
+    "If pedestrians stay 'criminals' in the mental model, concrete keeps getting poured for the wrong stakeholder. Change the goal, and the budget follows.",
+});
+
+/** Flippy */
+const FL = `${P}/Flippy/portfolio`;
+const flippyHero = `${FL}/flippy-hero.png`;
+
+const flippyCaseStudyRich = simpleGalleryCaseStudy({
+  overview: {
+    client: "Personal · Experimental Web",
+    industry: "AR-adjacent · Creative Coding · Photo",
+    timeline: "Personal build · Solo",
+    role: "Product design · front-end · ML integration",
+  },
+  introParagraphs: [
+    "A photo captures what a moment looked like. Flippy captures what it felt like to stand there.",
+    "Point the camera, estimate depth on-device, slice the frame into paper cutouts, and tilt to look around a pop-up book of your own life. Nothing leaves the phone.",
+  ],
+  highlights: [
+    {
+      label: "Pipeline",
+      value: "Capture → Depth Anything V2 → FG/mid/BG cutouts → CSS 3D stand-up.",
+    },
+    {
+      label: "Constraint",
+      value: "On-device only. WebGPU with WASM fallback.",
+    },
+  ],
+  base: FL,
+  imageFiles: ["flippy-hero.png", "flippy-flow.png", "flippy-tech.png"],
+  blockParagraphs: [
+    "Process boards for the Flippy loop. Drop real device captures into this folder anytime. The live app is the proof.",
+  ],
+  conclusion:
+    "Depth models finally make casual 3D memories feel possible in the browser. Next polish: tighter cutouts, richer paper textures, and a shareable moment format.",
+});
+
+/** Who Fiddled? */
+const WF = `${P}/Who Fiddled`;
+const whoFiddledHero = `${WF}/logo-full.png`;
+
+const whoFiddledCaseStudyRich = simpleGalleryCaseStudy({
+  overview: {
+    client: "Personal · Reddit Devvit Game",
+    industry: "Games · Social · Community",
+    timeline: "Product sprint · Solo",
+    role: "Game design · visual system · Devvit UI",
+  },
+  introParagraphs: [
+    "Who Fiddled? is a daily bluffing game for Reddit. Write one truth and three lies. The crowd votes. Points for fooling people, and for smelling the truth.",
+    "Bright cyan, hot pink, milk-white cards. Built for a 390px Reddit post that still punches on desktop.",
+  ],
+  highlights: [
+    {
+      label: "Fantasy",
+      value: "Be the deceiver and the detective in the same post.",
+    },
+    {
+      label: "Platform",
+      value: "Reddit Devvit, React UI, KV store state. No camera. No canvas game engine.",
+    },
+    {
+      label: "Look",
+      value: "Cyan field, pink CTAs, navy outlines, Noot display type.",
+    },
+  ],
+  showJumpNav: true,
+  sections: [
+    {
+      title: "Brand",
+      blocks: [
+        {
+          title: "Loud on purpose",
+          paragraphs: [
+            "The identity has to read inside a noisy feed. Logo, banner, and trophy marks carry the joke before a single prompt loads.",
+          ],
+          images: projectImages(WF, [
+            "logo-full.png",
+            "banner.png",
+            "hero.png",
+            "trophy.png",
+            "leaderboard-trophy.png",
+            "fiddle.png",
+          ]),
+        },
+      ],
+    },
+    {
+      title: "Interaction",
+      blocks: [
+        {
+          title: "Cursors with personality",
+          paragraphs: [
+            "Hover, tap, lock-in. Custom cursors sell the bluff energy without needing a game engine.",
+          ],
+          images: projectImages(WF, [
+            "cursor.png",
+            "cursor-option.png",
+            "cursor-tap.png",
+            "cursor-lock.png",
+          ]),
+        },
+      ],
+    },
+  ],
+  conclusion:
+    "Community games win when the prompt is weirder than the designer. Next: ship more prompt seasons and watch which lies people fall for hardest.",
+});
+
 export const projects = [
   {
     id: 1,
@@ -1356,6 +1772,76 @@ export const projects = [
     caseStudyHero: ccaHero,
     caseStudyGallery: [],
     caseStudyRich: ccaPathfindingCaseStudyRich,
+  },
+  {
+    id: 10,
+    title: "A Fowl Play",
+    category: "AR Experience",
+    tagline: "Solve a murder with an iPad and a hunch.",
+    description:
+      "Image-anchored AR mystery. Scan the room, follow game-style cues, and catch a restaurant owner before the trail goes cold.",
+    tags: ["AR", "Narrative Design", "3D", "Prototyping"],
+    slug: "a-fowl-play",
+    thumb: aFowlPlayHero,
+    caseStudyHero: aFowlPlayHero,
+    caseStudyGallery: [],
+    caseStudyRich: aFowlPlayCaseStudyRich,
+  },
+  {
+    id: 11,
+    title: "The Adherence Project",
+    category: "Health Hardware",
+    tagline: "Medicine that meets you halfway.",
+    description:
+      "Voice + screen companion wired to a physical pill dispenser. Soft reminders, swinging door, fewer missed doses.",
+    tags: ["Product Design", "Physical Computing", "Accessibility"],
+    slug: "adherence",
+    thumb: adherenceHero,
+    caseStudyHero: adherenceHero,
+    caseStudyGallery: [],
+    caseStudyRich: adherenceCaseStudyRich,
+  },
+  {
+    id: 12,
+    title: "The Price for Concrete",
+    category: "Systems Thinking",
+    tagline: "What streets cost when people aren't the point.",
+    description:
+      "Systems deck on car-first design, pedestrian blame, and the leverage points that could flip the goal from throughput to safe human access.",
+    tags: ["Systems Design", "Visual Narrative", "Research"],
+    slug: "concrete",
+    thumb: concreteHero,
+    caseStudyHero: concreteHero,
+    caseStudyGallery: [],
+    caseStudyRich: concreteCaseStudyRich,
+  },
+  {
+    id: 13,
+    title: "Flippy",
+    category: "Experimental Web",
+    tagline: "Your photo, as a pop-up book.",
+    description:
+      "On-device depth slices a moment into paper cutouts you can tilt around. Capture the feeling of being there, not just the pixels.",
+    tags: ["Creative Coding", "Product Design", "ML"],
+    slug: "flippy",
+    thumb: flippyHero,
+    caseStudyHero: flippyHero,
+    caseStudyGallery: [],
+    caseStudyRich: flippyCaseStudyRich,
+  },
+  {
+    id: 14,
+    title: "Who Fiddled?",
+    category: "Social Game",
+    tagline: "One truth. Three lies. Reddit decides.",
+    description:
+      "Daily bluffing game on Reddit Devvit. Fool the crowd or catch the fiddler. Loud cyan, louder pink.",
+    tags: ["Game Design", "Visual Design", "Community"],
+    slug: "who-fiddled",
+    thumb: whoFiddledHero,
+    caseStudyHero: whoFiddledHero,
+    caseStudyGallery: [],
+    caseStudyRich: whoFiddledCaseStudyRich,
   },
 ];
 

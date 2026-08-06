@@ -27,3 +27,17 @@ public/images/projects/dream-detective/Dream Detective.pdf
 # Prototype screen recordings — too large for GitHub (keep local)
 public/images/projects/Pulse/Anny Prototype Video.mp4
 public/images/projects/Pulse/Tamiko Prototype Video.mp4
+
+# Nested app repos dumped into projects/ (portfolio uses curated folders instead)
+public/images/projects/who-fiddled/
+public/images/projects/Flippy/node_modules/
+public/images/projects/Flippy/.git/
+public/images/projects/Flippy/dist/
+public/images/projects/Flippy/src/
+public/images/projects/Flippy/.github/
+
+# Oversized source decks — site uses converted slide PNGs / curated assets
+public/images/projects/Concrete/*.pdf
+public/images/projects/AR Project A Fowl Play/AR Project — A Fowl Play.pdf
+public/images/projects/The Adherence Project/FlowChart.pdf
+public/images/projects/The Adherence Project/Letter_-_65.pdf
