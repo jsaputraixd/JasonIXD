@@ -77,6 +77,7 @@ export default function Cursor() {
         left: 0,
         pointerEvents: "none",
         zIndex: 70000,
+        mixBlendMode: "screen",
         transform: "translate3d(-100px, -100px, 0)",
         willChange: "transform",
       }}

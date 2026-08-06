@@ -71,7 +71,11 @@ body {
   z-index: 1;
   width: 100%;
   min-height: 100vh;
-  /* No full-stage 3D perspective — was promoting the entire desktop to a costly layer. */
+  perspective: 2400px;
+  perspective-origin: 50% 50%;
+}
+
+.crt-stage:not(:has(> .crt-tilt)) {
   perspective: none;
 }
 
@@ -79,9 +83,16 @@ body {
   width: 100%;
 }
 
-/* Desktop home only — flat stage (tilt removed for perf; bezel still sells the CRT). */
+/* Desktop home only — slight tilt; tall pages (e.g. work) must stay untilted or layout “sinks” */
 .crt-stage > .crt-tilt {
-  transform: none;
+  transform: rotateX(1.2deg);
+  transform-origin: center 80%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .crt-stage > .crt-tilt {
+    transform: none;
+  }
 }
 
 /* Mobile — kill the perspective tilt and let pages scroll naturally */
@@ -1766,21 +1777,20 @@ video {
   opacity: 0;
 }
 
-/* FX only while hovered / expanded — idle desktop constellation stays static. */
-.skills-constellation--fx .skills-spoke-flow {
+.skills-constellation--live .skills-spoke-flow {
   opacity: 0.9;
   animation: skills-spoke-flow 1.85s linear infinite;
   animation-delay: var(--flow-delay, 0s);
 }
 
-.skills-constellation--fx .skills-spoke-packet {
+.skills-constellation--live .skills-spoke-packet {
   opacity: 1;
   offset-rotate: 0deg;
   animation: skills-packet-travel 2.6s linear infinite;
   animation-delay: var(--packet-delay, 0s);
 }
 
-.skills-constellation--fx .skills-node-ping {
+.skills-constellation--live .skills-node-ping {
   opacity: 1;
   transform-box: fill-box;
   transform-origin: center;
@@ -1788,11 +1798,11 @@ video {
   animation-delay: var(--ping-delay, 0s);
 }
 
-.skills-constellation--fx .skills-range-ring {
+.skills-constellation--live .skills-range-ring {
   animation: skills-range-drift 9s linear infinite;
 }
 
-.skills-constellation--fx .skills-orbit-label--live {
+.skills-constellation--live .skills-orbit-label--live {
   animation: skills-label-breathe 3.2s ease-in-out infinite;
   animation-delay: var(--label-delay, 0s);
 }
@@ -1800,11 +1810,11 @@ video {
 @media (prefers-reduced-motion: reduce) {
   .skills-orbit-rotor--live,
   .skills-orbit-label-counter--live,
-  .skills-constellation--fx .skills-spoke-flow,
-  .skills-constellation--fx .skills-spoke-packet,
-  .skills-constellation--fx .skills-node-ping,
-  .skills-constellation--fx .skills-range-ring,
-  .skills-constellation--fx .skills-orbit-label--live {
+  .skills-constellation--live .skills-spoke-flow,
+  .skills-constellation--live .skills-spoke-packet,
+  .skills-constellation--live .skills-node-ping,
+  .skills-constellation--live .skills-range-ring,
+  .skills-constellation--live .skills-orbit-label--live {
     animation: none !important;
     will-change: auto;
   }
@@ -1828,21 +1838,21 @@ video {
   }
 }
 
-/* Status bar ticker — CSS transform, not Framer Infinite */
-@keyframes status-bar-marquee {
-  from { transform: translate3d(0, 0, 0); }
-  to { transform: translate3d(-33.333%, 0, 0); }
+/* CRT tracking band animation — global to avoid hydration mismatches */
+@keyframes crt-roll {
+  0%   { top: -10%; opacity: 0; }
+  5%   { opacity: 1; }
+  95%  { opacity: 1; }
+  100% { top: 110%; opacity: 0; }
 }
 
-.status-bar-marquee--run {
-  animation: status-bar-marquee var(--marquee-duration, 32s) linear infinite;
-  will-change: transform;
+.crt-roll-band {
+  animation: crt-roll 14s linear infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .status-bar-marquee--run {
+  .crt-roll-band {
     animation: none !important;
-    will-change: auto;
   }
 }
 

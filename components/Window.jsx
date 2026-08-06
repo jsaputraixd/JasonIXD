@@ -130,7 +130,8 @@ export default function Window({
             height,
             minWidth,
             zIndex,
-            willChange: "transform",
+            // Only promote a compositor layer while dragging.
+            willChange: isHeld ? "transform" : "auto",
             pointerEvents: interactive ? "auto" : "none",
           }}
         >

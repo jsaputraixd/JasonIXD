@@ -47,10 +47,11 @@ export default function StatusBar({
       const d = new Date();
       const hh = String(d.getHours()).padStart(2, "0");
       const mm = String(d.getMinutes()).padStart(2, "0");
-      setTime(`${hh}:${mm}`);
+      const ss = String(d.getSeconds()).padStart(2, "0");
+      setTime(`${hh}:${mm}:${ss}`);
     };
     tick();
-    const id = setInterval(tick, 30000);
+    const id = setInterval(tick, 1000);
     return () => clearInterval(id);
   }, []);
 
@@ -98,7 +99,7 @@ export default function StatusBar({
         pointerEvents: "none",
       }}
     >
-      <div
+      <motion.div
         style={{
           padding: isMobile ? "3px 0" : "4px 0",
           overflow: "hidden",
@@ -109,10 +110,9 @@ export default function StatusBar({
           background: "rgba(0, 0, 0, 0.25)",
         }}
       >
-        <div
-          className={
-            reduceMotion ? "status-bar-marquee" : "status-bar-marquee status-bar-marquee--run"
-          }
+        <motion.div
+          animate={reduceMotion ? undefined : { x: ["0%", "-33.333%"] }}
+          transition={{ duration: isMobile ? 28 : 32, repeat: Infinity, ease: "linear" }}
           style={{
             display: "inline-block",
             fontFamily: "'VT323', monospace",
@@ -121,7 +121,6 @@ export default function StatusBar({
             color: ACCENT,
             textShadow: "0 0 6px rgba(255, 122, 41, 0.45)",
             textTransform: "uppercase",
-            ["--marquee-duration"]: isMobile ? "28s" : "32s",
           }}
         >
           {stream.map((s, i) => (
@@ -129,8 +128,8 @@ export default function StatusBar({
               {s}
             </span>
           ))}
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {minimizedWindows.length > 0 ? (
         <motion.div
