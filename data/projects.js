@@ -955,7 +955,7 @@ const dairyCaseStudyRich = {
 /** Project Pulse */
 const PL = `${P}/Pulse`;
 const pulseScreen = (time) => `Screenshot 2026-05-10 at ${time}\u202fPM.png`;
-const pulseHero = `${PL}/${pulseScreen("4.28.02")}`;
+const pulseHero = `${PL}/Pulse-hero.jpg`;
 const pulseScreen2 = `${PL}/${pulseScreen("4.29.59")}`;
 const pulseScreen3 = `${PL}/${pulseScreen("4.30.11")}`;
 
@@ -1374,7 +1374,7 @@ const aFowlPlayCaseStudyRich = simpleGalleryCaseStudy({
 
 /** The Adherence Project */
 const ADH = `${P}/The Adherence Project`;
-const adherenceHero = `${ADH}/20251130_122322.jpg`;
+const adherenceHero = `${ADH}/Adherence-hero.jpg`;
 
 const adherenceCaseStudyRich = simpleGalleryCaseStudy({
   overview: {
@@ -1845,7 +1845,7 @@ export const projects = [
   },
 ];
 
-const FEATURED_SLUGS = ["eleara", "kits", "dairy-delight", "dream-detective"];
+const FEATURED_SLUGS = ["eleara", "pulse", "adherence", "kits"];
 
 export const featuredProjects = FEATURED_SLUGS.map((slug) =>
   projects.find((p) => p.slug === slug)
