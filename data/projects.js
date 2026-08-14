@@ -954,26 +954,23 @@ const dairyCaseStudyRich = {
 };
 /** Project Pulse */
 const PL = `${P}/Pulse`;
-const pulseScreen = (time) => `Screenshot 2026-05-10 at ${time}\u202fPM.png`;
-const pulseHero = `${PL}/Pulse-hero.jpg`;
-const pulseScreen2 = `${PL}/${pulseScreen("4.29.59")}`;
-const pulseScreen3 = `${PL}/${pulseScreen("4.30.11")}`;
-
-const pulseDeckPdf = {
-  label: "Full slide deck · PDF",
-  href: `${PL}/Pulse Slide Deck.pdf`,
-};
+const pulseSlides = Array.from({ length: 27 }, (_, i) => {
+  const n = String(i + 1).padStart(2, "0");
+  return `${PL}/slides/pulse-slide-${n}.jpg`;
+});
+/** Deck slide 16 is the actual smart-mirror prototype UI. */
+const pulseHero = `${PL}/slides/pulse-slide-16.jpg`;
 
 const pulseCaseStudyRich = {
   overview: {
-    client: "Concept · Smart Mirror Fitness (Academic)",
+    client: "IXD Research · Project 03 (Academic)",
     industry: "Health / Fitness · Gesture UX · Habit Formation",
-    timeline: "Multi-week · Solo",
+    timeline: "Spring 2026 · Multi-week",
     role: "UX research, interaction design, prototyping",
   },
   introParagraphs: [
     "Pulse is a smart-mirror fitness companion for student athletes, personalized workout plans, calendar-aware scheduling, and distance-friendly gesture controls so you can start a session without touching a screen.",
-    "The project spans research, habit-formation framing, usability testing, and a fully interactive prototype exploring pinch-to-select, dwell interactions, and Google Calendar integration for finding real workout windows between classes.",
+    "The deck below is the full 0-1 story. The live prototype is the part you can actually play: onboard, sync a calendar, pick a plan, and AirTap through a workout.",
   ],
   highlights: [
     {
@@ -990,7 +987,7 @@ const pulseCaseStudyRich = {
     },
     {
       label: "Shipped artifact",
-      value: "Live interactive prototype, onboarding through workout completion, in the browser.",
+      value: "Live interactive prototype in the browser, plus the full research deck.",
     },
   ],
   heroFirst: true,
@@ -1000,54 +997,24 @@ const pulseCaseStudyRich = {
   videos: [],
   livePrototype: {
     href: "https://jsaputraixd.github.io/Pulse/",
-    label: "Open Pulse prototype",
+    label: "Open live Pulse demo",
     intro:
-      "Hi, welcome to Pulse, your smart mirror workout buddy! Fully interactive concept: onboarding, personalized plans, calendar sync, gesture tutorials, and a complete workout loop.",
+      "Fully interactive concept: onboarding, personalized plans, calendar sync, gesture tutorials, and a complete workout loop.",
   },
   processWork: {
     sections: [
       {
-        title: "Overview",
+        title: "Deck",
         blocks: [
           {
-            title: "Problem & opportunity",
+            title: "Full slide sequence",
             paragraphs: [
-              "Student athletes know consistency matters, but motivation drops when workouts feel bolted onto an already overloaded schedule. Most fitness tools assume you'll open a phone app, log in, and manually plan around classes and meetings.",
-              "Pulse reframes fitness as ambient coaching on a shared dorm mirror: quick sessions, calendar-aware suggestions, and interactions designed for distance, not touch.",
+              "Research through prototype mapping, the mirror UI, usability findings, and next steps. Scroll the boards, then open the live demo.",
             ],
-          },
-          {
-            title: "Research & testing",
-            paragraphs: [
-              "Research covered fitness-tech habit formation, prototyping plans, and moderated usability sessions. Testing surfaced where gesture tutorials needed to be clearer, how users interpreted plan recommendations, and what 'good enough' scheduling felt like when calendar data was sparse.",
-              "Full research artifacts live in the project deck, this page is a visual snapshot while the written case study is still in progress.",
-            ],
-          },
-        ],
-      },
-      {
-        title: "Design",
-        blocks: [
-          {
-            title: "Mirror experience",
-            paragraphs: [
-              "The UI system balances glanceability at mirror distance with playful energy, sky gradients, bold plan cards, and a workout loop that keeps form feedback and rest timers legible from across the room.",
-              "Selected screens below; the live prototype is the best way to feel the gesture layer and end-to-end flow.",
-            ],
-            images: [
-              {
-                src: pulseHero,
-                alt: "Pulse, smart mirror home and personalized plans.",
-              },
-              {
-                src: pulseScreen2,
-                alt: "Pulse, onboarding and calendar connection.",
-              },
-              {
-                src: pulseScreen3,
-                alt: "Pulse, workout session and gesture controls.",
-              },
-            ],
+            images: pulseSlides.map((src, i) => ({
+              src,
+              alt: `Pulse slide ${i + 1}`,
+            })),
           },
         ],
       },
@@ -1714,7 +1681,6 @@ export const projects = [
     thumb: pulseHero,
     caseStudyHero: pulseHero,
     caseStudyGallery: [],
-    caseStudyDeckPdf: pulseDeckPdf,
     caseStudyRich: pulseCaseStudyRich,
   },
   {

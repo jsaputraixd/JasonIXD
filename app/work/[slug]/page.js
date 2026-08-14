@@ -76,6 +76,49 @@ function CaseStudyJumpNav({ sections, hasPrototype }) {
   );
 }
 
+function CaseStudyLivePrototype({ proto }) {
+  if (!proto?.href) return null;
+
+  return (
+    <div id="section-prototype" className="mt-12 case-study-prototype-anchor">
+      <CaseStudySectionTitle>Live prototype</CaseStudySectionTitle>
+      {proto.intro ? (
+        <p
+          className="m-0 mb-4 case-study-prose"
+          style={{
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: 15,
+            color: "#888",
+            lineHeight: 1.6,
+          }}
+        >
+          {proto.intro}
+        </p>
+      ) : null}
+      <a
+        href={proto.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        data-cursor="enter"
+        style={{
+          display: "inline-block",
+          fontFamily: "'VT323', monospace",
+          fontSize: 16,
+          letterSpacing: "0.22em",
+          textTransform: "uppercase",
+          color: "#FF7A29",
+          textDecoration: "none",
+          border: "1px solid rgba(255, 122, 41, 0.55)",
+          padding: "10px 16px",
+          borderRadius: 2,
+          textShadow: "0 0 8px rgba(255, 122, 41, 0.35)",
+        }}
+      >
+        {proto.label || "Open prototype"} ↗
+      </a>
+    </div>
+  );
+}
 function CaseStudyHighlights({ items }) {
   if (!items?.length) return null;
 
@@ -181,6 +224,7 @@ function CaseStudyRichLayout({ project, frameStyle }) {
     highlights,
     showJumpNav = false,
     showDeckEmbed = true,
+    livePrototype,
   } = rich;
   const bodyStyle = {};
   const metaLabel = {
@@ -260,9 +304,14 @@ function CaseStudyRichLayout({ project, frameStyle }) {
       {shouldShowJumpNav ? (
         <CaseStudyJumpNav
           sections={processSections}
-          hasPrototype={Boolean(videos?.length) && videosPlacement === "afterSection"}
+          hasPrototype={
+            (Boolean(videos?.length) && videosPlacement === "afterSection") ||
+            Boolean(livePrototype?.href)
+          }
         />
       ) : null}
+
+      {livePrototype?.href ? <CaseStudyLivePrototype proto={livePrototype} /> : null}
 
       {(finalDesign?.images ?? []).length > 0 ? (
       <div className="mt-16">
