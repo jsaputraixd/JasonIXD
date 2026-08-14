@@ -292,16 +292,6 @@ body {
   white-space: nowrap;
 }
 
-.other-projects-row__tagline {
-  font-family: "DM Sans", sans-serif;
-  font-size: 12px;
-  line-height: 1.3;
-  color: rgba(255, 235, 220, 0.78);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .other-projects-row__meta {
   font-family: "VT323", monospace;
   font-size: 11px;
@@ -474,17 +464,6 @@ body {
   text-transform: uppercase;
   color: #ffb570;
   text-shadow: 0 0 6px rgba(255, 122, 41, 0.45);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.project-card-caption__tagline {
-  margin: 3px 0 0;
-  font-family: "DM Sans", sans-serif;
-  font-size: 14px;
-  line-height: 1.4;
-  color: rgba(255, 235, 220, 0.92);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2078,7 +2057,6 @@ video {
     font-size: 18px;
   }
 
-  .project-card-caption__tagline,
   .project-card-caption__cta {
     font-size: 15px;
   }

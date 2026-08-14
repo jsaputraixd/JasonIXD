@@ -44,9 +44,6 @@ function MobileOtherProjectRow({ project, gradient, loading }) {
       </span>
       <span className="other-projects-row__copy">
         <span className="other-projects-row__title">{project.title}</span>
-        {project.tagline ? (
-          <span className="other-projects-row__tagline">{project.tagline}</span>
-        ) : null}
         {meta ? <span className="other-projects-row__meta">{meta}</span> : null}
       </span>
       <span className="other-projects-row__arrow" aria-hidden>

@@ -153,7 +153,6 @@ export default function ProjectFlipCard({
 
         <div className="project-card-caption">
           <p className="project-card-caption__title">{project.title}</p>
-          <p className="project-card-caption__tagline">{project.tagline}</p>
           {(category || timeline || roleSummary) ? (
             <p className="project-card-caption__meta">
               {[category, timeline].filter(Boolean).join(" · ")}
