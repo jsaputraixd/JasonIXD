@@ -957,8 +957,7 @@ const PL = `${P}/Pulse`;
 const pulseSlides = Array.from({ length: 27 }, (_, i) => {
   const n = String(i + 1).padStart(2, "0");
   return `${PL}/slides/pulse-slide-${n}.jpg`;
-});
-/** Deck slide 16 is the actual smart-mirror prototype UI. */
+}).filter((_, i) => i !== 15);
 const pulseHero = `${PL}/Pulse-hero.jpg`;
 
 const pulseCaseStudyRich = {
