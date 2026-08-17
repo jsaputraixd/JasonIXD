@@ -4,6 +4,10 @@ import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { otherStuff } from "@/data/otherStuff";
+import {
+  otherStuffLightboxSrc,
+  otherStuffThumbSrc,
+} from "@/lib/otherStuffMedia";
 import { playClick } from "@/lib/typingSound";
 
 const ACCENT = "#FF7A29";
@@ -176,7 +180,13 @@ export default function OtherStuffFolder({ variant = "desktop", layoutScale = 1 
       </motion.div>
 
       <AnimatePresence>
-        {lightbox ? <MediaLightbox item={lightbox} onClose={closeLightbox} /> : null}
+        {lightbox ? (
+          <MediaLightbox
+            key={lightbox.id}
+            item={lightbox}
+            onClose={closeLightbox}
+          />
+        ) : null}
       </AnimatePresence>
     </>
   );
@@ -303,6 +313,9 @@ function EmptyCategoryNote({
 function MediaTile({ item, index, variant, layoutScale, onOpen }) {
   const reduceMotion = useReducedMotion();
   const tileW = variant === "mobile" ? "min(72vw, 220px)" : "100%";
+  const thumbSrc = encodeURI(otherStuffThumbSrc(item.src));
+  const fullSrc = encodeURI(item.src);
+  const [imgSrc, setImgSrc] = useState(thumbSrc);
 
   return (
     <motion.button
@@ -349,9 +362,13 @@ function MediaTile({ item, index, variant, layoutScale, onOpen }) {
         ) : (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
-            src={encodeURI(item.src)}
+            src={imgSrc}
             alt={item.alt ?? item.caption ?? "Media item"}
             loading="lazy"
+            decoding="async"
+            onError={() => {
+              if (imgSrc !== fullSrc) setImgSrc(fullSrc);
+            }}
             style={{
               position: "absolute",
               inset: 0,
@@ -403,6 +420,23 @@ function MediaTile({ item, index, variant, layoutScale, onOpen }) {
 }
 
 function MediaLightbox({ item, onClose }) {
+  const thumbSrc = encodeURI(otherStuffThumbSrc(item.src));
+  const fullSrc = encodeURI(otherStuffLightboxSrc(item.src));
+  const [fullReady, setFullReady] = useState(false);
+
+  useEffect(() => {
+    if (isVideoItem(item)) return undefined;
+    let cancelled = false;
+    const img = new window.Image();
+    img.onload = () => {
+      if (!cancelled) setFullReady(true);
+    };
+    img.src = fullSrc;
+    return () => {
+      cancelled = true;
+    };
+  }, [fullSrc, item]);
+
   const dismiss = () => {
     playClick();
     onClose();
@@ -458,7 +492,7 @@ function MediaLightbox({ item, onClose }) {
         ) : (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
-            src={encodeURI(item.src)}
+            src={fullReady ? fullSrc : thumbSrc}
             alt={item.alt ?? item.caption ?? ""}
             style={{
               display: "block",

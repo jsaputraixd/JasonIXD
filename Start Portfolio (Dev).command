@@ -7,9 +7,22 @@ if ! command -v node >/dev/null 2>&1; then
   exit 1
 fi
 
+# iCloud Documents can evict node_modules. Next then crashes on boot:
+#   Error: ETIMEDOUT: connection timed out, read
+#   ERR_CONNECTION_REFUSED on http://127.0.0.1:3000
+if [ -e "node_modules/next/package.json" ] && ls -lO "node_modules/next/package.json" 2>/dev/null | grep -q dataless; then
+  echo "iCloud evicted node_modules — reinstalling so the server can start…"
+  echo ""
+  rm -rf node_modules
+fi
+
 if [ ! -d "node_modules" ]; then
-  osascript -e 'display alert "Dependencies missing" message "Open Terminal in this folder and run: npm install"'
-  exit 1
+  echo "Installing dependencies (first time or after iCloud restore)…"
+  echo ""
+  npm install || {
+    osascript -e 'display alert "npm install failed" message "Open Terminal in this folder and run: npm install"'
+    exit 1
+  }
 fi
 
 echo "Starting portfolio dev server…"
