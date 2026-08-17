@@ -505,8 +505,14 @@ export default function Desktop() {
 
   const otherStuffWindowTop = Math.max(
     12,
-    pos.otherStuff?.top ??
-      Math.round((vhSafe - Math.round(360 * layoutScale)) / 2)
+    otherStuffBrowsing
+      ? Math.round(vhSafe * 0.05)
+      : pos.otherStuff?.top ??
+          Math.round((vhSafe - Math.round(360 * layoutScale)) / 2)
+  );
+  const otherStuffMaxBodyHeight = Math.max(
+    240,
+    vhSafe - otherStuffWindowTop - Math.round(56 * layoutScale)
   );
   const otherStuffWindowLeft = Math.max(
     12,
@@ -934,6 +940,7 @@ export default function Desktop() {
             variant="desktop"
             layoutScale={layoutScale}
             onBrowseChange={setOtherStuffBrowsing}
+            maxBodyHeight={otherStuffMaxBodyHeight}
           />
         </Window>
       )}
@@ -992,7 +999,7 @@ export default function Desktop() {
               marginBottom: 4,
             }}
           >
-            ▢ Say hi
+            ▢ Looking for internships
           </p>
           <a
             href={`mailto:${about.email}`}

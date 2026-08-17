@@ -18,7 +18,12 @@ function isVideoItem(item) {
   return item.type === "video" || /\.(mp4|webm|mov)(\?|$)/i.test(item.src);
 }
 
-export default function OtherStuffFolder({ variant = "desktop", layoutScale = 1 }) {
+export default function OtherStuffFolder({
+  variant = "desktop",
+  layoutScale = 1,
+  onBrowseChange,
+  maxBodyHeight,
+}) {
   const reduceMotion = useReducedMotion();
   const [activeCategoryId, setActiveCategoryId] = useState(null);
   const [lightbox, setLightbox] = useState(null);
@@ -28,6 +33,10 @@ export default function OtherStuffFolder({ variant = "desktop", layoutScale = 1 
     (c) => c.id === activeCategoryId
   );
   const items = activeCategory?.items ?? [];
+
+  useEffect(() => {
+    onBrowseChange?.(Boolean(activeCategoryId));
+  }, [activeCategoryId, onBrowseChange]);
 
   const closeLightbox = useCallback(() => setLightbox(null), []);
 
@@ -57,6 +66,11 @@ export default function OtherStuffFolder({ variant = "desktop", layoutScale = 1 
           flexDirection: "column",
           gap: Math.round(12 * s),
           minHeight: 0,
+          overflow: "hidden",
+          maxHeight:
+            variant === "desktop"
+              ? maxBodyHeight ?? "min(68vh, 560px)"
+              : undefined,
         }}
       >
         {activeCategory ? (
@@ -70,6 +84,7 @@ export default function OtherStuffFolder({ variant = "desktop", layoutScale = 1 
               }}
               style={{
                 alignSelf: "flex-start",
+                flexShrink: 0,
                 margin: 0,
                 padding: "4px 8px",
                 border: "1px solid rgba(255, 122, 41, 0.4)",
@@ -88,6 +103,7 @@ export default function OtherStuffFolder({ variant = "desktop", layoutScale = 1 
             <p
               style={{
                 margin: 0,
+                flexShrink: 0,
                 fontFamily: "'VT323', monospace",
                 fontSize: Math.max(12, Math.round(13 * s)),
                 letterSpacing: "0.2em",
@@ -101,35 +117,26 @@ export default function OtherStuffFolder({ variant = "desktop", layoutScale = 1 
             {items.length > 0 ? (
               <div
                 className={
-                  variant === "mobile" ? "other-stuff-track" : "other-stuff-grid"
-                }
-                style={
-                  variant === "mobile"
-                    ? {
-                        display: "flex",
-                        gap: 10,
-                        overflowX: "auto",
-                        paddingBottom: 4,
-                      }
-                    : {
-                        display: "grid",
-                        gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-                        gap: Math.round(8 * s),
-                        overflowY: "auto",
-                        alignContent: "start",
-                      }
+                  variant === "desktop" ? "other-stuff-gallery" : undefined
                 }
               >
-                {items.map((item, index) => (
-                  <MediaTile
-                    key={item.id}
-                    item={item}
-                    index={index}
-                    variant={variant}
-                    layoutScale={s}
-                    onOpen={() => setLightbox(item)}
-                  />
-                ))}
+                <div
+                  className={
+                    variant === "desktop"
+                      ? "other-stuff-masonry other-stuff-masonry--desktop"
+                      : "other-stuff-masonry"
+                  }
+                >
+                  {items.map((item, index) => (
+                    <MediaTile
+                      key={item.id}
+                      item={item}
+                      index={index}
+                      folderLabel={activeCategory.label}
+                      onOpen={() => setLightbox(item)}
+                    />
+                  ))}
+                </div>
               </div>
             ) : (
               <EmptyCategoryNote
@@ -310,111 +317,55 @@ function EmptyCategoryNote({
   );
 }
 
-function MediaTile({ item, index, variant, layoutScale, onOpen }) {
+function MediaTile({ item, index, folderLabel, onOpen }) {
   const reduceMotion = useReducedMotion();
-  const tileW = variant === "mobile" ? "min(72vw, 220px)" : "100%";
   const thumbSrc = encodeURI(otherStuffThumbSrc(item.src));
   const fullSrc = encodeURI(item.src);
   const [imgSrc, setImgSrc] = useState(thumbSrc);
+  const label = folderLabel ?? "Media";
 
   return (
     <motion.button
       type="button"
+      className="other-stuff-tile"
       data-cursor="hover"
+      aria-label={label}
       onClick={() => {
         playClick();
         onOpen();
       }}
-      initial={reduceMotion ? false : { opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={reduceMotion ? false : { opacity: 0 }}
+      animate={{ opacity: 1 }}
       transition={{ delay: 0.04 * index, duration: 0.35, ease: EASE }}
-      style={{
-        flex: variant === "mobile" ? `0 0 ${tileW}` : undefined,
-        width: variant === "mobile" ? tileW : "100%",
-        margin: 0,
-        padding: 0,
-        border: "1px solid rgba(255, 122, 41, 0.4)",
-        borderRadius: 2,
-        background: "rgba(12, 8, 6, 0.9)",
-        cursor: "pointer",
-        overflow: "hidden",
-        textAlign: "left",
-      }}
     >
-      <div style={{ position: "relative", aspectRatio: "1 / 1", width: "100%" }}>
-        {isVideoItem(item) ? (
+      {isVideoItem(item) ? (
+        <span className="other-stuff-tile__video">
           <video
+            className="other-stuff-tile__img"
             src={encodeURI(item.src)}
             muted
             loop
             playsInline
             preload="metadata"
-            aria-label={item.alt ?? item.caption ?? "Video"}
-            style={{
-              position: "absolute",
-              inset: 0,
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              background: "#0a0806",
-            }}
+            aria-label={label}
           />
-        ) : (
-          /* eslint-disable-next-line @next/next/no-img-element */
-          <img
-            src={imgSrc}
-            alt={item.alt ?? item.caption ?? "Media item"}
-            loading="lazy"
-            decoding="async"
-            onError={() => {
-              if (imgSrc !== fullSrc) setImgSrc(fullSrc);
-            }}
-            style={{
-              position: "absolute",
-              inset: 0,
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-            }}
-          />
-        )}
-        {isVideoItem(item) ? (
-          <span
-            aria-hidden
-            style={{
-              position: "absolute",
-              right: 6,
-              bottom: 6,
-              fontFamily: "'VT323', monospace",
-              fontSize: 10,
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              color: ACCENT,
-              padding: "2px 5px",
-              border: "1px solid rgba(255, 122, 41, 0.5)",
-              background: "rgba(10, 6, 4, 0.85)",
-            }}
-          >
+          <span className="other-stuff-tile__video-badge" aria-hidden>
             ▶
           </span>
-        ) : null}
-      </div>
-      {item.caption ? (
-        <p
-          style={{
-            margin: 0,
-            padding: "6px 8px 8px",
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: Math.max(10, Math.round(11 * layoutScale)),
-            color: "rgba(255, 255, 255, 0.75)",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
+        </span>
+      ) : (
+        /* eslint-disable-next-line @next/next/no-img-element */
+        <img
+          className="other-stuff-tile__img"
+          src={imgSrc}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          onError={() => {
+            if (imgSrc !== fullSrc) setImgSrc(fullSrc);
           }}
-        >
-          {item.caption}
-        </p>
-      ) : null}
+        />
+      )}
     </motion.button>
   );
 }
@@ -493,7 +444,7 @@ function MediaLightbox({ item, onClose }) {
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
             src={fullReady ? fullSrc : thumbSrc}
-            alt={item.alt ?? item.caption ?? ""}
+            alt=""
             style={{
               display: "block",
               maxWidth: "100%",

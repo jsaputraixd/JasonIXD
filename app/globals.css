@@ -1403,12 +1403,12 @@ body::-webkit-scrollbar-thumb:hover {
 .other-stuff-gallery {
   flex: 1 1 auto;
   min-height: 0;
-  overflow-y: auto;
+  overflow-y: scroll;
   overflow-x: hidden;
   overscroll-behavior: contain;
+  scrollbar-gutter: stable;
   scrollbar-width: thin;
   scrollbar-color: #ff7a29 #111111;
-  max-height: min(460px, 58vh);
   padding-bottom: 4px;
   -webkit-overflow-scrolling: touch;
 }
@@ -1423,23 +1423,20 @@ body::-webkit-scrollbar-thumb:hover {
   column-count: 3;
 }
 
-@media (min-width: 1100px) {
-  .other-stuff-masonry--desktop {
-    column-count: 4;
-  }
-}
-
 .other-stuff-tile {
   display: block;
   width: 100%;
   margin: 0 0 8px;
   padding: 0;
-  border: 1px solid rgba(255, 122, 41, 0.34);
+  border: 1px solid rgba(255, 122, 41, 0.4);
   border-radius: 2px;
   background: rgba(12, 8, 6, 0.9);
   cursor: pointer;
   overflow: hidden;
+  position: relative;
   break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+  page-break-inside: avoid;
 }
 
 .other-stuff-tile__img {

@@ -81,24 +81,31 @@ export default function CaseStudyVideos({
   };
 
   const isMulti = fileItems.length >= 2;
-  /** Portrait app demos, wide enough to read UI, height capped to one viewport. */
-  const fileMaxWidth = isMulti ? "min(100%, 380px)" : "min(100%, 400px)";
-  const fileMaxHeight = isMulti
-    ? "min(48vh, 500px)"
-    : "min(calc(100dvh - 240px), 640px)";
+  /** Portrait app demos stay narrow; landscape clips (layout: "wide") fill the column. */
+  const fileMaxWidth = (item) => {
+    if (isMulti) return "min(100%, 380px)";
+    if (item.layout === "wide") return "min(100%, 1100px)";
+    return "min(100%, 400px)";
+  };
+  const fileMaxHeight = (item) => {
+    if (isMulti) return "min(48vh, 500px)";
+    if (item.layout === "wide") return "min(78vh, 820px)";
+    return "min(calc(100dvh - 240px), 640px)";
+  };
 
   return (
     <div className="mt-16">
       <h2
         className="m-0"
         style={{
-          fontFamily: "'VT323', monospace",
-          fontSize: 13,
-          letterSpacing: "0.28em",
-          textTransform: "uppercase",
-          color: "#FF7A29",
-          textShadow: "0 0 8px rgba(255,122,41,0.35)",
-          marginBottom: 14,
+        fontFamily: "'VT323', monospace",
+        fontSize: 26,
+        letterSpacing: "0.14em",
+        textTransform: "uppercase",
+        color: "#FF7A29",
+        textShadow: "0 0 10px rgba(255,122,41,0.4)",
+        marginBottom: 16,
+        lineHeight: 1.15,
         }}
       >
         {title}
@@ -141,14 +148,18 @@ export default function CaseStudyVideos({
                 : "w-full flex justify-center"
             }
           >
-            {fileItems.map((item, i) => (
+            {fileItems.map((item, i) => {
+              const maxWidth = fileMaxWidth(item);
+              const maxHeight = fileMaxHeight(item);
+              const wide = item.layout === "wide";
+              return (
               <div
                 key={`${item.src}-${i}`}
                 style={{
                   ...cellFrame,
                   width: "100%",
-                  maxWidth: fileMaxWidth,
-                  margin: isMulti ? "0 auto" : undefined,
+                  maxWidth,
+                  margin: isMulti || wide ? "0 auto" : undefined,
                 }}
               >
                 <p style={{ ...labelStyle, padding: "10px 12px 0" }}>
@@ -158,8 +169,12 @@ export default function CaseStudyVideos({
                   className="case-study-video-stage flex items-center justify-center"
                   style={{
                     background: "#0a0a0a",
-                    maxHeight: fileMaxHeight,
-                    minHeight: isMulti ? "min(36vh, 320px)" : "min(52vh, 420px)",
+                    maxHeight,
+                    minHeight: isMulti
+                      ? "min(36vh, 320px)"
+                      : wide
+                        ? undefined
+                        : "min(52vh, 420px)",
                   }}
                 >
                   <video
@@ -171,7 +186,7 @@ export default function CaseStudyVideos({
                     style={{
                       width: "100%",
                       height: "auto",
-                      maxHeight: fileMaxHeight,
+                      maxHeight,
                       objectFit: "contain",
                       display: "block",
                     }}
@@ -180,7 +195,8 @@ export default function CaseStudyVideos({
                   </video>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         </>
       ) : null}

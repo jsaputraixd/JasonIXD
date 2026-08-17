@@ -25,7 +25,7 @@ const MARQUEE_ITEMS = [
   "★",
   "Visual design",
   "★",
-  "Available for hire",
+  "Open for internships",
   "★",
 ];
 

@@ -954,66 +954,209 @@ const dairyCaseStudyRich = {
 };
 /** Project Pulse */
 const PL = `${P}/Pulse`;
-const pulseSlides = Array.from({ length: 27 }, (_, i) => {
-  const n = String(i + 1).padStart(2, "0");
-  return `${PL}/slides/pulse-slide-${n}.jpg`;
-}).filter((_, i) => i !== 15);
+function pulseSlide(n) {
+  return `${PL}/slides/pulse-slide-${String(n).padStart(2, "0")}.jpg`;
+}
 const pulseHero = `${PL}/Pulse-hero.jpg`;
 
 const pulseCaseStudyRich = {
   overview: {
-    client: "IXD Research · Project 03 (Academic)",
+    client: "IXD Research · Project 03 · Team of 3",
     industry: "Health / Fitness · Gesture UX · Habit Formation",
-    timeline: "Spring 2026 · Multi-week",
-    role: "UX research, interaction design, prototyping",
+    timeline: "Spring 2026 · March 30 to May 11",
+    role: "Lead designer, synthesis, visual system, prototype",
   },
   introParagraphs: [
-    "Pulse is a smart-mirror fitness companion for student athletes, personalized workout plans, calendar-aware scheduling, and distance-friendly gesture controls so you can start a session without touching a screen.",
-    "The deck below is the full 0-1 story. The live prototype is the part you can actually play: onboard, sync a calendar, pick a plan, and AirTap through a workout.",
+    "Pulse is a smart-mirror fitness companion for busy students: personalized plans, calendar-aware slots, and AirTap gestures so sweaty hands never have to touch the glass.",
+    "Made with Annalise and Jason W. They ran a lot of the interviews. I helped write discussion guides, talked to participants, put the screening form together, and synthesized what we were hearing. I also prototyped the live demo and pushed for AirTap once we landed on a smart mirror.",
   ],
   highlights: [
     {
-      label: "Core idea",
-      value: "A mirror that coaches you, not another phone app fighting for attention between lectures.",
+      label: "My role",
+      value: "Lead designer. Helped steer the concept, synthesized research, and prototyped the working demo.",
     },
     {
-      label: "Key interaction",
-      value: "AirTap gestures, point, pinch, and dwell so sweaty hands never need the glass.",
+      label: "Key design call",
+      value: "AirTap over touch. Mid-workout, hands are sweaty. The glass shouldn't be a to-do list.",
     },
     {
-      label: "Smart scheduling",
-      value: "Google Calendar sync to surface open slots for workouts in a packed student week.",
+      label: "Prototype",
+      value: "Browser demo covering onboarding, calendar sync, plans, gesture tutorial, and a full workout loop.",
     },
     {
-      label: "Shipped artifact",
-      value: "Live interactive prototype in the browser, plus the full research deck.",
+      label: "The team",
+      value: "Annalise and Jason W. on interviews. We reviewed screening together before anything went out.",
     },
   ],
   heroFirst: true,
   imagesBeforeText: true,
   showJumpNav: true,
   showDeckEmbed: false,
-  videos: [],
+  videos: [
+    {
+      kind: "file",
+      src: `${PL}/Pulse-prototype-demo.mp4?v=2`,
+      label: "Prototype walkthrough",
+      layout: "wide",
+    },
+  ],
+  videosPlacement: "afterSection",
+  videosAfterSection: "Build",
+  videosTitle: "Prototype in motion",
+  videosIntro:
+    "A short pass through the live demo: onboarding, plans, and AirTap in a workout.",
   livePrototype: {
     href: "https://jsaputraixd.github.io/Pulse/",
     label: "Open live Pulse demo",
     intro:
-      "Fully interactive concept: onboarding, personalized plans, calendar sync, gesture tutorials, and a complete workout loop.",
+      "Playable in the browser. Onboard, sync a calendar, pick a plan, and AirTap through a workout at arm's length.",
   },
   processWork: {
     sections: [
       {
-        title: "Deck",
+        title: "The brief",
         blocks: [
           {
-            title: "Full slide sequence",
+            title: "A fitness problem with no product yet",
             paragraphs: [
-              "Research through prototype mapping, the mirror UI, usability findings, and next steps. Scroll the boards, then open the live demo.",
+              "We started with a how-might-we, not a screen: how might we give busy students and professionals a low-friction fitness experience that actually survives a packed week.",
+              "We stalled for a bit. Lots of problem, no object. I floated a few directions until a smart mirror felt right, a coach in the room instead of another phone app. It wasn't a finished idea I handed over. We talked it through until we had something we could actually build.",
             ],
-            images: pulseSlides.map((src, i) => ({
-              src,
-              alt: `Pulse slide ${i + 1}`,
-            })),
+            images: [
+              {
+                src: pulseSlide(1),
+                alt: "Pulse title slide, 0-1 product project.",
+              },
+              {
+                src: pulseSlide(5),
+                alt: "Problem statement. How might we remove time and procrastination barriers to a lasting workout rhythm.",
+              },
+              {
+                src: pulseSlide(6),
+                alt: "Project timeline from framing through discovery, scoping, synthesis, and validation.",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        title: "Research",
+        blocks: [
+          {
+            title: "Interviews together, synthesis after",
+            paragraphs: [
+              "Annalise and Jason W. ran most of the interviews. I wrote discussion guides, talked to people too, sent emails, and put the screening form together, then ran it by them before it went out.",
+              "Crazy 8s and expert interviews (yoga, health-tech, fitness) gave us a pile of directions. I pulled that into personas and a plan we could design against: feature priority, how dense the mirror UI should be, how you'd interact, and where the thing would even live in a dorm or apartment.",
+            ],
+            images: [
+              {
+                src: pulseSlide(7),
+                alt: "Research goals. Feature priorities, interface design, interaction methods, physical setup.",
+              },
+              {
+                src: pulseSlide(11),
+                alt: "Crazy 8s sketches, including an early workout-assistant mirror concept.",
+              },
+              {
+                src: pulseSlide(12),
+                alt: "Expert interviews with a yoga instructor, health-tech advisor, and fitness instructor.",
+              },
+              {
+                src: pulseSlide(8),
+                alt: "Persona Marin, a software engineer in SF who falls off after one missed gym session.",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        title: "Direction",
+        blocks: [
+          {
+            title: "AirTap, because sweat is a constraint",
+            paragraphs: [
+              "Once we had a mirror, the interaction question was sweaty hands on glass. I pushed for AirTap, point, pinch, dwell, so you never have to poke the screen mid-set.",
+              "We mapped the service from onboarding through coaching and recovery, then concept-tested calendar sync, facial tracking, and posture coaching with five people at CCA. Calendar-aware micro workouts landed. Camera tracking was useful and a little invasive. That tension is still in the prototype on purpose.",
+            ],
+            images: [
+              {
+                src: pulseSlide(14),
+                alt: "Prototype mapping worksheet from onboarding through in-workout coaching and recovery.",
+              },
+              {
+                src: pulseSlide(15),
+                alt: "MVP concept testing. Calendar sync, facial tracking, and AI posture with five CCA participants.",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        title: "Build",
+        blocks: [
+          {
+            title: "From deck to something you can play",
+            paragraphs: [
+              "I prototyped the live demo: onboarding, plans, calendar, gesture tutorial, workout loop, and the visual system the deck uses.",
+              "Building it showed us the real smart-mirror problems: type that dies at 6 to 10 feet, a rest timer colliding with the nav, and gesture logic that was a little too clever. Those are bugs you only find when the thing actually runs.",
+            ],
+            images: [
+              {
+                src: pulseSlide(20),
+                alt: "Visual barriers in the live UI. Small type at distance and overlapping rest and rep chrome.",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        title: "Testing",
+        blocks: [
+          {
+            title: "We all ran sessions. Then we looked at the pile.",
+            paragraphs: [
+              "I ran usability sessions, and so did Annalise and Jason W. I synthesized what we heard: crowded UI, tiny type at workout distance, and gesture overload. People hated switching between point and pinch. They wanted one gesture, and tracking was jumpy enough to exit a workout by accident.",
+              "AirTap was still the right constraint. The first version just had too many verbs. Next pass: one selection gesture, bigger type, camera guidance so the whole body stays in frame.",
+            ],
+            images: [
+              {
+                src: pulseSlide(18),
+                alt: "Usability participants and the focus of each session.",
+              },
+              {
+                src: pulseSlide(19),
+                alt: "Executive summary. Crowded UI and unintuitive gestures, versus larger type and unified gesture logic.",
+              },
+              {
+                src: pulseSlide(21),
+                alt: "Interaction friction. Users wanted one pinch gesture instead of switching between point and pinch.",
+              },
+              {
+                src: pulseSlide(22),
+                alt: "Onboarding fatigue. Too much text, dead rest screens, and exercises that were hard to identify.",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        title: "What's next",
+        blocks: [
+          {
+            title: "Honest about fit",
+            paragraphs: [
+              "A Sean Ellis-style survey put essential-to-disappointed at 33%. Not a product people would riot over losing yet. Half the group hadn't wired Pulse into a real week. That's the next design problem, not a branding problem: make the calendar slot so obviously the path of least resistance that skipping feels worse than starting.",
+            ],
+            images: [
+              {
+                src: pulseSlide(25),
+                alt: "Product-market fit survey. Only 33% would be very disappointed if Pulse went away.",
+              },
+              {
+                src: pulseSlide(26),
+                alt: "Next-step recommendations across UI, gesture logic, onboarding, and camera coaching.",
+              },
+            ],
           },
         ],
       },
@@ -1021,7 +1164,7 @@ const pulseCaseStudyRich = {
   },
   conclusionTitle: "Reflection",
   conclusion:
-    "Pulse is the project closest to where I want my career to go, product UX that meets people in physical space, not just on a phone. The live prototype is early and imperfect, but it proves the loop: onboard, connect your calendar, pick a plan, and work out with gestures that actually make sense at arm's length. Next I'd validate whether calendar-suggested slots change real adherence in a dorm setting.",
+    "Pulse is the closest I've come to the work I want: product UX in physical space. I got to lead design on a three-person team, prototype the thing, and still hear that the first gesture set was too much. Next I'd unify AirTap into one selection, grow the type for 10-foot reading, and test whether a calendar-suggested slot actually changes whether a student works out.",
 };
 
 /** Pawfect Match */
@@ -1675,7 +1818,7 @@ export const projects = [
     tagline: "Coach in the glass, not in your pocket.",
     description:
       "Gesture-first workout coaching for student athletes. Calendar-aware plans on a smart mirror, because phones already ruin enough gyms.",
-    tags: ["UX Design", "Product Design", "Prototyping", "Research"],
+    tags: ["Lead Designer", "Prototyping", "Research", "Gesture UX"],
     slug: "pulse",
     thumb: pulseHero,
     caseStudyHero: pulseHero,

@@ -11,7 +11,7 @@ const siteUrl = getSiteUrl();
 export const metadata = {
   title: "Jason Saputra · Interaction & Visual Designer",
   description:
-    "Bali-born, SF-based. Interaction and visual design that feels a little alive. Running on oat-milk lattes.",
+    "Bali-born, SF-based. Interaction and visual design that feels a little alive. Looking for internships.",
   metadataBase: new URL(siteUrl),
   icons: {
     icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
@@ -20,7 +20,7 @@ export const metadata = {
   openGraph: {
     title: "Jason Saputra · Interaction & Visual Designer",
     description:
-      "Dream. Think. Build. Then maybe another latte. Portfolio by Jason Saputra.",
+      "Dream. Think. Build. Looking for internships. Portfolio by Jason Saputra.",
     url: siteUrl,
     siteName: "Jason Saputra",
     type: "website",

@@ -18,12 +18,13 @@ function CaseStudySectionTitle({ children, className = "" }) {
       className={`m-0 ${className}`}
       style={{
         fontFamily: "'VT323', monospace",
-        fontSize: 13,
-        letterSpacing: "0.28em",
+        fontSize: 26,
+        letterSpacing: "0.14em",
         textTransform: "uppercase",
         color: ACCENT,
-        textShadow: "0 0 8px rgba(255,122,41,0.35)",
-        marginBottom: 14,
+        textShadow: "0 0 10px rgba(255,122,41,0.4)",
+        marginBottom: 16,
+        lineHeight: 1.15,
       }}
     >
       {children}
@@ -37,13 +38,14 @@ function CaseStudySubTitle({ children }) {
       className="m-0"
       style={{
         fontFamily: "'VT323', monospace",
-        fontSize: 12,
-        letterSpacing: "0.22em",
+        fontSize: 20,
+        letterSpacing: "0.12em",
         textTransform: "uppercase",
         color: ACCENT,
-        textShadow: "0 0 8px rgba(255,122,41,0.28)",
-        marginTop: 28,
-        marginBottom: 12,
+        textShadow: "0 0 8px rgba(255,122,41,0.32)",
+        marginTop: 32,
+        marginBottom: 14,
+        lineHeight: 1.2,
       }}
     >
       {children}
@@ -651,12 +653,12 @@ export default async function ProjectPage({ params }) {
             <p
               style={{
                 fontFamily: "'VT323', monospace",
-                fontSize: 13,
-                letterSpacing: "0.28em",
+                fontSize: 26,
+                letterSpacing: "0.14em",
                 textTransform: "uppercase",
                 color: "#FF7A29",
-                textShadow: "0 0 8px rgba(255,122,41,0.35)",
-                marginBottom: 14,
+                textShadow: "0 0 10px rgba(255,122,41,0.4)",
+                marginBottom: 16,
               }}
             >
               Slides · PDF

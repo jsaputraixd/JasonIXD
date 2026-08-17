@@ -17,9 +17,6 @@ npm-debug.log*
 public/videos/Earth Ascii.mov
 public/videos/Earth Ascii.webm
 
-# Over GitHub’s 100MB limit — keep local; compress or use Git LFS before committing.
-public/images/other-stuff/motion/JasonSaputra_TitleSeq3_fa25.mp4
-
 # Local source exports — use compressed mp4 on site
 public/images/projects/dream-detective/Dream Detective App Flow.mov
 public/images/projects/dream-detective/Dream Detective.pdf
@@ -27,6 +24,8 @@ public/images/projects/dream-detective/Dream Detective.pdf
 # Prototype screen recordings — too large for GitHub (keep local)
 public/images/projects/Pulse/Anny Prototype Video.mp4
 public/images/projects/Pulse/Tamiko Prototype Video.mp4
+public/images/projects/Pulse/Pulse Prototype Demo.mov
+public/images/projects/Pulse/Actual prototype demo.mov
 public/images/projects/Pulse/Pulse Slide Deck.pdf
 
 # Nested app repos dumped into projects/ (portfolio uses curated folders instead)

@@ -147,14 +147,14 @@ const MOBILE_NAV_SECTIONS = [
     label: "Art",
     glyph: "A",
     path: "~/other/",
-    hint: "Illustration, photo & motion",
+    hint: "Illustration, photo & drawing",
   },
   {
     id: "mobile-about",
     label: "About",
     glyph: "M",
     path: "~/me.txt",
-    hint: "Bio & open for work",
+    hint: "Bio & internships",
   },
   {
     id: "mobile-contact",
@@ -434,7 +434,7 @@ function MobileOpenForWorkStrip() {
           boxShadow: "0 0 10px rgba(255, 122, 41, 0.8)",
         }}
       />
-      J.S. · Open for work
+      J.S. · Open for internships
     </a>
   );
 }
@@ -1402,7 +1402,7 @@ function MobileContact({ scrollRoot, skipTyping = false }) {
       <ScrollTypedLine
         scrollRoot={scrollRoot}
         skipTyping={skipTyping}
-        text="▢ Say hi"
+        text="▢ Looking for internships"
         charMs={28}
         delay={100}
         amount={0.4}

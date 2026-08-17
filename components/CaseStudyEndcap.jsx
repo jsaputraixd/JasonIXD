@@ -80,13 +80,13 @@ export default function CaseStudyEndcap({ nextProject, hasRichCaseStudy }) {
               <span className="case-study-contact-window__prompt" aria-hidden>
                 &gt;{" "}
               </span>
-              open_for_work: <strong>true</strong>
+              seeking_internship: <strong>true</strong>
             </p>
 
             <p className="case-study-contact-window__lead">
               {hasRichCaseStudy
-                ? "Got a wild brief, a half-baked idea, or just want to talk shop? Slide into my inbox."
-                : "Some write-ups are still baking. Ping me anyway. I answer humans faster than forms."}
+                ? "Got an internship, a studio that needs a junior, or just want to talk shop? Slide into my inbox."
+                : "Some write-ups are still baking. Ping me anyway. I'm looking for internships and I answer humans faster than forms."}
             </p>
 
             <ul className="case-study-contact-window__list">
