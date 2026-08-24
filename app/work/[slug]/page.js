@@ -227,6 +227,10 @@ function CaseStudyRichLayout({ project, frameStyle }) {
     showJumpNav = false,
     showDeckEmbed = true,
     livePrototype,
+    extraVideos,
+    extraVideosAfterSection,
+    extraVideosTitle,
+    extraVideosIntro,
   } = rich;
   const bodyStyle = {};
   const metaLabel = {
@@ -272,6 +276,16 @@ function CaseStudyRichLayout({ project, frameStyle }) {
         intro={videosIntro}
       />
       </div>
+    ) : null;
+
+  const extraVideoSection =
+    extraVideos && extraVideos.length > 0 ? (
+      <CaseStudyVideos
+        videos={extraVideos}
+        frameStyle={frameStyle}
+        title={extraVideosTitle}
+        intro={extraVideosIntro}
+      />
     ) : null;
 
   const shouldShowJumpNav = showJumpNav && processSections.length > 1;
@@ -362,6 +376,9 @@ function CaseStudyRichLayout({ project, frameStyle }) {
               {videosPlacement === "afterSection" &&
               videosAfterSection === section.title
                 ? videoSection
+                : null}
+              {extraVideosAfterSection === section.title
+                ? extraVideoSection
                 : null}
             </div>
           ))}

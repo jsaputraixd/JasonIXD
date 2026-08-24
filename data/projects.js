@@ -1679,75 +1679,184 @@ const flippyCaseStudyRich = simpleGalleryCaseStudy({
 
 /** Who Fiddled? */
 const WF = `${P}/Who Fiddled`;
-const whoFiddledHero = `${WF}/logo-full.png`;
+const whoFiddledHero = `${WF}/wf-hero-wordmark.jpg`;
+const wfAsset = (name) => `${WF}/${name}`;
 
-const whoFiddledCaseStudyRich = simpleGalleryCaseStudy({
+const whoFiddledCaseStudyRich = {
   overview: {
-    client: "Personal · Reddit Devvit Game",
-    industry: "Games · Social · Community",
-    timeline: "Product sprint · Solo",
-    role: "Game design · visual system · Devvit UI",
+    client: "Reddit · Games with a Hook hackathon",
+    industry: "Social games · Devvit · Community",
+    timeline: "June 17 to July 15, 2026 · Solo",
+    role: "Concept, visual system, interaction, identity",
   },
   introParagraphs: [
-    "Who Fiddled? is a daily bluffing game for Reddit. Write one truth and three lies. The crowd votes. Points for fooling people, and for smelling the truth.",
-    "Bright cyan, hot pink, milk-white cards. Built for a 390px Reddit post that still punches on desktop.",
+    "Who Fiddled? is a daily bluffing game that lives inside a Reddit post. Ten ranked questions. One truth, three lies. Fool the crowd or catch the fiddler.",
+    "I designed the loop, the sticker system, and the identity for Reddit's Games with a Hook. It had to read on a phone inside a post, and still feel like a party game when you expand it.",
   ],
   highlights: [
     {
-      label: "Fantasy",
-      value: "Be the deceiver and the detective in the same post.",
+      label: "My role",
+      value: "Solo. Concept, visual system, interaction, identity, and the UI inside the Reddit post.",
     },
     {
-      label: "Platform",
-      value: "Reddit Devvit, React UI, KV store state. No camera. No canvas game engine.",
+      label: "Key design call",
+      value: "One pinned daily hub with a sequential 10. Community posts stay optional and unranked.",
+    },
+    {
+      label: "Constraint",
+      value: "The whole game has to read in a Reddit post, on a phone, without looking like a shrunk desktop.",
     },
     {
       label: "Look",
-      value: "Cyan field, pink CTAs, navy outlines, Noot display type.",
+      value: "Cyan field, pink as the one primary action, navy outlines, Noot on the wordmark only.",
     },
   ],
+  heroFirst: true,
+  imagesBeforeText: false,
   showJumpNav: true,
-  sections: [
+  showDeckEmbed: false,
+  videos: [
     {
-      title: "Brand",
-      blocks: [
-        {
-          title: "Loud on purpose",
-          paragraphs: [
-            "The identity has to read inside a noisy feed. Logo, banner, and trophy marks carry the joke before a single prompt loads.",
-          ],
-          images: projectImages(WF, [
-            "logo-full.png",
-            "banner.png",
-            "hero.png",
-            "trophy.png",
-            "leaderboard-trophy.png",
-            "fiddle.png",
-          ]),
-        },
-      ],
-    },
-    {
-      title: "Interaction",
-      blocks: [
-        {
-          title: "Cursors with personality",
-          paragraphs: [
-            "Hover, tap, lock-in. Custom cursors sell the bluff energy without needing a game engine.",
-          ],
-          images: projectImages(WF, [
-            "cursor.png",
-            "cursor-option.png",
-            "cursor-tap.png",
-            "cursor-lock.png",
-          ]),
-        },
-      ],
+      kind: "youtube",
+      url: "https://youtu.be/Qhi6wbqrLME",
+      label: "Full loop inside a Reddit post",
     },
   ],
+  videosPlacement: "afterIntro",
+  videosTitle: "Full loop",
+  videosIntro:
+    "Hub to question to reveal to the next one. This is the game as it actually plays.",
+  livePrototype: {
+    href: "https://www.reddit.com/r/who_fiddled_dev",
+    label: "Open r/who_fiddled_dev",
+    intro:
+      "Play inside a Reddit post. Expand the pinned Daily Trivia hub and run today's 10.",
+  },
+  extraVideosAfterSection: "Playing it",
+  extraVideosTitle: "The tap, the miss, the hit",
+  extraVideosIntro:
+    "Radio stickers press down. Miss, and fiddles eat the post. Hit the truth and confetti does the talking.",
+  extraVideos: [
+    {
+      kind: "file",
+      src: `${WF}/wf-picking.mp4`,
+      label: "Picking an answer",
+      layout: "wide",
+    },
+    {
+      kind: "file",
+      src: `${WF}/wf-fiddled.mp4`,
+      label: "You got fiddled",
+      layout: "wide",
+    },
+    {
+      kind: "file",
+      src: `${WF}/wf-confetti.mp4`,
+      label: "You found the truth",
+      layout: "wide",
+    },
+  ],
+  processWork: {
+    sections: [
+      {
+        title: "In the feed",
+        blocks: [
+          {
+            title: "It has to look like a Reddit post first",
+            paragraphs: [
+              "The game lives in a custom post, not a standalone site. Expand it, hit Play, then you're on the cyan. If that first card doesn't feel like a thing you tap, nobody reaches Today's 10.",
+            ],
+            images: [
+              {
+                src: wfAsset("wf-reddit-splash.png"),
+                alt: "Who Fiddled splash inside a Reddit post. Play card, upvote chrome, u/who-fiddled.",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        title: "Daily 10",
+        blocks: [
+          {
+            title: "Fair ranking needed one shared deck",
+            paragraphs: [
+              "The actual sport is Today's 10. Same ten questions for everyone that Pacific day, so the leaderboard is fair. One hero card, a row of pips, Start daily trivia. You don't pick from truncated teasers. You play the deck in order.",
+              "Community sits under it, for fun, no ranked points. One question a day if you want to post. Ranked points never leak into that lane, or a popular lie-farm would beat people who just played the official ten.",
+            ],
+            images: [
+              {
+                src: wfAsset("wf-todays-10.png"),
+                alt: "Hub home. Today's 10 with empty pips, Start daily trivia, Community empty state, Post a question.",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        title: "Playing it",
+        blocks: [
+          {
+            title: "A tap had to feel like a tap",
+            paragraphs: [
+              "Answer cards are radio stickers, not static text. Lock it in stays dead until you pick something. The copy says Pick an answer first so the grey button isn't a mystery. Sixty seconds on the clock, fill reading as time left, not a loading bar.",
+              "Once you select, the white face presses down and the navy shadow stays put. Switch answers and the old one pops back up. No checkmark. A checkmark shoved the copy and wrapped a word.",
+            ],
+            images: [
+              {
+                src: wfAsset("wf-question-idle.png"),
+                alt: "Question 1 of 10. Four radio answers, timer at 55s, Lock it in disabled until a pick.",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        title: "Posting",
+        blocks: [
+          {
+            title: "Type on the card players will see",
+            paragraphs: [
+              "The magenta card is the prompt. You type on it, not in a leftover field underneath. Extra context is optional and only shows after voting, so the backstory can't leak the truth. Draft saves as a quiet chip. Next takes you to the three lies.",
+              "Two steps, not seven fields in one scroll. Personal questions and Write the lies are different jobs, so they got different tabs.",
+            ],
+            images: [
+              {
+                src: wfAsset("wf-post-question.png"),
+                alt: "Post a question, step 1. Magenta prompt card, truth field, extra context, Next write your lies.",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        title: "After the ten",
+        blocks: [
+          {
+            title: "The deck ends. The day doesn't.",
+            paragraphs: [
+              "Finish the ten and the card goes yellow, brand yellow, not a random green. Score up top. Correct, missed, and the deck bonus in one box so 2 correct and 8 missed actually add up. If you're #1, that line gets a trophy, not a footnote.",
+              "Share my score is the pink action. View leaderboard is yellow. Next deck drops on a live Pacific countdown, so Check back tomorrow has a clock on it.",
+            ],
+            images: [
+              {
+                src: wfAsset("wf-deck-complete.png"),
+                alt: "Deck complete. 250 pts, #1 on today's board, score breakdown, next deck countdown.",
+              },
+              {
+                src: wfAsset("wf-leaderboard.png"),
+                alt: "Daily leaderboard. Trophy header, Today and All time nested under Today and Leaderboard, sticky Your rank.",
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  conclusionTitle: "Reflection",
   conclusion:
-    "Community games win when the prompt is weirder than the designer. Next: ship more prompt seasons and watch which lies people fall for hardest.",
-});
+    "Hackathon rules wanted a 60-second demo inside a live post, public sub under 200 people. I seeded trivia so judges could play without waiting for a crowd. Generated lies used to give themselves away with parentheses. I made the writer stop doing that. Next I'd grow the prompt packs and watch which lies actually fool people. The game is only as good as the lie that almost sounded true.",
+};
 
 export const projects = [
   {
@@ -1943,8 +2052,8 @@ export const projects = [
     category: "Social Game",
     tagline: "One truth. Three lies. Reddit decides.",
     description:
-      "Daily bluffing game on Reddit Devvit. Fool the crowd or catch the fiddler. Loud cyan, louder pink.",
-    tags: ["Game Design", "Visual Design", "Community"],
+      "Daily bluffing trivia inside a Reddit post. Ranked 10, one truth, three lies. PRD, visual system, and interaction, shipped for Reddit's Games with a Hook.",
+    tags: ["Game Design", "Visual Design", "Interaction"],
     slug: "who-fiddled",
     thumb: whoFiddledHero,
     caseStudyHero: whoFiddledHero,

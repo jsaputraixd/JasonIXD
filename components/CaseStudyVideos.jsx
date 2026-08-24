@@ -80,11 +80,13 @@ export default function CaseStudyVideos({
     flexDirection: "column",
   };
 
-  const isMulti = fileItems.length >= 2;
+  const allWide =
+    fileItems.length > 0 && fileItems.every((item) => item.layout === "wide");
+  const isMulti = fileItems.length >= 2 && !allWide;
   /** Portrait app demos stay narrow; landscape clips (layout: "wide") fill the column. */
   const fileMaxWidth = (item) => {
-    if (isMulti) return "min(100%, 380px)";
     if (item.layout === "wide") return "min(100%, 1100px)";
+    if (isMulti) return "min(100%, 380px)";
     return "min(100%, 400px)";
   };
   const fileMaxHeight = (item) => {
