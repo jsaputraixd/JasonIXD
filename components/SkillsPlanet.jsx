@@ -37,17 +37,32 @@ const SIZE = {
     lowPower: true,
   },
   desktop: {
-    disc: 248,
-    orbitExtra: 88,
-    padX: 72,
-    padY: 52,
+    disc: 500,
+    orbitExtra: 0,
+    padX: 16,
+    padY: 16,
     labelFont: 12,
     homeFont: 18,
-    // Keep rows stable when expanding so the ASCII grid isn't rebuilt mid-zoom.
-    globeRows: 26,
+    globeRows: 30,
     lowPower: false,
   },
 };
+
+function sizeFromAnchor(px) {
+  const disc = Math.max(96, Math.round(px));
+  return {
+    disc,
+    orbitExtra: Math.round(disc * 0.08),
+    padX: Math.round(disc * 0.92),
+    padY: Math.round(disc * 0.68),
+    labelFont: Math.max(11, Math.min(13, Math.round(disc * 0.068))),
+    labelPadX: 12,
+    labelPadY: 8,
+    homeFont: 18,
+    globeRows: 8,
+    lowPower: true,
+  };
+}
 
 /** Screen-filling desktop size from the stage viewport. */
 function sizeForFullscreen(vw, vh) {
@@ -80,9 +95,7 @@ function sizeForFullscreen(vw, vh) {
   };
 }
 
-/** Layout box for the screen-filling expanded globe (keeps blur margins clickable). */
-export function desktopSkillsExpandedBox(vw, vh) {
-  const size = sizeForFullscreen(vw, vh);
+function globeBoxFromSize(size) {
   const discR = size.disc / 2;
   const orbitR = discR + size.orbitExtra;
   const boxW = Math.ceil(orbitR * 2) + size.padX;
@@ -90,6 +103,21 @@ export function desktopSkillsExpandedBox(vw, vh) {
     Math.ceil(Math.max(discR * 2, orbitR * ELLIPSE_Y_RATIO * 2) + discR * 0.35) +
     size.padY;
   return { boxW, boxH, size };
+}
+
+/** Layout box for the idle desktop globe (centered decorative planet). */
+export function desktopGlobeBox() {
+  return globeBoxFromSize(SIZE.desktop);
+}
+
+/** Layout box for a skill orbit sized to a portrait (or other) disc. */
+export function portraitOrbitBox(anchorSize) {
+  return globeBoxFromSize(sizeFromAnchor(anchorSize));
+}
+
+/** Layout box for the screen-filling expanded globe (keeps blur margins clickable). */
+export function desktopSkillsExpandedBox(vw, vh) {
+  return globeBoxFromSize(sizeForFullscreen(vw, vh));
 }
 
 function pulseSkill() {
@@ -152,12 +180,19 @@ function rimPoint(θ, cx, cy, discR, ryRatio) {
 
 /**
  * ASCII globe with a tilted elliptical skill orbit.
- * Mobile: scroll-revealed constellation. Desktop: always live in skills.log.
+ * Mobile: scroll-revealed constellation around the globe.
+ * Desktop: globe is decorative; skill orbit attaches to me.txt.
  */
 export default function SkillsPlanet({
   variant = "desktop",
   scrollRootSelector,
   expanded = false,
+  /** Desktop: skill chips orbit when true. Mobile uses scroll reveal. */
+  orbitActive = false,
+  /** When false, only the orbit layer renders (portrait attach). */
+  showGlobe = true,
+  /** Portrait (or other) disc in px. Drives a tight orbit around that anchor. */
+  anchorSize = null,
   /** idle | hover | focus, circumferential rim glow (desktop). */
   glow = "idle",
   viewportWidth,
@@ -165,6 +200,9 @@ export default function SkillsPlanet({
 }) {
   const isMobile = variant === "mobile";
   const size = useMemo(() => {
+    if (Number.isFinite(anchorSize) && anchorSize > 0) {
+      return sizeFromAnchor(anchorSize);
+    }
     if (isMobile) return SIZE.mobile;
     if (
       expanded &&
@@ -174,8 +212,10 @@ export default function SkillsPlanet({
       return sizeForFullscreen(viewportWidth, viewportHeight);
     }
     return SIZE.desktop;
-  }, [isMobile, expanded, viewportWidth, viewportHeight]);
-  const [constellationOpen, setConstellationOpen] = useState(!isMobile);
+  }, [isMobile, expanded, viewportWidth, viewportHeight, anchorSize]);
+  const [mobileConstellationOpen, setMobileConstellationOpen] = useState(
+    !isMobile
+  );
   const [activeSkill, setActiveSkill] = useState(null);
   const [stageScale, setStageScale] = useState(1);
   const [reduceMotion, setReduceMotion] = useState(false);
@@ -190,6 +230,8 @@ export default function SkillsPlanet({
   const angleRef = useRef(0);
   const activeSkillRef = useRef(null);
   activeSkillRef.current = activeSkill;
+  const constellationOpen = isMobile ? mobileConstellationOpen : orbitActive;
+  const showOrbitLayer = isMobile || constellationOpen;
 
   useEffect(() => {
     setKeyCollected(hasVaultKey());
@@ -243,7 +285,7 @@ export default function SkillsPlanet({
 
     const obs = new IntersectionObserver(
       ([entry]) => {
-        setConstellationOpen(
+        setMobileConstellationOpen(
           entry.isIntersecting && entry.intersectionRatio > 0.25
         );
       },
@@ -302,7 +344,8 @@ export default function SkillsPlanet({
           label.style.zIndex = String(
             activeSkillRef.current === i ? GLOBE_Z + 3 : z
           );
-          label.style.pointerEvents = constellationOpen ? "auto" : "none";
+          label.style.pointerEvents =
+            constellationOpen && showGlobe ? "auto" : "none";
           label.dataset.depth = inFront ? "front" : "back";
         }
 
@@ -352,8 +395,12 @@ export default function SkillsPlanet({
       }
     };
 
+    const startAngle = angleRef.current
+      ? angleRef.current - Math.PI / 2
+      : -Math.PI / 2;
+    paint(startAngle);
+
     if (!constellationOpen || reduceMotion) {
-      paint(angleRef.current || -Math.PI / 2);
       return undefined;
     }
 
@@ -403,7 +450,18 @@ export default function SkillsPlanet({
       document.removeEventListener("visibilitychange", onVisibility);
       halt();
     };
-  }, [constellationOpen, reduceMotion, n, cx, cy, rx, ry, discR, expanded]);
+  }, [
+    constellationOpen,
+    reduceMotion,
+    n,
+    cx,
+    cy,
+    rx,
+    ry,
+    discR,
+    expanded,
+    showGlobe,
+  ]);
 
   const ellipsePathOpacity = constellationOpen ? 0.55 : 0;
 
@@ -421,6 +479,7 @@ export default function SkillsPlanet({
         marginLeft: "auto",
         marginRight: "auto",
         paddingBottom: isMobile ? 6 : 2,
+        pointerEvents: "none",
       }}
     >
       {isMobile ? (
@@ -449,6 +508,8 @@ export default function SkillsPlanet({
             overflow: "visible",
           }}
         >
+          {showOrbitLayer ? (
+          <>
           <svg
             aria-hidden
             width={boxW}
@@ -469,32 +530,36 @@ export default function SkillsPlanet({
               </radialGradient>
             </defs>
 
-            <ellipse
-              cx={cx}
-              cy={cy}
-              rx={rx}
-              ry={ry}
-              fill="none"
-              stroke="rgba(255, 122, 41, 0.22)"
-              strokeWidth={1}
-              strokeDasharray="4 8"
-              className="skills-range-ring"
-              opacity={ellipsePathOpacity}
-              style={{ transition: "opacity 0.4s ease" }}
-            />
-            <ellipse
-              cx={cx}
-              cy={cy}
-              rx={rx * 0.62}
-              ry={ry * 0.62}
-              fill="none"
-              stroke="rgba(255, 122, 41, 0.12)"
-              strokeWidth={1}
-              strokeDasharray="3 7"
-              className="skills-range-ring"
-              opacity={ellipsePathOpacity}
-              style={{ transition: "opacity 0.4s ease" }}
-            />
+            {showGlobe ? (
+              <>
+                <ellipse
+                  cx={cx}
+                  cy={cy}
+                  rx={rx}
+                  ry={ry}
+                  fill="none"
+                  stroke="rgba(255, 122, 41, 0.22)"
+                  strokeWidth={1}
+                  strokeDasharray="4 8"
+                  className="skills-range-ring"
+                  opacity={ellipsePathOpacity}
+                  style={{ transition: "opacity 0.4s ease" }}
+                />
+                <ellipse
+                  cx={cx}
+                  cy={cy}
+                  rx={rx * 0.62}
+                  ry={ry * 0.62}
+                  fill="none"
+                  stroke="rgba(255, 122, 41, 0.12)"
+                  strokeWidth={1}
+                  strokeDasharray="3 7"
+                  className="skills-range-ring"
+                  opacity={ellipsePathOpacity}
+                  style={{ transition: "opacity 0.4s ease" }}
+                />
+              </>
+            ) : null}
 
             {skills.map((_, i) => (
               <g key={`back-spoke-${i}`}>
@@ -534,6 +599,7 @@ export default function SkillsPlanet({
 
           {skills.map((skill, i) => {
             const isActive = activeSkill === i;
+            const LabelTag = showGlobe ? "button" : "span";
             return (
               <div
                 key={skill}
@@ -549,84 +615,103 @@ export default function SkillsPlanet({
                   willChange: "transform, opacity",
                 }}
               >
-                <button
-                  type="button"
+                <LabelTag
+                  type={showGlobe ? "button" : undefined}
                   className={
-                    constellationOpen
+                    showGlobe && constellationOpen
                       ? "skills-orbit-label skills-orbit-label--live"
-                      : "skills-orbit-label"
+                      : showGlobe
+                        ? "skills-orbit-label"
+                        : "skills-orbit-label skills-orbit-label--portrait-in"
                   }
                   aria-label={`Skill: ${skill}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    playClick();
-                    pulseSkill();
-                    setActiveSkill(i);
-                  }}
+                  onClick={
+                    showGlobe
+                      ? (e) => {
+                          e.stopPropagation();
+                          playClick();
+                          pulseSkill();
+                          setActiveSkill(i);
+                        }
+                      : undefined
+                  }
                   style={{
                     display: "inline-block",
-                    pointerEvents: "auto",
+                    appearance: "none",
+                    pointerEvents: showGlobe ? "auto" : "none",
                     fontFamily: "'VT323', monospace",
                     fontSize: size.labelFont,
                     letterSpacing: "0.1em",
                     textTransform: "uppercase",
                     color: ACCENT,
                     textShadow: "0 0 8px rgba(255, 122, 41, 0.55)",
-                    padding: "3px 7px",
-                    border: `1px solid rgba(255, 122, 41, ${isActive ? 0.9 : 0.5})`,
-                    background: "rgba(12, 10, 8, 0.96)",
-                    borderRadius: 2,
-                    whiteSpace: "nowrap",
-                    cursor: "pointer",
-                    boxShadow: isActive
-                      ? "0 0 16px rgba(255, 122, 41, 0.65)"
+                    padding: showGlobe
+                      ? `${size.labelPadY ?? 3}px ${size.labelPadX ?? 7}px`
+                      : 0,
+                    border: showGlobe
+                      ? `1px solid rgba(255, 122, 41, ${isActive ? 0.9 : 0.5})`
                       : "none",
+                    background: showGlobe
+                      ? "rgba(12, 10, 8, 0.96)"
+                      : "transparent",
+                    borderRadius: showGlobe ? 2 : 0,
+                    whiteSpace: "nowrap",
+                    cursor: showGlobe ? "pointer" : "default",
+                    boxShadow:
+                      showGlobe && isActive
+                        ? "0 0 16px rgba(255, 122, 41, 0.65)"
+                        : "none",
                     ["--label-delay"]: `${i * 0.4}s`,
+                    ["--label-in-delay"]: `${i * 38}ms`,
                   }}
                 >
                   {skill}
-                </button>
+                </LabelTag>
               </div>
             );
           })}
+          </>
+          ) : null}
 
-          <div
-            className={
-              glow === "none"
-                ? "skills-globe-disc skills-globe-halo skills-globe-halo--none"
-                : glow === "focus"
-                  ? "skills-globe-disc skills-globe-halo skills-globe-halo--focus"
-                  : glow === "hover"
+          {showGlobe ? (
+            <div
+              className={
+                isMobile
+                  ? glow === "hover"
                     ? "skills-globe-disc skills-globe-halo skills-globe-halo--hover"
                     : "skills-globe-disc skills-globe-halo"
-            }
-            style={{
-              position: "absolute",
-              left: "50%",
-              top: "50%",
-              transform: "translate(-50%, -50%)",
-              zIndex: GLOBE_Z,
-              width: discR * 2,
-              height: discR * 2,
-              borderRadius: "50%",
-              // Clip ASCII to the rim so it can’t overshoot the orange circle.
-              overflow: "hidden",
-              background: "transparent",
-              pointerEvents: "auto",
-            }}
-          >
-            <InteractiveAsciiGlobe
-              rows={size.globeRows}
-              // Corner float: lighter paint. Expanded: full quality but capped rows.
-              lowPower={size.lowPower || (!isMobile && !expanded)}
-              // 1 = orthographic disc diameter matches the circular frame exactly.
-              fillScale={1}
-              ariaLabel="Interactive globe. Drag to rotate. Watch for a signal over SF."
-              style={{ opacity: 0.96 }}
-              surfacePin={surfacePin}
-            />
-          </div>
+                  : "skills-globe-disc"
+              }
+              style={{
+                position: "absolute",
+                left: "50%",
+                top: "50%",
+                transform: "translate(-50%, -50%)",
+                zIndex: GLOBE_Z,
+                width: discR * 2,
+                height: discR * 2,
+                borderRadius: "50%",
+                overflow: "hidden",
+                background: "transparent",
+                pointerEvents: "auto",
+                boxShadow: "none",
+                opacity: isMobile ? 1 : 0.44,
+              }}
+            >
+              <InteractiveAsciiGlobe
+                rows={size.globeRows}
+                lowPower={size.lowPower}
+                fillScale={1}
+                spinSpeed={isMobile ? 1 : 0.55}
+                ariaLabel="Decorative globe. Drag to rotate. Watch for a signal over SF."
+                style={{ opacity: 1, pointerEvents: "auto" }}
+                muted={!isMobile}
+                surfacePin={surfacePin}
+              />
+            </div>
+          ) : null}
 
+          {showOrbitLayer ? (
           <svg
             aria-hidden
             width={boxW}
@@ -665,6 +750,7 @@ export default function SkillsPlanet({
               </g>
             ))}
           </svg>
+          ) : null}
         </div>
       </div>
 

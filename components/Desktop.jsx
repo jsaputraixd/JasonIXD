@@ -23,8 +23,8 @@ import CoffeeSnakeGame from "./CoffeeSnakeGame";
 import ProjectViewLink from "@/components/ProjectViewLink";
 import { projectHeroTransitionName } from "@/lib/viewTransition";
 import DesktopIdleLayer from "./DesktopIdleLayer";
-import SkillsPlanet, { desktopSkillsExpandedBox } from "./SkillsPlanet";
-import { featuredProjects } from "@/data/projects";
+import SkillsPlanet, { desktopGlobeBox, portraitOrbitBox } from "./SkillsPlanet";
+import { desktopFeaturedProjects } from "@/data/projects";
 import { about } from "@/data/about";
 import WelcomeReadAloud from "@/components/WelcomeReadAloud";
 import DesktopFolderIcon from "@/components/DesktopFolderIcon";
@@ -34,13 +34,19 @@ import ProjectFlipCard, { PROJECT_CARD_GRADIENTS } from "@/components/ProjectFli
 import { otherStuff } from "@/data/otherStuff";
 import { otherProjects } from "@/data/otherProjects";
 import {
+  BOTTOM_RESERVE,
   DESKTOP_FOLDER_ICON_W,
   getDeterministicDesktopPositions,
   LEFT_COLUMN_INSET,
+  PROJECT_GRID_LEFT_GAP,
+  PROJECT_GRID_LIFT,
   PROJECT_WINDOW_GAP,
   RIGHT_RESERVE,
 } from "@/lib/desktopWindowPlacement";
-import { getProjectDesktopCards, projectGridMetrics } from "@/lib/projectDesktopCards";
+import {
+  fitProjectCardsToBounds,
+  getProjectDesktopCards,
+} from "@/lib/projectDesktopCards";
 import { preloadPortfolioAssets } from "@/lib/preloadPortfolio";
 import {
   markIntroSeen,
@@ -51,6 +57,7 @@ import {
   playClick,
   playTypingClick,
   playTypingClickThrottled,
+  playWindowClose,
   playWindowRestore,
 } from "@/lib/typingSound";
 import { incrementCoffeeCount } from "@/lib/coffeeCounter";
@@ -93,17 +100,12 @@ function getWindowTitle(id) {
       const m = /^proj-(\d+)$/.exec(id);
       if (m) {
         const idx = Number(m[1]) - 1;
-        return featuredProjects[idx]?.title ?? id;
+        return desktopFeaturedProjects[idx]?.title ?? id;
       }
       return id;
     }
   }
 }
-
-const ASCII_PORTRAIT_SRC = "/images/ascii-portrait.png";
-/** Intrinsic size from source PNG (next/image uses this for aspect ratio). */
-const ASCII_PORTRAIT_W = 6591;
-const ASCII_PORTRAIT_H = 6624;
 
 function clamp(n, lo, hi) {
   return Math.max(lo, Math.min(hi, n));
@@ -114,7 +116,7 @@ const LAYOUT_REF_W = 1280;
 
 /** Viewport-aware sizes; positions are fixed zones (center welcome, grouped project row). */
 function getDesktopLayout(vw, vh) {
-  const nProj = featuredProjects.length;
+  const nProj = desktopFeaturedProjects.length;
   const edge = 12;
   const g = 10;
   const layoutScale = Math.min(1, vw / LAYOUT_REF_W);
@@ -123,8 +125,6 @@ function getDesktopLayout(vw, vh) {
   const W0 = {
     welcome: Math.round(clamp(380, 540, 400 + 130 * u)),
     me: Math.round(clamp(208, 288, 218 + 70 * u)),
-    /** Floating skills globe footprint (top-right, no window chrome). */
-    skills: Math.round(clamp(440, 520, 470 + 50 * u)),
     otherStuff: Math.round(clamp(340, 520, 420 + 32 * u)),
     otherProjects: Math.round(clamp(460, 620, 520 + 40 * u)),
     contact: Math.round(clamp(248, 298, 260 + 28 * u)),
@@ -133,18 +133,14 @@ function getDesktopLayout(vw, vh) {
   let W = {
     welcome: Math.round(W0.welcome * layoutScale),
     me: Math.round(W0.me * layoutScale),
-    skills: Math.max(400, Math.round(W0.skills * layoutScale)),
     otherStuff: Math.round(W0.otherStuff * layoutScale),
     otherProjects: Math.round(W0.otherProjects * layoutScale),
     contact: Math.round(W0.contact * layoutScale),
   };
 
-  const skillsLeft = Math.max(edge, vw - W.skills - edge - RIGHT_RESERVE);
   const topBand = vh * 0.034;
 
-  // Keep welcome + me widths reasonable on narrow viewports (avoid wider than usable band).
-  const marginBeforeSkills = 18;
-  const maxCluster = Math.max(220, skillsLeft - edge - marginBeforeSkills);
+  const maxCluster = Math.max(220, vw - 2 * edge - RIGHT_RESERVE);
   let clusterW = W.welcome + g + W.me;
   if (clusterW > maxCluster && maxCluster > 0) {
     const ratio = maxCluster / clusterW;
@@ -159,33 +155,31 @@ function getDesktopLayout(vw, vh) {
   }
 
   const projectGap = Math.max(14, Math.round(PROJECT_WINDOW_GAP * layoutScale));
-  let projectCards = getProjectDesktopCards(featuredProjects, layoutScale);
+  const leftColumnInset = Math.round(LEFT_COLUMN_INSET * layoutScale);
+  const projectLeftGap = Math.max(
+    20,
+    Math.round(PROJECT_GRID_LEFT_GAP * layoutScale)
+  );
+  let projectCards = getProjectDesktopCards(desktopFeaturedProjects, layoutScale);
 
-  const maxGridW = Math.max(0, vw - 2 * edge - RIGHT_RESERVE);
-  const bandInner = Math.max(0, skillsLeft - edge - g);
-  const gridFitW = Math.min(maxGridW, bandInner > 0 ? bandInner : maxGridW);
-  const { gridWidth: gridW0 } = projectGridMetrics(projectCards, projectGap);
-
-  if (gridW0 > gridFitW && gridFitW > 0 && gridW0 > 0) {
-    const shrink = gridFitW / gridW0;
-    projectCards = projectCards.map((card) => {
-      const width = Math.max(100, Math.round(card.width * shrink));
-      const bodyHeight = Math.round(width / card.aspect);
-      const tb = Math.max(26, Math.round(28 * layoutScale));
-      return {
-        ...card,
-        width,
-        bodyHeight,
-        windowHeight: tb + bodyHeight,
-        topOffset: 0,
-      };
-    });
-  }
+  const gridMinLeft = edge + leftColumnInset + W.me + projectLeftGap;
+  const gridMaxRight = vw - edge - RIGHT_RESERVE;
+  const maxGridW = Math.max(0, gridMaxRight - gridMinLeft);
+  const maxGridH = Math.max(
+    0,
+    vh -
+      BOTTOM_RESERVE -
+      Math.round(PROJECT_GRID_LIFT * layoutScale) -
+      topBand
+  );
+  projectCards = fitProjectCardsToBounds(projectCards, layoutScale, {
+    maxGridW,
+    maxGridH,
+    projectGap,
+  });
 
   // Same width as rendered `contact.msg`; required for accurate non-overlap packing.
   W.contact = W.me;
-
-  const leftColumnInset = Math.round(LEFT_COLUMN_INSET * layoutScale);
 
   const pos = getDeterministicDesktopPositions({
     vw,
@@ -199,12 +193,14 @@ function getDesktopLayout(vw, vh) {
     g,
     topBand,
     leftColumnInset,
+    gridMinLeft,
+    gridMaxRight,
   });
 
   return { W, pos, projectCards, layoutScale };
 }
 
-const DESKTOP_PROJECT_SLOTS = featuredProjects.map((_, projectIndex) => ({
+const DESKTOP_PROJECT_SLOTS = desktopFeaturedProjects.map((_, projectIndex) => ({
   slot: `projSlot${projectIndex}`,
   projectIndex,
   delay: 0.4 + projectIndex * 0.15,
@@ -242,8 +238,6 @@ export default function Desktop() {
   const [skillsFocused, setSkillsFocused] = useState(false);
   const skillsFocusedRef = useRef(false);
   skillsFocusedRef.current = skillsFocused;
-  const [skillsHovered, setSkillsHovered] = useState(false);
-  const skillsPointerRef = useRef(null);
   const [minimizedIds, setMinimizedIds] = useState([]);
   const welcomeDoneTimerRef = useRef(null);
   const [iconOffsets, setIconOffsets] = useState(() => ({}));
@@ -251,13 +245,10 @@ export default function Desktop() {
 
   const openSkillsFocus = useCallback(() => {
     setSkillsFocused(true);
-    playClick();
   }, []);
 
   const closeSkillsFocus = useCallback(() => {
     setSkillsFocused(false);
-    setSkillsHovered(false);
-    playClick();
   }, []);
 
   useEffect(() => {
@@ -395,8 +386,6 @@ export default function Desktop() {
   );
 
   const bringToFront = useCallback((id) => {
-    // Don't let title-bar focus punch windows through the zoomed globe overlay.
-    if (skillsFocusedRef.current) return;
     setTopZ((z) => {
       const next = z + 1;
       setZMap((m) => ({ ...m, [id]: next }));
@@ -429,6 +418,24 @@ export default function Desktop() {
     playWindowRestore();
   }, []);
 
+  const toggleFolderWindow = useCallback(
+    (windowId, isOpen, setOpen) => {
+      if (!isOpen) {
+        setOpen(true);
+        bringToFront(windowId);
+        return;
+      }
+      if (minimizedIds.includes(windowId)) {
+        restoreWindow(windowId);
+        bringToFront(windowId);
+        return;
+      }
+      setOpen(false);
+      playWindowClose();
+    },
+    [bringToFront, minimizedIds, restoreWindow]
+  );
+
   const isMinimized = useCallback(
     (id) => minimizedIds.includes(id),
     [minimizedIds]
@@ -443,7 +450,6 @@ export default function Desktop() {
 
   useEffect(() => {
     if (!viewport || viewport.w < 900 || phase !== "dashboard") return;
-    if (skillsFocused) return;
     const el = stageRef.current;
     if (!el) return;
 
@@ -489,7 +495,7 @@ export default function Desktop() {
       el.style.setProperty("--desk-px", "0");
       el.style.setProperty("--desk-py", "0");
     };
-  }, [viewport, phase, skillsFocused]);
+  }, [viewport, phase]);
 
   const vwSafe = viewport?.w ?? 1280;
   const vhSafe = viewport?.h ?? 800;
@@ -594,16 +600,14 @@ export default function Desktop() {
     introSkippedRef.current ? 0 : seconds;
   const skipWelcomeTyping = phase === "dashboard";
 
-  const skillsExpandedBox = skillsFocused
-    ? desktopSkillsExpandedBox(vwSafe, vhSafe)
-    : null;
-  const skillsFloatW = skillsExpandedBox ? skillsExpandedBox.boxW : W.skills;
-  const skillsFloatLeft = skillsFocused
-    ? Math.round((vwSafe - skillsFloatW) / 2)
-    : Math.round(vwSafe - skillsFloatW - pos.skills.right);
-  const skillsFloatTop = skillsFocused
-    ? Math.round((vhSafe - skillsExpandedBox.boxH) / 2)
-    : pos.skills.top;
+  const globeBox = desktopGlobeBox();
+  const skillsFloatW = Math.min(
+    globeBox.boxW,
+    Math.max(280, vwSafe - 40)
+  );
+  const skillsFloatH = globeBox.boxH * (skillsFloatW / globeBox.boxW);
+  const skillsFloatLeft = Math.round((vwSafe - skillsFloatW) / 2);
+  const skillsFloatTop = Math.round((vhSafe - skillsFloatH) / 2);
 
   return (
     <div
@@ -669,7 +673,7 @@ export default function Desktop() {
           playOpenSound={false}
           zIndex={zOf("welcome", 12)}
           onFocus={bringToFront}
-          interactive={!skillsFocused}
+          interactive
           minimized={isMinimized("welcome")}
           onMinimize={() => minimizeWindow("welcome")}
           dragConstraints={stageRef}
@@ -694,144 +698,60 @@ export default function Desktop() {
           top={pos.me.top}
           width={W.me}
           delay={cascadeDelay(0.45)}
-          zIndex={zOf("me", 13)}
+          zIndex={skillsFocused ? 36 : zOf("me", 13)}
           onFocus={bringToFront}
-          interactive={!skillsFocused}
+          interactive
           minimized={isMinimized("me")}
           onMinimize={() => minimizeWindow("me")}
           dragConstraints={stageRef}
           parallaxDepth={depth.me}
           uiScale={layoutScale}
+          clipContent={false}
         >
-          <MeTxtBody frameWidth={W.me} layoutScale={layoutScale} />
+          <MeTxtBody
+            frameWidth={W.me}
+            layoutScale={layoutScale}
+            portraitActive={skillsFocused}
+            onPortraitHoverStart={openSkillsFocus}
+            onPortraitHoverEnd={closeSkillsFocus}
+          />
         </Window>
       )}
 
       {showOtherWindows && (
-        <>
-          <AnimatePresence>
-            {skillsFocused ? (
-              <motion.button
-                key="skills-focus-backdrop"
-                type="button"
-                aria-label="Dismiss skills globe"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.28, ease: EASE }}
-                onClick={closeSkillsFocus}
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  zIndex: SKILLS_FOCUS_BACKDROP_Z,
-                  margin: 0,
-                  padding: 0,
-                  border: "none",
-                  cursor: "default",
-                  // Soft vignette only — solid fill, no backdrop-filter (expensive over CRT).
-                  background:
-                    "radial-gradient(ellipse at center, rgba(6, 4, 3, 0.22) 0%, rgba(6, 4, 3, 0.62) 55%, rgba(6, 4, 3, 0.78) 100%)",
-                }}
-              />
-            ) : null}
-          </AnimatePresence>
-
-          {skillsFocused ? (
-            <div
-              aria-hidden
-              style={{
-                position: "absolute",
-                left: "50%",
-                bottom: 28,
-                transform: "translateX(-50%)",
-                zIndex: SKILLS_FOCUS_HINT_Z,
-                pointerEvents: "none",
-                fontFamily: "'VT323', monospace",
-                fontSize: 14,
-                letterSpacing: "0.28em",
-                textTransform: "uppercase",
-                color: "rgba(255, 180, 112, 0.72)",
-                textShadow: "0 0 8px rgba(255, 122, 41, 0.35)",
-              }}
-            >
-              esc to close
-            </div>
-          ) : null}
-
-          <motion.div
-            aria-label={
-              skillsFocused
-                ? "Skills globe expanded. Press Escape to close."
-                : "Skills globe. Click to expand."
-            }
-            initial={{ opacity: 0, scale: 0.92 }}
-            animate={{
-              opacity: 1,
-              scale: skillsFocused ? 1 : skillsHovered ? 1.03 : 1,
-              left: skillsFloatLeft,
-              top: skillsFloatTop,
-            }}
-            transition={{ duration: 0.4, ease: EASE }}
-            onHoverStart={() => {
-              if (!skillsFocused) setSkillsHovered(true);
-            }}
-            onHoverEnd={() => setSkillsHovered(false)}
-            onPointerDown={(e) => {
-              skillsPointerRef.current = { x: e.clientX, y: e.clientY };
-            }}
-            onClickCapture={(e) => {
-              if (skillsFocused) return;
-              // Don't steal the SF vault pin, let it collect before expand.
-              if (
-                e.target instanceof Element &&
-                e.target.closest(".globe-surface-pin")
-              ) {
-                return;
-              }
-              const origin = skillsPointerRef.current;
-              if (
-                origin &&
-                Math.hypot(e.clientX - origin.x, e.clientY - origin.y) > 10
-              ) {
-                return;
-              }
-              openSkillsFocus();
-            }}
+        <motion.div
+          aria-label="Decorative globe. Drag to rotate."
+          initial={{ opacity: 0, scale: 0.92 }}
+          animate={{
+            opacity: 1,
+            scale: 1,
+            left: skillsFloatLeft,
+            top: skillsFloatTop,
+          }}
+          transition={{ duration: 0.4, ease: EASE }}
+          style={{
+            position: "absolute",
+            width: skillsFloatW,
+            zIndex: 5,
+            pointerEvents: "none",
+            overflow: "visible",
+            background: "transparent",
+            boxShadow: "none",
+          }}
+        >
+          <div
             style={{
-              position: "absolute",
-              width: skillsFloatW,
-              zIndex: skillsFocused ? SKILLS_FOCUS_GLOBE_Z : 8,
-              pointerEvents: "auto",
-              overflow: "visible",
-              cursor: skillsFocused ? "default" : "pointer",
-              // No rectangular container chrome, glow lives on the globe rim.
-              background: "transparent",
-              boxShadow: "none",
-              transition: "width 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+              transform: `translate3d(calc(var(--desk-px, 0) * ${-depth.skills} * 1px), calc(var(--desk-py, 0) * ${-depth.skills * 0.78} * 1px), 0)`,
             }}
           >
-            <div
-              style={{
-                transform: skillsFocused
-                  ? undefined
-                  : `translate3d(calc(var(--desk-px, 0) * ${-depth.skills} * 1px), calc(var(--desk-py, 0) * ${-depth.skills * 0.78} * 1px), 0)`,
-              }}
-            >
-              <SkillsPlanet
-                variant="desktop"
-                expanded={skillsFocused}
-                glow={skillsFocused ? "none" : skillsHovered ? "hover" : "idle"}
-                viewportWidth={vwSafe}
-                viewportHeight={vhSafe}
-              />
-            </div>
-          </motion.div>
-        </>
+            <SkillsPlanet variant="desktop" showGlobe orbitActive={false} />
+          </div>
+        </motion.div>
       )}
 
       {showOtherWindows &&
         DESKTOP_PROJECT_SLOTS.map(({ slot, projectIndex, zBase }) => {
-          const p = featuredProjects[projectIndex];
+          const p = desktopFeaturedProjects[projectIndex];
           const card = projectCards[projectIndex];
           const id = `proj-${projectIndex + 1}`;
           return (
@@ -846,13 +766,14 @@ export default function Desktop() {
               delay={cascadeDelay(0.62 + projectIndex * 0.28)}
               zIndex={zOf(id, zBase)}
               onFocus={bringToFront}
-              interactive={!skillsFocused}
+              interactive
               minimized={isMinimized(id)}
               onMinimize={() => minimizeWindow(id)}
               dragConstraints={stageRef}
               parallaxDepth={depth.proj}
               uiScale={layoutScale}
               clipContent={false}
+              growOnHover
             >
               <ProjectFlipCard
                 project={p}
@@ -863,6 +784,14 @@ export default function Desktop() {
                 frameWidth={card.width}
                 frameHeight={card.bodyHeight}
                 aspectRatio={card.aspect}
+                hoverScale={false}
+                hoverFocusDelayMs={
+                  (otherStuffOpen && !isMinimized("otherStuff")) ||
+                  (otherProjectsOpen && !isMinimized("otherProjects")) ||
+                  coffeeSnakeOpen
+                    ? 700
+                    : 0
+                }
                 onRequestFocus={() => bringToFront(id)}
               />
             </Window>
@@ -883,13 +812,14 @@ export default function Desktop() {
           stageRef={stageRef}
           onFocus={() => bringToFront("otherStuffIcon")}
           onOffsetChange={(offset) => handleIconOffset("otherStuffIcon", offset)}
-          onOpen={() => {
-            bringToFront("otherStuff");
-            setOtherStuffOpen(true);
-          }}
+          onOpen={() =>
+            toggleFolderWindow("otherStuff", otherStuffOpen, setOtherStuffOpen)
+          }
+          windowOpen={otherStuffOpen}
+          windowMinimized={isMinimized("otherStuff")}
           parallaxDepth={depth.otherStuffIcon}
           selected={otherStuffOpen}
-          interactive={!skillsFocused}
+          interactive
         />
       )}
 
@@ -908,13 +838,18 @@ export default function Desktop() {
           stageRef={stageRef}
           onFocus={() => bringToFront("otherProjectsIcon")}
           onOffsetChange={(offset) => handleIconOffset("otherProjectsIcon", offset)}
-          onOpen={() => {
-            bringToFront("otherProjects");
-            setOtherProjectsOpen(true);
-          }}
+          onOpen={() =>
+            toggleFolderWindow(
+              "otherProjects",
+              otherProjectsOpen,
+              setOtherProjectsOpen
+            )
+          }
+          windowOpen={otherProjectsOpen}
+          windowMinimized={isMinimized("otherProjects")}
           parallaxDepth={depth.otherProjectsIcon}
           selected={otherProjectsOpen}
-          interactive={!skillsFocused}
+          interactive
         />
       )}
 
@@ -929,7 +864,7 @@ export default function Desktop() {
           delay={0}
           zIndex={zOf("otherStuff", 22)}
           onFocus={bringToFront}
-          interactive={!skillsFocused}
+          interactive
           minimized={isMinimized("otherStuff")}
           onMinimize={() => minimizeWindow("otherStuff")}
           dragConstraints={stageRef}
@@ -956,7 +891,7 @@ export default function Desktop() {
           delay={0}
           zIndex={zOf("otherProjects", 22)}
           onFocus={bringToFront}
-          interactive={!skillsFocused}
+          interactive
           minimized={isMinimized("otherProjects")}
           onMinimize={() => minimizeWindow("otherProjects")}
           dragConstraints={stageRef}
@@ -977,7 +912,7 @@ export default function Desktop() {
         delay={cascadeDelay(2.85)}
         zIndex={zOf("contact", 17)}
         onFocus={bringToFront}
-        interactive={!skillsFocused}
+        interactive
         minimized={isMinimized("contact")}
         onMinimize={() => minimizeWindow("contact")}
         dragConstraints={stageRef}
@@ -1181,7 +1116,13 @@ function WelcomeIntroMorph({ phase, typed, targetOffset }) {
   );
 }
 
-function MeTxtBody({ frameWidth, layoutScale = 1 }) {
+function MeTxtBody({
+  frameWidth,
+  layoutScale = 1,
+  onPortraitHoverStart,
+  onPortraitHoverEnd,
+  portraitActive = false,
+}) {
   const s = layoutScale;
   const inset = Math.max(18, Math.round(26 * s));
   const isDesktop = frameWidth != null;
@@ -1198,29 +1139,102 @@ function MeTxtBody({ frameWidth, layoutScale = 1 }) {
       : { width: "min(220px, 72vw)", height: "min(220px, 72vw)" };
   const bioSize = isDesktop ? Math.max(13, Math.round(15 * s)) : 14;
   const bioPad = isDesktop ? Math.round(8 * s) : 12;
+  const portraitInteractive = typeof onPortraitHoverStart === "function";
+  const reduceMotion = useReducedMotion();
+  const orbitBox = inner != null ? portraitOrbitBox(inner) : null;
 
   return (
     <div
       style={{
         padding: `${Math.round(12 * s)}px ${Math.round(10 * s)}px ${Math.round(14 * s)}px`,
+        overflow: "visible",
       }}
     >
-      <div style={{ textAlign: "center" }}>
+      <div style={{ textAlign: "center", overflow: "visible" }}>
         <div
           style={{
             ...box,
             margin: "0 auto",
             lineHeight: 0,
+            position: "relative",
+            overflow: "visible",
+            zIndex: 2,
           }}
+          onMouseEnter={portraitInteractive ? onPortraitHoverStart : undefined}
+          onMouseLeave={portraitInteractive ? onPortraitHoverEnd : undefined}
         >
-          <WelcomeAsciiPortrait
-            sizes={inner != null ? `${Math.ceil(inner * 1.2)}px` : "min(280px, 85vw)"}
-            style={{
-              width: "100%",
-              height: "100%",
-              maxWidth: "none",
-            }}
-          />
+          {orbitBox && portraitInteractive ? (
+            <AnimatePresence>
+              {portraitActive ? (
+                <motion.div
+                  key="me-skills-orbit"
+                  initial={
+                    reduceMotion
+                      ? { opacity: 1, scale: 1, x: "-50%", y: "-50%" }
+                      : { opacity: 0, scale: 0.9, x: "-50%", y: "-50%" }
+                  }
+                  animate={{ opacity: 1, scale: 1, x: "-50%", y: "-50%" }}
+                  exit={
+                    reduceMotion
+                      ? { opacity: 0, scale: 1, x: "-50%", y: "-50%" }
+                      : { opacity: 0, scale: 0.96, x: "-50%", y: "-50%" }
+                  }
+                  transition={{
+                    duration: reduceMotion ? 0 : 0.5,
+                    ease: EASE,
+                  }}
+                  style={{
+                    position: "absolute",
+                    left: "50%",
+                    top: "50%",
+                    width: orbitBox.boxW,
+                    height: orbitBox.boxH,
+                    transformOrigin: "center center",
+                    zIndex: 0,
+                    pointerEvents: "none",
+                  }}
+                >
+                  <SkillsPlanet
+                    variant="desktop"
+                    showGlobe={false}
+                    orbitActive
+                    anchorSize={inner}
+                  />
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
+          ) : null}
+          {portraitInteractive ? (
+            <div
+              data-cursor="hover"
+              aria-label="Hover to show skills"
+              style={{
+                display: "block",
+                position: "relative",
+                zIndex: 1,
+                width: "100%",
+                height: "100%",
+              }}
+            >
+              <WelcomeAsciiPortrait
+                sizes={inner != null ? `${Math.ceil(inner * 1.2)}px` : "min(280px, 85vw)"}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  maxWidth: "none",
+                }}
+              />
+            </div>
+          ) : (
+            <WelcomeAsciiPortrait
+              sizes={inner != null ? `${Math.ceil(inner * 1.2)}px` : "min(280px, 85vw)"}
+              style={{
+                width: "100%",
+                height: "100%",
+                maxWidth: "none",
+              }}
+            />
+          )}
         </div>
         <p
           style={{

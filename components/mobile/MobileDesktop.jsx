@@ -185,6 +185,8 @@ const MOBILE_WORK_TINTS = [
   "rgba(255, 105, 48, 0.11)",
   "rgba(255, 145, 55, 0.12)",
   "rgba(120, 90, 200, 0.1)",
+  "rgba(40, 160, 190, 0.12)",
+  "rgba(220, 90, 140, 0.11)",
 ];
 
 function MobileWorkSection({ scrollRoot }) {

@@ -37,6 +37,8 @@ export default function Window({
   titleBarExtra,
   /** When false, content may extend outside window bounds (e.g. hover scale on project cards). */
   clipContent = true,
+  /** Scale the full chrome (title bar + body) on hover. */
+  growOnHover = false,
   /** Play a short whoosh when the window first appears (cascade delay respected). */
   playOpenSound = true,
   /** When false, ignore focus/drag so overlays (skills zoom) stay on top. */
@@ -135,6 +137,15 @@ export default function Window({
             pointerEvents: interactive ? "auto" : "none",
           }}
         >
+          <div
+            className={
+              growOnHover
+                ? isHeld
+                  ? "os-window-grow os-window-grow--held"
+                  : "os-window-grow"
+                : undefined
+            }
+          >
           <div
             style={{
               background: "rgba(18, 12, 8, 0.92)",
@@ -235,6 +246,7 @@ export default function Window({
             </div>
 
             <div style={{ position: "relative" }}>{children}</div>
+          </div>
           </div>
         </motion.div>
       )}

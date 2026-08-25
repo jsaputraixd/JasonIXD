@@ -2206,9 +2206,30 @@ export const projects = [
   },
 ];
 
-const FEATURED_SLUGS = ["eleara", "pulse", "adherence", "kits"];
+const FEATURED_SLUGS = [
+  "eleara",
+  "pulse",
+  "adherence",
+  "kits",
+  "cca-pathfinding",
+  "dairy-delight",
+];
+
+/** Desktop 2×3: keep the original 2×2 on the left, new cards in the right column. */
+const DESKTOP_FEATURED_SLUGS = [
+  "eleara",
+  "pulse",
+  "cca-pathfinding",
+  "adherence",
+  "kits",
+  "dairy-delight",
+];
 
 export const featuredProjects = FEATURED_SLUGS.map((slug) =>
+  projects.find((p) => p.slug === slug)
+).filter(Boolean);
+
+export const desktopFeaturedProjects = DESKTOP_FEATURED_SLUGS.map((slug) =>
   projects.find((p) => p.slug === slug)
 ).filter(Boolean);
 

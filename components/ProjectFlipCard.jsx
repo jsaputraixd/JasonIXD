@@ -1,10 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { projectCardThumbSrc, projectCarouselThumbSrc } from "@/lib/projectMedia";
 import { DESKTOP_PROJECT_CARD_ASPECT } from "@/lib/projectDesktopCards";
-import { projectCardMeta, projectCardRoleSummary } from "@/lib/projectCardMeta";
 import { playClick } from "@/lib/typingSound";
 
 export const PROJECT_CARD_GRADIENTS = [
@@ -61,6 +60,8 @@ export default function ProjectFlipCard({
   frameHeight,
   aspectRatio = DESKTOP_PROJECT_CARD_ASPECT,
   onRequestFocus,
+  hoverFocusDelayMs = 0,
+  hoverScale = true,
   loading = "lazy",
 }) {
   const aspect = aspectRatio ?? DESKTOP_PROJECT_CARD_ASPECT;
@@ -69,17 +70,45 @@ export default function ProjectFlipCard({
   const cardH = frameHeight ?? Math.round(innerW / aspect);
 
   const heroSrc = project.thumb ?? project.caseStudyHero ?? null;
-  const { category, role, timeline } = projectCardMeta(project);
-  const roleSummary = projectCardRoleSummary(role);
+  const hoverTimerRef = useRef(null);
+
+  const clearHoverTimer = () => {
+    if (hoverTimerRef.current == null) return;
+    clearTimeout(hoverTimerRef.current);
+    hoverTimerRef.current = null;
+  };
+
+  useEffect(() => {
+    if (hoverFocusDelayMs <= 0) clearHoverTimer();
+    return clearHoverTimer;
+  }, [hoverFocusDelayMs]);
+
+  const handleMouseEnter = () => {
+    if (!onRequestFocus) return;
+    if (hoverFocusDelayMs <= 0) {
+      onRequestFocus();
+      return;
+    }
+    clearHoverTimer();
+    hoverTimerRef.current = setTimeout(() => {
+      hoverTimerRef.current = null;
+      onRequestFocus();
+    }, hoverFocusDelayMs);
+  };
 
   return (
     <Link
       href={`/work/${project.slug}`}
       data-cursor="view"
       aria-label={`Open ${project.title} case study`}
-      onMouseEnter={() => onRequestFocus?.()}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={clearHoverTimer}
       onFocus={() => onRequestFocus?.()}
-      onPointerDown={() => playClick()}
+      onPointerDown={() => {
+        clearHoverTimer();
+        playClick();
+        onRequestFocus?.();
+      }}
       style={{
         display: "block",
         position: "relative",
@@ -94,7 +123,9 @@ export default function ProjectFlipCard({
       }}
     >
       <div
-        className="project-card-shell"
+        className={
+          hoverScale ? "project-card-shell" : "project-card-shell project-card-shell--locked"
+        }
         style={{
           position: "relative",
           height: "100%",
@@ -149,19 +180,6 @@ export default function ProjectFlipCard({
               zIndex: 1,
             }}
           />
-        </div>
-
-        <div className="project-card-caption">
-          <p className="project-card-caption__title">{project.title}</p>
-          {(category || timeline || roleSummary) ? (
-            <p className="project-card-caption__meta">
-              {[category, timeline].filter(Boolean).join(" · ")}
-              {roleSummary ? (
-                <span className="project-card-caption__meta-role">{roleSummary}</span>
-              ) : null}
-            </p>
-          ) : null}
-          <span className="project-card-caption__cta">Case study →</span>
         </div>
       </div>
     </Link>

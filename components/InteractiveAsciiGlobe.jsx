@@ -114,6 +114,10 @@ export default function InteractiveAsciiGlobe({
   lowPower = false,
   /** >1 grows the ASCII disc to fill its circular frame (closes the dark rim gap). */
   fillScale = 1,
+  /** Multiplier on idle spin. 1 = default, lower is slower. */
+  spinSpeed = 1,
+  /** Quieter paint for a background globe (no orange glyph glow). */
+  muted = false,
   /**
    * Optional surface pin (e.g. SF vault key).
    * { lat, lon, collected, onCollect, glyph? }
@@ -133,6 +137,8 @@ export default function InteractiveAsciiGlobe({
   const resumeAtRef = useRef(0);
   const visibleRef = useRef(true);
   const pinDragRef = useRef(null);
+  const spinSpeedRef = useRef(spinSpeed);
+  spinSpeedRef.current = spinSpeed;
 
   pinCollectedRef.current = Boolean(surfacePin?.collected);
   surfacePinRef.current = surfacePin;
@@ -438,7 +444,7 @@ export default function InteractiveAsciiGlobe({
         !reduceMotion &&
         now >= resumeAtRef.current
       ) {
-        rotRef.current.spin += AUTO_SPIN_RAD_PER_MS * dt;
+        rotRef.current.spin += AUTO_SPIN_RAD_PER_MS * spinSpeedRef.current * dt;
       }
 
       const interval = draggingRef.current ? dragInterval : idleInterval;
@@ -600,11 +606,14 @@ export default function InteractiveAsciiGlobe({
           fontSize,
           lineHeight: 1,
           letterSpacing: 0,
-          color: "rgba(212, 210, 200, 0.94)",
+          color: muted
+            ? "rgba(196, 194, 186, 0.72)"
+            : "rgba(212, 210, 200, 0.94)",
           // text-shadow is expensive on mobile GPUs, keep glow on desktop only
-          textShadow: useLowPower
-            ? "none"
-            : "0 0 10px rgba(255, 122, 41, 0.22), 0 0 2px rgba(0,0,0,0.85)",
+          textShadow:
+            useLowPower || muted
+              ? "none"
+              : "0 0 10px rgba(255, 122, 41, 0.22), 0 0 2px rgba(0,0,0, 0.85)",
           background: "transparent",
           userSelect: "none",
           whiteSpace: "pre",

@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useRef } from "react";
 import { motion } from "framer-motion";
 import { useDesktopIconDrag } from "@/hooks/useDesktopIconDrag";
 import { playClick } from "@/lib/typingSound";
@@ -30,8 +31,11 @@ export default function DesktopFolderIcon({
   delay = 0,
   selected = false,
   interactive = true,
+  windowOpen = false,
+  windowMinimized = false,
 }) {
   const iconH = Math.round(width * 0.82);
+  const lastActivateRef = useRef(0);
 
   const drag = useDesktopIconDrag({
     iconId,
@@ -44,8 +48,18 @@ export default function DesktopFolderIcon({
     onOffsetChange,
   });
 
+  const actionLabel = !windowOpen
+    ? "Open"
+    : windowMinimized
+      ? "Restore"
+      : "Close";
+
   const activate = () => {
     if (!interactive) return;
+    const now = Date.now();
+    // A double-click fires two clicks; don't open then immediately close.
+    if (now - lastActivateRef.current < 280) return;
+    lastActivateRef.current = now;
     playClick();
     onFocus?.();
     onOpen?.();
@@ -55,7 +69,7 @@ export default function DesktopFolderIcon({
     <motion.button
       type="button"
       data-cursor="hover"
-      aria-label={`Open ${label}`}
+      aria-label={`${actionLabel} ${label}`}
       disabled={!interactive}
       onPointerDown={interactive ? drag.onPointerDown : undefined}
       onPointerMove={interactive ? drag.onPointerMove : undefined}
@@ -68,9 +82,6 @@ export default function DesktopFolderIcon({
       }}
       onDoubleClick={(e) => {
         e.preventDefault();
-        if (!interactive) return;
-        if (drag.consumeClickIfDragged()) return;
-        activate();
       }}
       initial={{ opacity: 0, scale: 0.92 }}
       animate={{
