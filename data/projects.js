@@ -1317,37 +1317,181 @@ const shiftOffCaseStudyRich = simpleGalleryCaseStudy({
 /** CCA Pathfinding */
 const CCA = `${P}/CCA Pathfinding`;
 const ccaHero = `${CCA}/30.jpg`;
-const ccaImages = Array.from({ length: 29 }, (_, i) => `${30 + i}.jpg`);
+const ccaSlide = (n) => `${CCA}/${n}.jpg`;
 
-const ccaPathfindingCaseStudyRich = simpleGalleryCaseStudy({
+const ccaPathfindingCaseStudyRich = {
   overview: {
-    client: "CCA · Pathfinding Design Program",
-    industry: "Education · Career Design · Service Design",
-    timeline: "Program project · Team",
-    role: "Visual / interaction design",
+    client: "CCA · IXD Core: Systems",
+    industry: "Systems design · Wayfinding · Campus",
+    timeline: "March 2026 · Solo",
+    role: "Research, numbering system, visual language, signage",
   },
   introParagraphs: [
-    "CCA Pathfinding is a program-scale exploration of how art and design students navigate career uncertainty, mapping services, touchpoints, and interventions across the Pathfinding curriculum.",
-    "This gallery collects presentation slides from the project. Written case study context is coming later; treat this as a visual archive for now.",
+    "New students get lost. I did. So did a lot of the people I interviewed. The front gate is locked. You walk around to the back of the main building, which nobody tells you.",
+    "Inside, the portal map is the real system, and it's still a hunt: 21A, 21B, 21C, one by one. The second floor uses a different numbering system. I stayed on the first floor.",
   ],
   highlights: [
     {
-      label: "Scope",
-      value: "Program-level service design: not a single app screen.",
+      label: "My role",
+      value: "Solo. Interviews, numbering, visual language, sign family.",
     },
     {
-      label: "Audience",
-      value: "CCA students finding their creative path without a linear roadmap.",
+      label: "Key design call",
+      value: "Hallways are the prefixes, like an airport. Map flipped 90 degrees to face the entrance.",
+    },
+    {
+      label: "What broke",
+      value: "Prefixes A, B, N, E, W don't mean anything on the ground. 4 out of 5 people said the codes cause issues.",
     },
   ],
-  base: CCA,
-  imageFiles: ccaImages,
-  blockParagraphs: [
-    "Full slide sequence from the CCA Pathfinding presentation, research synthesis through proposed interventions.",
-  ],
+  heroFirst: true,
+  imagesBeforeText: false,
+  showJumpNav: true,
+  showDeckEmbed: false,
+  processWork: {
+    sections: [
+      {
+        title: "The campus",
+        blocks: [
+          {
+            title: "The building got a renovation. The signs didn't.",
+            paragraphs: [
+              "1111 8th St used to be a warehouse. The Nave is the postcard. Wayfinding is tape, floor stickers, silver plaques, and a number painted on wired glass. Some signs still point at rooms that don't exist.",
+            ],
+            images: [
+              {
+                src: ccaSlide(33),
+                alt: "The Nave before and after renovation. Raw warehouse to finished hall.",
+              },
+              {
+                src: ccaSlide(34),
+                alt: "Current signage mapped onto the floor plan. Mixed styles, floor decals, hard-to-see type.",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        title: "The codes",
+        blocks: [
+          {
+            title: "A, B, N, E, W. What does A even mean.",
+            paragraphs: [
+              "CCA numbers by section: A, B, N, E, W. N, E, W are cardinals. A and B aren't. Standing in the hall, none of that tells you where you are.",
+              "You're also on the floor, not above it. The official map is a bird's-eye. From the entrance you rotate it 90 degrees before it matches what you see.",
+            ],
+            images: [
+              {
+                src: ccaSlide(35),
+                alt: "Floor plan with North, East, West, and Nave coding. Prefixes that don't match ground-level walking.",
+              },
+              {
+                src: ccaSlide(36),
+                alt: "Problem statement. Intuitive wayfinding for 1111 8th St that still feels like CCA.",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        title: "Research",
+        blocks: [
+          {
+            title: "Students and professors. Same scavenger hunt.",
+            paragraphs: [
+              "I interviewed 5 people, students and faculty: Anny, Peter, Dave, Leo, Willow. Same script, then I synthesized.",
+              "4 out of 5 said the codes cause issues. First visits were walking until they found it. Lost, they pull the portal map. Homeroom, bathrooms, and the Nave came up over and over.",
+            ],
+            images: [
+              {
+                src: ccaSlide(39),
+                alt: "Interview set. Anny, Peter, Dave, Leo, Willow.",
+              },
+              {
+                src: ccaSlide(40),
+                alt: "4 out of 5 participants said room codes cause navigational issues. Quote from Anny: yeah it's like it's random.",
+              },
+              {
+                src: ccaSlide(46),
+                alt: "4 out of 5 walked until they found the room on their first visit. Dave: checked everyplace.",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        title: "Direction",
+        blocks: [
+          {
+            title: "Number like an airport.",
+            paragraphs: [
+              "The hallway is the code. Flip the map 90 degrees so it faces you at the entrance. Hallways become A, B, C. If the door opens onto hallway A, you're A1, A2, A3. Next to A but the door dumps into B? That's B.",
+            ],
+            images: [
+              {
+                src: ccaSlide(48),
+                alt: "Mood board. Floor paths, chunky numerals, playful posts, topographic mark.",
+              },
+              {
+                src: ccaSlide(52),
+                alt: "Room numbering. Entrance-oriented plan, corridor prefixes, odd and even sides, split-room suffixes.",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        title: "The system",
+        blocks: [
+          {
+            title: "Kiosk, crossways, hanging signs",
+            paragraphs: [
+              "Digibop for the voice, Quicksand for the read. Purple, pink, cyan. 3 objects: kiosk at the entrance, totems at the crossways, hanging signs in the long hall.",
+            ],
+            images: [
+              {
+                src: ccaSlide(54),
+                alt: "Styleguide. Digibop, Quicksand, purple pink cyan, pixel wayfinding icons.",
+              },
+              {
+                src: ccaSlide(55),
+                alt: "Sign family. Entrance kiosk, directional totem, hanging EXIT and IXD HR signs.",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        title: "In the building",
+        blocks: [
+          {
+            title: "Put it in the hall, not in a vacuum",
+            paragraphs: [
+              "Kiosk by the desk. Totem at the studio crossing, where IXD already has a taped arrow. Hanging pair over the Nave: EXIT one way, homeroom and toilets the other.",
+            ],
+            images: [
+              {
+                src: ccaSlide(56),
+                alt: "Entrance kiosk mocked into the lobby corridor.",
+              },
+              {
+                src: ccaSlide(57),
+                alt: "Crossways totem in the studio, pointing to toilets, IXD homeroom, and the Nave.",
+              },
+              {
+                src: ccaSlide(58),
+                alt: "Hanging signs in the Nave. EXIT, IXD HR, toilets.",
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  conclusionTitle: "Reflection",
   conclusion:
-    "WIP. Pathfinding lives where education design meets career panic. Full story lands once the layout doc stops moving."
-});
+    "Next I'd put a totem at full size in the Nave and watch whether a first-year stops walking aimlessly.",
+};
 
 /** A Fowl Play (AR) */
 const AFP = `${P}/AR Project A Fowl Play`;
@@ -1979,11 +2123,11 @@ export const projects = [
   {
     id: 9,
     title: "CCA Pathfinding",
-    category: "Service Design",
-    tagline: "Career panic, redesigned.",
+    category: "Wayfinding",
+    tagline: "Stop walking until you luck into class.",
     description:
-      "Service design for CCA Pathfinding. Helping art and design students find a next step when 'just freelance' is not a plan.",
-    tags: ["Service Design", "Visual Design", "Education"],
+      "Wayfinding for CCA's first floor. Hallway prefixes like an airport, a map that faces the entrance.",
+    tags: ["Systems Design", "Wayfinding", "Visual Design"],
     slug: "cca-pathfinding",
     thumb: ccaHero,
     caseStudyHero: ccaHero,
