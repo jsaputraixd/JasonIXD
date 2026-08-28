@@ -38,6 +38,7 @@ import { otherStuff } from "@/data/otherStuff";
 import { otherProjects } from "@/data/otherProjects";
 import {
   BOTTOM_RESERVE,
+  DESKTOP_FOLDER_ICON_W,
   getDeterministicDesktopPositions,
   LEFT_COLUMN_INSET,
   PROJECT_GRID_LEFT_GAP,
@@ -542,12 +543,7 @@ export default function Desktop() {
     if (phase !== "dashboard") return;
     writeIconOffset("otherStuffIcon", { dx: 0, dy: 0 });
     writeIconOffset("otherProjectsIcon", { dx: 0, dy: 0 });
-  }, [
-    phase,
-    pos.folderIconRowTop,
-    pos.otherStuffIcon?.left,
-    pos.otherProjectsIcon?.left,
-  ]);
+  }, [phase, pos.folderIconRowTop]);
 
   useEffect(() => {
     if (!otherStuffOpen) setOtherStuffBrowsing(false);
@@ -617,8 +613,14 @@ export default function Desktop() {
   const skillsFloatLeft = Math.round((vwSafe - skillsFloatW) / 2);
   const skillsFloatTop = Math.round((vhSafe - skillsFloatH) / 2);
 
-  const contactBannerLeft = pos.contactBanner?.left ?? 0;
-  const contactBannerW = pos.contactBanner?.width ?? 184;
+  const crtFrameInset = 10;
+  const contactBannerW = Math.round(clamp(184 * layoutScale, 168, 200));
+  const welcomeRight = pos.welcome.left + W.welcome;
+  const canvasRight = vw - crtFrameInset;
+  const contactGap = canvasRight - welcomeRight;
+  const contactBannerLeft = Math.round(
+    welcomeRight + (contactGap - contactBannerW) / 2
+  );
 
   return (
     <div
@@ -812,7 +814,7 @@ export default function Desktop() {
 
       {showOtherWindows && (
         <DesktopFolderIcon
-          key={`other-stuff-${pos.otherStuffIcon.left}-${pos.otherStuffIcon.top}`}
+          key={`other-stuff-${pos.folderIconRowTop}`}
           label={otherStuff.label}
           iconSrc={otherStuff.icon}
           left={pos.otherStuffIcon.left}
@@ -837,7 +839,7 @@ export default function Desktop() {
 
       {showOtherWindows && (
         <DesktopFolderIcon
-          key={`other-projects-${pos.otherProjectsIcon.left}-${pos.otherProjectsIcon.top}`}
+          key={`other-projects-${pos.folderIconRowTop}`}
           label={otherProjects.label}
           iconSrc={otherProjects.icon}
           iconId="otherProjectsIcon"
