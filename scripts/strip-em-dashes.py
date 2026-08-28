@@ -10,6 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 TARGETS = [
     ROOT / "data/projects.js",
+    ROOT / "data/about.js",
     ROOT / "data/quotes.js",
     ROOT / "data/trashMessages.js",
     ROOT / "data/listenScripts.js",

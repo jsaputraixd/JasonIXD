@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, useDragControls } from "framer-motion";
-import { playClick, playWindowWhoosh, playWindowPickup, playWindowDrop, playWindowClose } from "@/lib/typingSound";
+import { playClick, playDragTick, playWindowWhoosh, playWindowPickup, playWindowDrop, playWindowClose, notePointerHover } from "@/lib/typingSound";
 
 const ACCENT = "#FF7A29";
 const EASE = [0.16, 1, 0.3, 1];
@@ -39,6 +39,8 @@ export default function Window({
   clipContent = true,
   /** Scale the full chrome (title bar + body) on hover. */
   growOnHover = false,
+  /** Marks this window as a featured project for the hover peek. */
+  dataProjectSlug,
   /** Play a short whoosh when the window first appears (cascade delay respected). */
   playOpenSound = true,
   /** When false, ignore focus/drag so overlays (skills zoom) stay on top. */
@@ -107,6 +109,10 @@ export default function Window({
             playClick();
             onFocus?.(id);
           }}
+          onDrag={(_e, info) => {
+            const dist = Math.hypot(info.delta.x, info.delta.y);
+            if (dist > 1.2) playDragTick(Math.min(1, dist / 16));
+          }}
           initial={{ opacity: 0, scale: 0.94 }}
           exit={{ opacity: 0, scale: 0.94, transition: { duration: 0.22, ease: EASE } }}
           animate={
@@ -138,16 +144,24 @@ export default function Window({
           }}
         >
           <div
-            className={
-              growOnHover
-                ? isHeld
-                  ? "os-window-grow os-window-grow--held"
-                  : "os-window-grow"
-                : undefined
-            }
+            className={[
+              "os-window-shell",
+              growOnHover ? "os-window-grow" : "",
+              isHeld ? "os-window-shell--held" : "",
+              growOnHover && isHeld ? "os-window-grow--held" : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
+            data-project-slug={dataProjectSlug || undefined}
+            data-sound="object"
+            data-cursor="hover"
+            onMouseEnter={(e) => notePointerHover(e.currentTarget)}
           >
           <div
+            className="os-window-chrome"
             style={{
+              position: "relative",
+              zIndex: 1,
               background: "rgba(18, 12, 8, 0.92)",
               border: "1px solid rgba(255, 122, 41, 0.55)",
               borderRadius: 3,

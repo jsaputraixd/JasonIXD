@@ -12,6 +12,29 @@ import { projectCaseStudyHeroSrc } from "@/lib/projectMedia";
 
 const ACCENT = "#FF7A29";
 
+function CaseStudyScan({ scan }) {
+  if (!scan) return null;
+  const rows = [
+    ["Project", scan.project],
+    ["Problem", scan.problem],
+    ["What I did", scan.role],
+    ["Hard part", scan.hard],
+    ["What changed", scan.change],
+  ].filter(([, value]) => Boolean(value));
+  if (!rows.length) return null;
+
+  return (
+    <dl className="case-study-scan">
+      {rows.map(([label, value]) => (
+        <div key={label} className="case-study-scan__row">
+          <dt className="case-study-scan__q">{label}</dt>
+          <dd className="case-study-scan__a">{value}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
 function CaseStudySectionTitle({ children, className = "" }) {
   return (
     <h2
@@ -253,10 +276,10 @@ function CaseStudyRichLayout({ project, frameStyle }) {
   };
 
   const metaRows = [
+    ["My role", overview.role],
+    ["Timeline", overview.timeline],
     ["Client", overview.client],
     ["Industry", overview.industry],
-    ["Timeline", overview.timeline],
-    ["My role", overview.role],
   ];
 
   const processSections =
@@ -587,9 +610,13 @@ export default async function ProjectPage({ params }) {
           <p className="case-study-browser__tagline">{project.tagline}</p>
         ) : null}
 
+        {rich?.scan ? <CaseStudyScan scan={rich.scan} /> : null}
+
         <ProjectPageListen project={project} />
 
-        <p className="case-study-browser__lede">{project.description}</p>
+        {rich?.scan ? null : (
+          <p className="case-study-browser__lede">{project.description}</p>
+        )}
 
         {rich ? (
           <CaseStudyRichLayout project={project} frameStyle={frameStyle} />

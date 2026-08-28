@@ -965,9 +965,9 @@ function MobileDesktop() {
 
             <MobileJourneyChapter scrollRoot={scrollRef} sectionId="mobile-more-projects">
               <MobileJourneySectionLabel scrollRoot={scrollRef} skipTyping={skipWelcomeTyping}>
-                ▢ Other projects
+                ▢ Archive
               </MobileJourneySectionLabel>
-              <MobileCard title="Other projects" titleUppercase={false} compactBody>
+              <MobileCard title="Archive" titleUppercase={false} compactBody>
                 <OtherProjectsFolder variant="mobile" />
               </MobileCard>
             </MobileJourneyChapter>
@@ -1295,7 +1295,7 @@ function MobileWelcomeBody({
         }}
       />
       <TypedLine
-        text="Interaction · Visual · Designer"
+        text={about.title}
         charMs={30}
         delay={1580}
         skipTyping={skipTyping}
@@ -1318,16 +1318,16 @@ function MobileWelcomeBody({
           <FadeInLine delay={skipTyping ? 0 : 120}>
             <p
               style={{
-                fontFamily: "'VT323', monospace",
-                fontSize: "clamp(11px, 3.1vw, 13px)",
-                letterSpacing: "0.14em",
-                textTransform: "uppercase",
-                color: ACCENT_DIM,
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: "clamp(13px, 3.4vw, 15px)",
+                letterSpacing: "0.01em",
+                textTransform: "none",
+                color: "rgba(255, 226, 200, 0.88)",
                 margin: "0",
-                lineHeight: 1.45,
+                lineHeight: 1.5,
               }}
             >
-              ─ Dream · Think · Build ─
+              {about.lede}
             </p>
           </FadeInLine>
           {!skipTyping ? (
@@ -1404,20 +1404,36 @@ function MobileContact({ scrollRoot, skipTyping = false }) {
       <ScrollTypedLine
         scrollRoot={scrollRoot}
         skipTyping={skipTyping}
-        text="▢ Looking for internships"
+        text={`▢ ${about.availability}`}
         charMs={28}
         delay={100}
         amount={0.4}
         style={{
           fontFamily: "'VT323', monospace",
           fontSize: 13,
-          letterSpacing: "0.32em",
+          letterSpacing: "0.22em",
           textTransform: "uppercase",
           color: ACCENT_DIM,
-          marginBottom: 16,
+          marginBottom: 10,
           display: "block",
         }}
       />
+      <a
+        href={`mailto:${about.email}`}
+        style={{
+          display: "block",
+          fontFamily: "'VT323', monospace",
+          fontSize: 15,
+          letterSpacing: "0.16em",
+          textTransform: "uppercase",
+          color: ACCENT,
+          textShadow: "0 0 8px rgba(255, 122, 41, 0.4)",
+          marginBottom: 8,
+          textDecoration: "none",
+        }}
+      >
+        Email me →
+      </a>
       <MobileScrollTypedMailto scrollRoot={scrollRoot} skipTyping={skipTyping} />
       <div
         style={{
@@ -1447,7 +1463,7 @@ function MobileContact({ scrollRoot, skipTyping = false }) {
             whiteSpace: "nowrap",
           }}
         >
-          LinkedIn
+          LinkedIn →
         </a>
         <span
           aria-hidden="true"

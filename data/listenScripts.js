@@ -25,21 +25,25 @@ export function buildWelcomeListenText() {
     "Hello.",
     about.name,
     about.title,
+    about.lede,
     about.bioDesktop || about.bio,
-    "Dream, think, build.",
   ]);
 }
 
 /** Short case-study summary for listen.exe (~45 to 90s). Override with project.listenScript. */
 export function buildProjectListenText(project) {
   if (project.listenScript) return project.listenScript.trim();
+  const scan = project.caseStudyRich?.scan;
   const tags = project.tags?.length ? project.tags.join(", ") : "";
   return normalizeScript([
     project.title,
-    project.category,
-    tags,
-    project.tagline,
-    project.description,
+    scan?.project || project.tagline,
+    scan?.problem,
+    scan?.role,
+    scan?.hard,
+    scan?.change,
+    scan ? null : project.description,
+    tags && !scan ? tags : null,
   ]);
 }
 

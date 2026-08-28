@@ -273,6 +273,7 @@ export default function SkillsPlanet({
   const cy = boxH / 2;
   const n = skills.length;
   const pingGradId = `skills-ping-grad-${variant}`;
+  const headMaskId = `skills-head-occlude-${variant}`;
 
   useLayoutEffect(() => {
     if (!isMobile || !scrollRootSelector) return;
@@ -333,9 +334,19 @@ export default function SkillsPlanet({
         const rim = rimPoint(θ, cx, cy, discR + 5, ELLIPSE_Y_RATIO);
         const t = (depth + 1) / 2; // 0 back → 1 front
         const scale = 0.72 + t * 0.36;
-        const opacity = 0.38 + t * 0.62;
+        let opacity = 0.38 + t * 0.62;
         const inFront = depth >= 0;
         const z = inFront ? GLOBE_Z + 2 : 1;
+
+        if (!showGlobe && !inFront) {
+          const dist = Math.hypot(x - cx, y - cy);
+          const hideR = discR * 0.94;
+          const fadeR = discR * 1.14;
+          if (dist <= hideR) opacity = 0;
+          else if (dist < fadeR) {
+            opacity *= (dist - hideR) / (fadeR - hideR);
+          }
+        }
 
         const label = labelRefs.current[i];
         if (label) {
@@ -347,6 +358,8 @@ export default function SkillsPlanet({
           label.style.pointerEvents =
             constellationOpen && showGlobe ? "auto" : "none";
           label.dataset.depth = inFront ? "front" : "back";
+          label.style.visibility =
+            constellationOpen && opacity < 0.02 ? "hidden" : "visible";
         }
 
         const applySpoke = (line, flow, show) => {
@@ -387,9 +400,11 @@ export default function SkillsPlanet({
         if (ping) {
           ping.setAttribute("cx", String(x));
           ping.setAttribute("cy", String(y));
+          const dist = Math.hypot(x - cx, y - cy);
+          const pingHidden = !showGlobe && !inFront && dist < discR * 1.05;
           ping.setAttribute(
             "opacity",
-            constellationOpen ? String(0.2 + t * 0.55) : "0"
+            constellationOpen && !pingHidden ? String(0.2 + t * 0.55) : "0"
           );
         }
       }
@@ -528,6 +543,25 @@ export default function SkillsPlanet({
                 <stop offset="0%" stopColor="rgba(255, 122, 41, 0.5)" />
                 <stop offset="100%" stopColor="rgba(255, 122, 41, 0)" />
               </radialGradient>
+              {!showGlobe ? (
+                <mask
+                  id={headMaskId}
+                  maskUnits="userSpaceOnUse"
+                  x="0"
+                  y="0"
+                  width={boxW}
+                  height={boxH}
+                >
+                  <rect width={boxW} height={boxH} fill="white" />
+                  <ellipse
+                    cx={cx}
+                    cy={cy}
+                    rx={discR * 0.78}
+                    ry={discR * 0.96}
+                    fill="black"
+                  />
+                </mask>
+              ) : null}
             </defs>
 
             {showGlobe ? (
@@ -562,7 +596,10 @@ export default function SkillsPlanet({
             ) : null}
 
             {skills.map((_, i) => (
-              <g key={`back-spoke-${i}`}>
+              <g
+                key={`back-spoke-${i}`}
+                mask={!showGlobe ? `url(#${headMaskId})` : undefined}
+              >
                 <line
                   ref={(el) => {
                     backSpokeRefs.current[i] = el;

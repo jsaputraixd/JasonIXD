@@ -24,18 +24,20 @@ import ProjectViewLink from "@/components/ProjectViewLink";
 import { projectHeroTransitionName } from "@/lib/viewTransition";
 import DesktopIdleLayer from "./DesktopIdleLayer";
 import SkillsPlanet, { desktopGlobeBox, portraitOrbitBox } from "./SkillsPlanet";
+import ProjectHoverPeek from "./ProjectHoverPeek";
 import { desktopFeaturedProjects } from "@/data/projects";
 import { about } from "@/data/about";
 import WelcomeReadAloud from "@/components/WelcomeReadAloud";
 import DesktopFolderIcon from "@/components/DesktopFolderIcon";
 import OtherStuffFolder from "@/components/OtherStuffFolder";
 import OtherProjectsFolder from "@/components/OtherProjectsFolder";
-import ProjectFlipCard, { PROJECT_CARD_GRADIENTS } from "@/components/ProjectFlipCard";
+import ProjectFlipCard, {
+  PROJECT_CARD_GRADIENTS,
+} from "@/components/ProjectFlipCard";
 import { otherStuff } from "@/data/otherStuff";
 import { otherProjects } from "@/data/otherProjects";
 import {
   BOTTOM_RESERVE,
-  DESKTOP_FOLDER_ICON_W,
   getDeterministicDesktopPositions,
   LEFT_COLUMN_INSET,
   PROJECT_GRID_LEFT_GAP,
@@ -59,6 +61,7 @@ import {
   playTypingClickThrottled,
   playWindowClose,
   playWindowRestore,
+  notePointerHover,
 } from "@/lib/typingSound";
 import { incrementCoffeeCount } from "@/lib/coffeeCounter";
 import { readIconOffset, writeIconOffset } from "@/lib/desktopIconPositions";
@@ -539,7 +542,12 @@ export default function Desktop() {
     if (phase !== "dashboard") return;
     writeIconOffset("otherStuffIcon", { dx: 0, dy: 0 });
     writeIconOffset("otherProjectsIcon", { dx: 0, dy: 0 });
-  }, [phase, pos.folderIconRowTop]);
+  }, [
+    phase,
+    pos.folderIconRowTop,
+    pos.otherStuffIcon?.left,
+    pos.otherProjectsIcon?.left,
+  ]);
 
   useEffect(() => {
     if (!otherStuffOpen) setOtherStuffBrowsing(false);
@@ -578,15 +586,15 @@ export default function Desktop() {
 
   // Parallax depth (px). Actual shift is applied via --desk-px / --desk-py CSS vars.
   const depth = {
-    welcome: 8,
-    me: 8,
-    proj: 12,
-    skills: 9,
-    otherStuff: 9,
-    otherStuffIcon: 7,
-    otherProjects: 9,
-    otherProjectsIcon: 7,
-    contact: 9,
+    welcome: 4,
+    me: 4,
+    proj: 5,
+    skills: 4,
+    otherStuff: 4,
+    otherStuffIcon: 3,
+    otherProjects: 4,
+    otherProjectsIcon: 3,
+    contact: 4,
   };
 
   const showIntroCard =
@@ -608,6 +616,9 @@ export default function Desktop() {
   const skillsFloatH = globeBox.boxH * (skillsFloatW / globeBox.boxW);
   const skillsFloatLeft = Math.round((vwSafe - skillsFloatW) / 2);
   const skillsFloatTop = Math.round((vhSafe - skillsFloatH) / 2);
+
+  const contactBannerLeft = pos.contactBanner?.left ?? 0;
+  const contactBannerW = pos.contactBanner?.width ?? 184;
 
   return (
     <div
@@ -774,6 +785,7 @@ export default function Desktop() {
               uiScale={layoutScale}
               clipContent={false}
               growOnHover
+              dataProjectSlug={p.slug}
             >
               <ProjectFlipCard
                 project={p}
@@ -800,7 +812,7 @@ export default function Desktop() {
 
       {showOtherWindows && (
         <DesktopFolderIcon
-          key={`other-stuff-${pos.folderIconRowTop}`}
+          key={`other-stuff-${pos.otherStuffIcon.left}-${pos.otherStuffIcon.top}`}
           label={otherStuff.label}
           iconSrc={otherStuff.icon}
           left={pos.otherStuffIcon.left}
@@ -825,7 +837,7 @@ export default function Desktop() {
 
       {showOtherWindows && (
         <DesktopFolderIcon
-          key={`other-projects-${pos.folderIconRowTop}`}
+          key={`other-projects-${pos.otherProjectsIcon.left}-${pos.otherProjectsIcon.top}`}
           label={otherProjects.label}
           iconSrc={otherProjects.icon}
           iconId="otherProjectsIcon"
@@ -902,118 +914,9 @@ export default function Desktop() {
         </Window>
       )}
 
-      {showOtherWindows && (
-      <Window
-        id="contact"
-        title="contact.msg"
-        left={pos.contact.left}
-        top={pos.contact.top}
-        width={W.contact}
-        delay={cascadeDelay(2.85)}
-        zIndex={zOf("contact", 17)}
-        onFocus={bringToFront}
-        interactive
-        minimized={isMinimized("contact")}
-        onMinimize={() => minimizeWindow("contact")}
-        dragConstraints={stageRef}
-        parallaxDepth={depth.contact}
-        uiScale={layoutScale}
-      >
-        <div
-          style={{
-            padding: `${Math.round(14 * layoutScale)}px ${Math.round(16 * layoutScale)}px ${Math.round(16 * layoutScale)}px`,
-          }}
-        >
-          <p
-            style={{
-              fontFamily: "'VT323', monospace",
-              fontSize: Math.max(10, Math.round(12 * layoutScale)),
-              letterSpacing: "0.32em",
-              textTransform: "uppercase",
-              color: ACCENT_DIM,
-              marginBottom: 4,
-            }}
-          >
-            ▢ Looking for internships
-          </p>
-          <a
-            href={`mailto:${about.email}`}
-            data-cursor="hover"
-            style={{
-              display: "block",
-              fontFamily: "'VT323', monospace",
-              fontSize: Math.max(14, Math.round(18 * layoutScale)),
-              letterSpacing: "0.1em",
-              color: "#fff",
-              textShadow: "0 0 10px rgba(255, 122, 41, 0.4)",
-            }}
-          >
-            {about.email}
-          </a>
-          <div
-            style={{
-              marginTop: Math.round(12 * layoutScale),
-              display: "flex",
-              flexWrap: "wrap",
-              alignItems: "center",
-              columnGap: Math.max(10, Math.round(18 * layoutScale)),
-              rowGap: 8,
-            }}
-          >
-            <a
-              href={about.socials.linkedin}
-              target="_blank"
-              rel="noopener noreferrer"
-              data-cursor="hover"
-              style={{
-                flex: "0 0 auto",
-                fontFamily: "'VT323', monospace",
-                fontSize: Math.max(11, Math.round(14 * layoutScale)),
-                letterSpacing: "0.18em",
-                textTransform: "uppercase",
-                color: ACCENT,
-                textShadow: "0 0 5px rgba(255,122,41,0.4)",
-                whiteSpace: "nowrap",
-              }}
-            >
-              LinkedIn
-            </a>
-            <span
-              aria-hidden="true"
-              style={{
-                color: ACCENT_DIM,
-                fontFamily: "'VT323', monospace",
-                fontSize: Math.max(10, Math.round(13 * layoutScale)),
-                opacity: 0.55,
-                userSelect: "none",
-              }}
-            >
-              ·
-            </span>
-            <a
-              href={about.socials.instagram}
-              target="_blank"
-              rel="noopener noreferrer"
-              data-cursor="hover"
-              style={{
-                flex: "0 0 auto",
-                fontFamily: "'VT323', monospace",
-                fontSize: Math.max(11, Math.round(14 * layoutScale)),
-                letterSpacing: "0.18em",
-                textTransform: "uppercase",
-                color: ACCENT,
-                textShadow: "0 0 5px rgba(255,122,41,0.4)",
-                whiteSpace: "nowrap",
-              }}
-            >
-              Instagram
-            </a>
-          </div>
-        </div>
-      </Window>
-      )}
-
-      <NomineeTab />
+      {showOtherWindows ? (
+        <ContactPorts left={contactBannerLeft} width={contactBannerW} />
+      ) : null}
       <MobileVaultToast open={toastOpen} onDone={dismissToast} />
       <DesktopVaultBreachOverlay
         open={vaultBreachOpen}
@@ -1040,6 +943,13 @@ export default function Desktop() {
             onQuit={() => setCoffeeSnakeOpen(false)}
           />
         </Window>
+      ) : null}
+      {showOtherWindows ? (
+        <ProjectHoverPeek
+          projects={desktopFeaturedProjects}
+          enabled={phase === "dashboard"}
+          layoutScale={layoutScale}
+        />
       ) : null}
       <StatusBar
         minimizedWindows={minimizedTaskbarItems}
@@ -1162,6 +1072,8 @@ function MeTxtBody({
           }}
           onMouseEnter={portraitInteractive ? onPortraitHoverStart : undefined}
           onMouseLeave={portraitInteractive ? onPortraitHoverEnd : undefined}
+          data-cursor={portraitInteractive ? "hover" : undefined}
+          data-sound={portraitInteractive ? "object" : undefined}
         >
           {orbitBox && portraitInteractive ? (
             <AnimatePresence>
@@ -1190,7 +1102,7 @@ function MeTxtBody({
                     width: orbitBox.boxW,
                     height: orbitBox.boxH,
                     transformOrigin: "center center",
-                    zIndex: 0,
+                    zIndex: 3,
                     pointerEvents: "none",
                   }}
                 >
@@ -1327,7 +1239,7 @@ function WelcomeBody({
         }}
       />
       <TypedLine
-        text="Interaction · Visual · Designer"
+        text={about.title}
         charMs={30}
         delay={2100}
         skipTyping={skipTyping}
@@ -1346,17 +1258,16 @@ function WelcomeBody({
       {typingDone ? (
         <FadeInLine delay={skipTyping ? 0 : 120}>
           <p
-            className="mt-4"
             style={{
-              fontFamily: "'VT323', monospace",
-              fontSize: Math.max(10, px(13 * s)),
-              letterSpacing: "0.28em",
-              textTransform: "uppercase",
-              color: ACCENT_DIM,
-              margin: `${px(16 * s)}px 0 0`,
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: Math.max(12, px(14 * s)),
+              lineHeight: 1.5,
+              color: "rgba(255, 226, 200, 0.88)",
+              margin: `${px(14 * s)}px 0 0`,
+              maxWidth: "36em",
             }}
           >
-            ─ Dream · Think · Build ─
+            {about.lede}
           </p>
         </FadeInLine>
       ) : null}
@@ -1365,39 +1276,94 @@ function WelcomeBody({
 }
 
 
-function NomineeTab() {
+function ContactPorts({ left, width }) {
+  const reduceMotion = useReducedMotion();
+  const [hotId, setHotId] = useState(null);
+  const ports = [
+    {
+      id: "mail",
+      plate: about.email,
+      icon: "/images/Icons/mail.png",
+      href: `mailto:${about.email}`,
+      aria: `Email ${about.email}`,
+    },
+    {
+      id: "li",
+      plate: "/in/jasonixd",
+      icon: "/images/Icons/linkedin.png",
+      href: about.socials.linkedin,
+      external: true,
+      aria: "Jason Saputra on LinkedIn",
+    },
+    {
+      id: "ig",
+      plate: "@jason.iv_s",
+      icon: "/images/Icons/instagram.png",
+      href: about.socials.instagram,
+      external: true,
+      aria: "Jason Saputra on Instagram",
+    },
+  ];
+  const hot = ports.find((port) => port.id === hotId) ?? null;
+
   return (
-    <a
-      href="https://linkedin.com/in/jasonixd"
-      target="_blank"
-      rel="noopener noreferrer"
-      data-cursor="hover"
-      title="LinkedIn · Jason Saputra"
-      aria-label="Open Jason Saputra on LinkedIn"
-      style={{
-        position: "absolute",
-        right: 0,
-        top: "50%",
-        transform: "translateY(-50%)",
-        zIndex: 30,
-        writingMode: "vertical-rl",
-        background: "#0a0a0a",
-        color: ACCENT,
-        fontFamily: "'VT323', monospace",
-        fontSize: 13,
-        letterSpacing: "0.4em",
-        textTransform: "uppercase",
-        padding: "16px 6px",
-        borderLeft: "1px solid rgba(255, 122, 41, 0.4)",
-        borderTop: "1px solid rgba(255, 122, 41, 0.4)",
-        borderBottom: "1px solid rgba(255, 122, 41, 0.4)",
-        borderRadius: "4px 0 0 4px",
-        textShadow: "0 0 6px rgba(255, 122, 41, 0.5)",
-        textDecoration: "none",
+    <nav
+      className={`contact-banner${hot ? " is-hot" : ""}`}
+      aria-label="Contact"
+      style={{ left, width }}
+      onMouseLeave={() => setHotId(null)}
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget)) setHotId(null);
       }}
     >
-      J.S. · Let's connect
-    </a>
+      <div className="contact-banner__icons">
+        {ports.map((port) => (
+          <a
+            key={port.id}
+            className={`contact-banner__icon${hotId === port.id ? " is-hot" : ""}`}
+            href={port.href}
+            target={port.external ? "_blank" : undefined}
+            rel={port.external ? "noopener noreferrer" : undefined}
+            data-cursor="hover"
+            aria-label={port.aria}
+            title={port.plate}
+            onPointerDown={playClick}
+            onMouseEnter={(e) => {
+              notePointerHover(e.currentTarget);
+              setHotId(port.id);
+            }}
+            onFocus={() => setHotId(port.id)}
+          >
+            <span className="contact-banner__led" aria-hidden="true" />
+            <Image
+              src={port.icon}
+              alt=""
+              width={40}
+              height={40}
+              className="contact-banner__glyph"
+            />
+          </a>
+        ))}
+      </div>
+      <div className="contact-banner__readout">
+        <div className="contact-banner__readout-inner">
+          <AnimatePresence mode="wait" initial={false}>
+            {hot ? (
+              <motion.span
+                key={hot.id}
+                className="contact-banner__text"
+                initial={reduceMotion ? false : { opacity: 0, y: -3 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 3 }}
+                transition={{ duration: reduceMotion ? 0 : 0.14 }}
+              >
+                {hot.plate}
+              </motion.span>
+            ) : null}
+          </AnimatePresence>
+        </div>
+      </div>
+    </nav>
   );
 }
 

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { projectCardThumbSrc, projectCarouselThumbSrc } from "@/lib/projectMedia";
 import { DESKTOP_PROJECT_CARD_ASPECT } from "@/lib/projectDesktopCards";
-import { playClick } from "@/lib/typingSound";
+import { playClick, notePointerHover } from "@/lib/typingSound";
 
 export const PROJECT_CARD_GRADIENTS = [
   "linear-gradient(135deg, #4a1f0a 0%, #1a0a05 60%, #0a0505 100%)",
@@ -83,7 +83,8 @@ export default function ProjectFlipCard({
     return clearHoverTimer;
   }, [hoverFocusDelayMs]);
 
-  const handleMouseEnter = () => {
+  const handleMouseEnter = (e) => {
+    notePointerHover(e.currentTarget);
     if (!onRequestFocus) return;
     if (hoverFocusDelayMs <= 0) {
       onRequestFocus();

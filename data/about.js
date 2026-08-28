@@ -1,9 +1,11 @@
 export const about = {
   name: "Jason Saputra",
-  title: "Interaction · Visual · Designer",
-  bio: "I grew up in Bali and design out of San Francisco now. I make interfaces that feel a little alive: researched enough to trust, weird enough to remember. Two oat-milk lattes a day. Currently looking for internships. Hit me up if you've got something cooking.",
+  title: "Product · Interaction · Designer",
+  lede: "I design digital and physical experiences through research, prototyping, and unconventional interaction.",
+  bio: "I grew up in Bali and design out of San Francisco now. I make interfaces that feel a little alive: researched enough to trust, weird enough to remember. Currently looking for internships. Hit me up if you've got something cooking.",
   bioDesktop:
-    "Bali-born, SF-based. I design products and brands that people actually want to poke at. Research when it matters, craft when it counts, jokes when the room needs air. Running on oat-milk lattes. Looking for internships.",
+    "Bali-born, SF-based product and interaction designer. I make products and brands people actually want to poke at. Research when it matters, craft when it counts. Looking for internships.",
+  availability: "Available for Summer 2027 internships",
   email: "Jsaputra.IXD@gmail.com",
   socials: {
     linkedin: "https://linkedin.com/in/jasonixd",
@@ -21,7 +23,6 @@ export const skills = [
   "Product",
   "UX",
   "UI",
-  "Interaction",
   "Visual",
   "Systems",
   "Research",

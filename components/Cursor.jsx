@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { notePointerHover } from "@/lib/typingSound";
 
 const ACCENT = "#FF7A29";
 
@@ -42,6 +43,7 @@ export default function Cursor() {
       }
 
       const el = e.target instanceof Element ? e.target : null;
+      notePointerHover(el);
       const hit = el?.closest("[data-cursor]");
       const next = hit?.getAttribute("data-cursor");
       const resolved = next && VARIANTS[next] ? next : "default";

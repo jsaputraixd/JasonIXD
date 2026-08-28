@@ -11,6 +11,7 @@ function simpleGalleryCaseStudy({
   overview,
   introParagraphs,
   highlights,
+  scan,
   base,
   imageFiles,
   blockParagraphs,
@@ -43,6 +44,7 @@ function simpleGalleryCaseStudy({
     overview,
     introParagraphs,
     highlights: highlights ?? [],
+    scan: scan ?? null,
     heroFirst: true,
     imagesBeforeText: true,
     showJumpNav,
@@ -82,6 +84,13 @@ const dreamDetectiveCaseStudyRich = {
     industry: "Health / Wellness · Behavior Change",
     timeline: "3 weeks · Solo",
     role: "End-to-end product design",
+  },
+  scan: {
+    project: "A mystery alarm. Get up or today's chapter dies.",
+    problem: "Student alarms beg for willpower. Snooze always wins.",
+    role: "Solo. Research through visual system, PRD, and prototype.",
+    hard: "Pairing story pull with real loss, not another streak counter.",
+    change: "Cold Trail: snooze once and that morning's chapter is gone.",
   },
   introParagraphs: [
     "Most alarm apps beg for willpower. Dream Detective bribes you with plot. Miss the wake-up and today's chapter dies. No snooze. No spoilers. No mercy.",
@@ -313,6 +322,13 @@ const elearaCaseStudyRich = {
     industry: "Health UX · Wearables",
     timeline: "72 hours · Remote sprint",
     role: "PM / UX Lead, process, user flow, feedback synthesis",
+  },
+  scan: {
+    project: "Wearable plus app that steadies dizziness before it hits.",
+    problem: "Vestibular episodes escalate before people can get help.",
+    role: "PM and UX lead. Process, user flow, feedback synthesis. Concepts were the team's.",
+    hard: "Zero to user-tested prototype in 72 hours, fully remote.",
+    change: "Hold-to-SOS, a predictive GVS flow, and a team that stayed on the clock.",
   },
   introParagraphs: [
     "Eleara is a predictive vestibular companion, a wearable plus app that uses galvanic vestibular stimulation to counter dizziness before episodes escalate, and alerts emergency contacts when they do.",
@@ -557,6 +573,13 @@ const kitsCaseStudyRich = {
     timeline: "3 weeks · Solo",
     role: "UX / product design: research through high-fidelity",
   },
+  scan: {
+    project: "Kiosk and app for borrowing hobby gear instead of buying it.",
+    problem: "Trying a hobby dies at the checkout line for expensive kit.",
+    role: "Solo UX from research through high-fidelity.",
+    hard: "Two roles, one kiosk, one app, without fake shared screens.",
+    change: "Paper-tested borrower and lender flows before high-fidelity rework.",
+  },
   introParagraphs: [
     "Kits! is a community-driven hobby sharing system, borrow curated kits from a public kiosk, or lend your own equipment for others to try. The goal is lowering the cost of entry for new hobbies without asking anyone to buy gear upfront.",
     "The design problem was service design at scale: two distinct roles, one physical touchpoint, one digital companion, and friction points like approval flows, kit processing, and motivation to participate on both sides.",
@@ -724,6 +747,13 @@ const dairyCaseStudyRich = {
     industry: "Organic Food · Brand & Multi-Touchpoint",
     timeline: "3 weeks · Solo",
     role: "Brand identity, illustration, poster, web & app",
+  },
+  scan: {
+    project: "Organic dairy brand across poster, web, and app.",
+    problem: "Farm brands default to farmer's-market cliché.",
+    role: "Solo. Identity, illustration, poster, web, and app.",
+    hard: "100+ logo sketches and one voice across print, web, and product.",
+    change: "A sun mark and a poster that feels like ice cream, not a lecture.",
   },
   introParagraphs: [
     "Dairy & Delight is an organic farm brand built around what they call the simple joys of nourishing living, milk, cheese, yogurt, and ice cream delivered direct to customers' homes.",
@@ -966,6 +996,13 @@ const pulseCaseStudyRich = {
     timeline: "Spring 2026 · March 30 to May 11",
     role: "Lead designer, synthesis, visual system, prototype",
   },
+  scan: {
+    project: "Adaptive fitness coaching on a smart mirror, not a phone.",
+    problem: "Student athletes skip gyms because plans ignore their week and sweaty hands.",
+    role: "Lead designer. Synthesis, visual system, working prototype.",
+    hard: "Coaching that fits a real calendar, and gestures that work mid-workout.",
+    change: "AirTap instead of touch, calendar-aware plans, a live demo of the full loop.",
+  },
   introParagraphs: [
     "Pulse is a smart-mirror fitness companion for busy students: personalized plans, calendar-aware slots, and AirTap gestures so sweaty hands never have to touch the glass.",
     "Made with Annalise and Jason W. They ran a lot of the interviews. I helped write discussion guides, talked to participants, put the screening form together, and synthesized what we were hearing. I also prototyped the live demo and pushed for AirTap once we landed on a smart mirror.",
@@ -1190,6 +1227,13 @@ const pawfectCaseStudyRich = simpleGalleryCaseStudy({
     timeline: "Sprint · Solo",
     role: "UX / UI design",
   },
+  scan: {
+    project: "A pet meetup app. Swipe on dogs, then meet at the park.",
+    problem: "Pet hangouts are chaos. Matching on owners first makes it worse.",
+    role: "Solo UX and UI.",
+    hard: "Warm profiles that don't turn into LinkedIn for Labs.",
+    change: "Pets first, owners second. Mockups carry the tone until the write-up lands.",
+  },
   introParagraphs: [
     "Pawfect Match is a playful dating-style app for pet owners, swipe, match, and meet up for park hangs based on compatible pets and personalities.",
     "Early exploration was about making pet profiles feel warm without turning into LinkedIn for Labs. Full write-up incoming. Until then, let the mockups do the talking.",
@@ -1232,6 +1276,13 @@ const safeSpaceCaseStudyRich = simpleGalleryCaseStudy({
     industry: "Mental Health · Productivity",
     timeline: "Sprint · Solo",
     role: "UX / UI design",
+  },
+  scan: {
+    project: "A private notebook for check-ins, not streak counters.",
+    problem: "Notes apps are built for tasks. Feelings get treated like inbox zero.",
+    role: "Solo UX and UI.",
+    hard: "Almost no friction between 'I need to write this down' and doing it.",
+    change: "User flow, wireframes, and a calmer visual direction. Write-up still in progress.",
   },
   introParagraphs: [
     "Safe Space is a note-taking and reflection app concept, a calmer place to capture thoughts, track emotional check-ins, and revisit patterns without the noise of a general-purpose notes tool.",
@@ -1291,6 +1342,13 @@ const shiftOffCaseStudyRich = simpleGalleryCaseStudy({
     timeline: "Multi-week · Solo",
     role: "UX / product design",
   },
+  scan: {
+    project: "End-of-day rituals so logging off actually means it.",
+    problem: "Work follows you home: notifications, open loops, Sunday scaries.",
+    role: "Solo UX and product design.",
+    hard: "Making disconnect feel like care, not a prettier guilt trip.",
+    change: "Rituals plus vault-locked work apps until morning review.",
+  },
   introParagraphs: [
     "ShiftOff helps knowledge workers actually disconnect, ritual builders, rumination redirects, and a morning review that closes the loop on what you carried home from work.",
     "The concept treats 'logging off' as a designed behavior, not a willpower test. Slide deck and narrative still in progress; images below are the current artifact set.",
@@ -1325,6 +1383,13 @@ const ccaPathfindingCaseStudyRich = {
     industry: "Systems design · Wayfinding · Campus",
     timeline: "March 2026 · Solo",
     role: "Research, numbering system, visual language, signage",
+  },
+  scan: {
+    project: "First-floor wayfinding for a campus people get lost in.",
+    problem: "Locked front gate, two numbering systems, prefixes that mean nothing on the ground.",
+    role: "Solo. Interviews, numbering, visual language, sign family.",
+    hard: "A map that faces the entrance, and codes that match the hallways.",
+    change: "Airport-style hallway prefixes and a flipped portal map.",
   },
   introParagraphs: [
     "New students get lost. I did. So did a lot of the people I interviewed. The front gate is locked. You walk around to the back of the main building, which nobody tells you.",
@@ -1504,6 +1569,13 @@ const aFowlPlayCaseStudyRich = simpleGalleryCaseStudy({
     timeline: "Studio project · Solo",
     role: "Narrative, 3D, AR interaction design",
   },
+  scan: {
+    project: "An iPad AR mystery. Scan the room, follow the cues, catch the cook.",
+    problem: "AR that explains itself with UI chrome instead of the world.",
+    role: "Solo. Narrative, 3D, AR interaction.",
+    hard: "Wayfinding with audio, light, and geometry. Almost no menus.",
+    change: "Image-anchored scenes and invisible room-to-room triggers.",
+  },
   introParagraphs: [
     "A Fowl Play turns an iPad into a detective kit. Scan the world, step into a mystery, and follow audio, light, and geometry cues like you're inside Half-Life: Alyx, just with more poultry and less gravity gloves.",
     "Built in Reality Composer with RealityScan assets and Blender cleanup. The story does the navigating. The UI stays quiet.",
@@ -1636,6 +1708,13 @@ const adherenceCaseStudyRich = simpleGalleryCaseStudy({
     timeline: "Studio project · Solo",
     role: "Product, interaction, physical prototype",
   },
+  scan: {
+    project: "Voice and screen companion wired to a physical pill dispenser.",
+    problem: "Missed doses are a system problem, not a willpower poster.",
+    role: "Solo. Product, interaction, and the physical prototype.",
+    hard: "Bridging app logic to hardware without turning it into a lecture.",
+    change: "Soft reminders and a swinging door that hands you the dose.",
+  },
   introParagraphs: [
     "Half of people with chronic conditions miss doses. Adherence is not a willpower poster. It is a system problem.",
     "This project pairs a soft digital companion with a physical pill dispenser: voice, screen, LEDs, and a door that hands you the dose instead of lecturing you about it.",
@@ -1760,6 +1839,13 @@ const concreteCaseStudyRich = simpleGalleryCaseStudy({
     timeline: "Unit 4 · Solo · May 2026",
     role: "Systems research · visual narrative",
   },
+  scan: {
+    project: "A systems deck on what streets cost when people aren't the point.",
+    problem: "Car-first design, then blame the pedestrian.",
+    role: "Solo. Systems research and visual narrative.",
+    hard: "Making leverage points readable without a policy lecture.",
+    change: "Iceberg models and a goal flip: safe human access over throughput.",
+  },
   introParagraphs: [
     "The Price for Concrete asks what we actually pay when streets are engineered for cars first and people second. Not the asphalt invoice. The human one.",
     "A systems-thinking deck: iceberg models, mental models, and leverage points. Boards first. The argument is in the sequence.",
@@ -1798,6 +1884,13 @@ const flippyCaseStudyRich = simpleGalleryCaseStudy({
     timeline: "Personal build · Solo",
     role: "Product design · front-end · ML integration",
   },
+  scan: {
+    project: "Your photo, sliced into a pop-up book you can tilt around.",
+    problem: "A still image keeps the look and throws away the feeling of standing there.",
+    role: "Solo. Product design, front-end, on-device ML.",
+    hard: "Depth on the phone. Nothing leaves the device.",
+    change: "Capture to paper cutouts in the browser, WebGPU with a WASM fallback.",
+  },
   introParagraphs: [
     "A photo captures what a moment looked like. Flippy captures what it felt like to stand there.",
     "Point the camera, estimate depth on-device, slice the frame into paper cutouts, and tilt to look around a pop-up book of your own life. Nothing leaves the phone.",
@@ -1832,6 +1925,13 @@ const whoFiddledCaseStudyRich = {
     industry: "Social games · Devvit · Community",
     timeline: "June 17 to July 15, 2026 · Solo",
     role: "Concept, visual system, interaction, identity",
+  },
+  scan: {
+    project: "Daily bluffing trivia inside a Reddit post. One truth, three lies.",
+    problem: "A game that has to read in a feed and still feel like a party when you expand it.",
+    role: "Solo. Concept, visual system, interaction, identity.",
+    hard: "Fair daily play for a public sub under 200 people, and lies that don't give themselves away.",
+    change: "A sequential ten, a sticker system, and a writer that stopped wrapping tells in parentheses.",
   },
   introParagraphs: [
     "Who Fiddled? is a daily bluffing game that lives inside a Reddit post. Ten ranked questions. One truth, three lies. Fool the crowd or catch the fiddler.",
@@ -2023,6 +2123,7 @@ export const projects = [
     title: "Eleara",
     category: "Health UX",
     tagline: "Steady the spin before it hits.",
+    cardLine: "Wearable plus app that steadies dizziness before it hits.",
     description:
       "Wearable + app that nudges the inner ear before dizziness spirals. Built remote in 72 hours, with real users testing at hour 36.",
     tags: ["UX Design", "Product Design", "Systems Design", "Team Lead"],
@@ -2039,6 +2140,7 @@ export const projects = [
     title: "Kits!",
     category: "Product Design",
     tagline: "Borrow the gear. Skip the receipt.",
+    cardLine: "Kiosk and app for borrowing hobby gear instead of buying it.",
     description:
       "Kiosk + app for sharing hobby kits. Try ceramics, climbing, or film without buying a whole new personality first.",
     tags: ["Product Design", "UX Design"],
@@ -2054,6 +2156,7 @@ export const projects = [
     title: "Dairy Delight",
     category: "Brand / UX",
     tagline: "Farm charm, zero farmer's-market cliché.",
+    cardLine: "Organic dairy brand with farm charm and none of the kitsch.",
     description:
       "Brand system for an organic dairy: poster, web, and app. 100+ logo sketches later, it finally tasted like sunshine.",
     tags: ["Brand Design", "Visual Design", "UX Design"],
@@ -2069,6 +2172,7 @@ export const projects = [
     title: "Pulse",
     category: "Smart Mirror UX",
     tagline: "Coach in the glass, not in your pocket.",
+    cardLine: "Adaptive fitness mirror built around habit formation.",
     description:
       "Gesture-first workout coaching for student athletes. Calendar-aware plans on a smart mirror, because phones already ruin enough gyms.",
     tags: ["Lead Designer", "Prototyping", "Research", "Gesture UX"],
@@ -2125,6 +2229,7 @@ export const projects = [
     title: "CCA Pathfinding",
     category: "Wayfinding",
     tagline: "Stop walking until you luck into class.",
+    cardLine: "Campus wayfinding for a tangled art-school building.",
     description:
       "Wayfinding for CCA's first floor. Hallway prefixes like an airport, a map that faces the entrance.",
     tags: ["Systems Design", "Wayfinding", "Visual Design"],
@@ -2153,6 +2258,7 @@ export const projects = [
     title: "The Adherence Project",
     category: "Health Hardware",
     tagline: "Medicine that meets you halfway.",
+    cardLine: "Voice and screen companion wired to a physical pill dispenser.",
     description:
       "Voice + screen companion wired to a physical pill dispenser. Soft reminders, swinging door, fewer missed doses.",
     tags: ["Product Design", "Physical Computing", "Accessibility"],
@@ -2207,15 +2313,15 @@ export const projects = [
 ];
 
 const FEATURED_SLUGS = [
-  "eleara",
   "pulse",
+  "eleara",
+  "cca-pathfinding",
   "adherence",
   "kits",
-  "cca-pathfinding",
   "dairy-delight",
 ];
 
-/** Desktop 2×3: keep the original 2×2 on the left, new cards in the right column. */
+/** Desktop 2×3: original 2×2 on the left, newer cards in the right column. */
 const DESKTOP_FEATURED_SLUGS = [
   "eleara",
   "pulse",

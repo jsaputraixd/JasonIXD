@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import { getQuoteOfDay } from "@/lib/quoteOfDay";
+import { about } from "@/data/about";
 import {
   CRT_BEZEL_RADIUS,
   CRT_FOOTER_BOTTOM_PAD,
@@ -14,21 +15,6 @@ const FOOTER_MUTED = "#FFC896";
 const MOBILE_BREAK = 900;
 const BUILD_LABEL = "JS-OS · v1.6";
 
-const MARQUEE_ITEMS = [
-  "Dream",
-  "★",
-  "Think",
-  "★",
-  "Build",
-  "★",
-  "Interaction design",
-  "★",
-  "Visual design",
-  "★",
-  "Open for internships",
-  "★",
-];
-
 /**
  * @param {{ id: string, title: string }[]} [minimizedWindows]
  * @param {(id: string) => void} [onRestoreWindow]
@@ -39,7 +25,6 @@ export default function StatusBar({
 }) {
   const [time, setTime] = useState("--:--:--");
   const [isMobile, setIsMobile] = useState(false);
-  const reduceMotion = useReducedMotion();
   const quote = useMemo(() => getQuoteOfDay(), []);
 
   useEffect(() => {
@@ -61,8 +46,6 @@ export default function StatusBar({
     window.addEventListener("resize", read);
     return () => window.removeEventListener("resize", read);
   }, []);
-
-  const stream = [...MARQUEE_ITEMS, ...MARQUEE_ITEMS, ...MARQUEE_ITEMS];
 
   const shellStyle = isMobile
     ? {
@@ -101,34 +84,72 @@ export default function StatusBar({
     >
       <motion.div
         style={{
-          padding: isMobile ? "3px 0" : "4px 0",
-          overflow: "hidden",
-          whiteSpace: "nowrap",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexWrap: "wrap",
+          gap: isMobile ? "6px 10px" : "8px 16px",
+          padding: isMobile ? "5px 10px" : "6px 16px",
           borderBottom: isMobile
             ? "1px solid rgba(255, 122, 41, 0.12)"
             : "1px solid rgba(255, 122, 41, 0.15)",
           background: "rgba(0, 0, 0, 0.25)",
+          pointerEvents: "auto",
+          fontFamily: "'VT323', monospace",
+          fontSize: isMobile ? 12 : 14,
+          letterSpacing: isMobile ? "0.14em" : "0.18em",
+          textTransform: "uppercase",
+          color: ACCENT,
+          textShadow: "0 0 6px rgba(255, 122, 41, 0.45)",
         }}
       >
-        <motion.div
-          animate={reduceMotion ? undefined : { x: ["0%", "-33.333%"] }}
-          transition={{ duration: isMobile ? 28 : 32, repeat: Infinity, ease: "linear" }}
-          style={{
-            display: "inline-block",
-            fontFamily: "'VT323', monospace",
-            fontSize: isMobile ? 12 : 15,
-            letterSpacing: isMobile ? "0.28em" : "0.4em",
-            color: ACCENT,
-            textShadow: "0 0 6px rgba(255, 122, 41, 0.45)",
-            textTransform: "uppercase",
-          }}
-        >
-          {stream.map((s, i) => (
-            <span key={i} style={{ paddingRight: isMobile ? "1.1em" : "1.5em" }}>
-              {s}
+        <span>Jason Saputra</span>
+        <span aria-hidden style={{ opacity: 0.45 }}>
+          /
+        </span>
+        <span>Product + Interaction</span>
+        <span aria-hidden style={{ opacity: 0.45 }}>
+          /
+        </span>
+        <span>SF</span>
+        {isMobile ? (
+          <>
+            <span aria-hidden style={{ opacity: 0.45 }}>
+              ·
             </span>
-          ))}
-        </motion.div>
+            <a
+              href={`mailto:${about.email}`}
+              data-cursor="hover"
+              style={{ color: ACCENT, textDecoration: "none" }}
+            >
+              Email
+            </a>
+            <span aria-hidden style={{ opacity: 0.45 }}>
+              ·
+            </span>
+            <a
+              href={about.socials.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-cursor="hover"
+              style={{ color: ACCENT, textDecoration: "none" }}
+            >
+              LinkedIn
+            </a>
+            <span aria-hidden style={{ opacity: 0.45 }}>
+              ·
+            </span>
+            <a
+              href={about.socials.instagram}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-cursor="hover"
+              style={{ color: ACCENT, textDecoration: "none" }}
+            >
+              Instagram
+            </a>
+          </>
+        ) : null}
       </motion.div>
 
       {minimizedWindows.length > 0 ? (
@@ -292,7 +313,7 @@ export default function StatusBar({
             className="status-bar-bottom-row__center"
             style={{ color: ACCENT, textShadow: "0 0 6px rgba(255,122,41,0.5)" }}
           >
-            ◉ Rec · {time}
+            ◉ {time}
           </span>
           <span className="status-bar-bottom-row__side status-bar-bottom-row__side--right">
             {BUILD_LABEL}

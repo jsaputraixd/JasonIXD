@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { playDragTick, playWindowDrop, playWindowPickup } from "@/lib/typingSound";
 
 const MASK_SRC = "/textures/earth-water-mask.png";
 const FONT_FAMILY = "'VT323', ui-monospace, monospace";
@@ -514,6 +515,7 @@ export default function InteractiveAsciiGlobe({
       x: e.clientX,
       y: e.clientY,
     };
+    playWindowPickup();
     try {
       e.currentTarget.setPointerCapture(e.pointerId);
     } catch {
@@ -533,12 +535,15 @@ export default function InteractiveAsciiGlobe({
       -TILT_LIMIT,
       TILT_LIMIT
     );
+    const dist = Math.hypot(dx, dy);
+    if (dist > 1.2) playDragTick(Math.min(1, dist / 16));
   };
 
   const endDrag = (e) => {
     if (!draggingRef.current) return;
     draggingRef.current = false;
     dragRef.current = null;
+    playWindowDrop();
     resumeAtRef.current = performance.now() + RESUME_DELAY_MS;
     try {
       e.currentTarget.releasePointerCapture(e.pointerId);
@@ -589,6 +594,8 @@ export default function InteractiveAsciiGlobe({
         contain: "layout size",
         ...style,
       }}
+      data-cursor={interactive ? "hover" : undefined}
+      data-sound={interactive ? "object" : undefined}
       role={interactive ? "application" : undefined}
       aria-label={interactive ? ariaLabel : undefined}
       onPointerDown={onPointerDown}

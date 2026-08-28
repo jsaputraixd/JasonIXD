@@ -6,7 +6,7 @@ import {
   readIconOffset,
   writeIconOffset,
 } from "@/lib/desktopIconPositions";
-import { playWindowDrop, playWindowPickup } from "@/lib/typingSound";
+import { playDragTick, playWindowDrop, playWindowPickup } from "@/lib/typingSound";
 
 const DRAG_THRESHOLD = 6;
 const STATUS_BAR_CLEARANCE = 108;
@@ -83,6 +83,16 @@ export function useDesktopIconDrag({
           pickupPlayedRef.current = true;
           playWindowPickup();
         }
+      }
+
+      const move = Math.hypot(
+        event.clientX - (d.lastX ?? event.clientX),
+        event.clientY - (d.lastY ?? event.clientY)
+      );
+      d.lastX = event.clientX;
+      d.lastY = event.clientY;
+      if (d.dragging && move > 1.2) {
+        playDragTick(Math.min(1, move / 16));
       }
 
       const stage = stageRef?.current?.getBoundingClientRect();
