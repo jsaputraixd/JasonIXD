@@ -29,6 +29,10 @@ public/images/projects/Pulse/Actual prototype demo.mov
 public/images/projects/Who Fiddled/*.mov
 public/images/projects/Pulse/Pulse Slide Deck.pdf
 
+# Tama source dump (~6GB video/PSD/Python). Site uses tama-*.jpg exports only.
+public/images/projects/Tama/*
+!public/images/projects/Tama/tama-*
+
 # Nested app repos dumped into projects/ (portfolio uses curated folders instead)
 public/images/projects/who-fiddled/
 public/images/projects/Flippy/node_modules/

@@ -8,6 +8,7 @@ import ProjectPageListen from "@/components/ProjectPageListen";
 import CaseStudyVideos from "@/components/CaseStudyVideos";
 import CaseStudyEndcap from "@/components/CaseStudyEndcap";
 import CaseStudyBrowserShell from "@/components/CaseStudyBrowserShell";
+import TamaModelViewer from "@/components/TamaModelViewer";
 import { projectCaseStudyHeroSrc } from "@/lib/projectMedia";
 
 const ACCENT = "#FF7A29";
@@ -240,7 +241,7 @@ function CaseStudyRichLayout({ project, frameStyle }) {
     processWork,
     designSolution,
     conclusion,
-    conclusionTitle,
+    nextSteps,
     videosPlacement = "afterIntro",
     videosAfterSection,
     videosTitle,
@@ -254,6 +255,8 @@ function CaseStudyRichLayout({ project, frameStyle }) {
     extraVideosAfterSection,
     extraVideosTitle,
     extraVideosIntro,
+    modelViewer,
+    modelViewerAfterSection,
   } = rich;
   const bodyStyle = {};
   const metaLabel = {
@@ -309,6 +312,17 @@ function CaseStudyRichLayout({ project, frameStyle }) {
         title={extraVideosTitle}
         intro={extraVideosIntro}
       />
+    ) : null;
+
+  const modelViewerSection =
+    modelViewer?.variants?.length > 0 ? (
+      <div className="mt-16">
+        <CaseStudySectionTitle>{modelViewer.title}</CaseStudySectionTitle>
+        {modelViewer.intro ? (
+          <p className="m-0 mb-8 case-study-prose">{modelViewer.intro}</p>
+        ) : null}
+        <TamaModelViewer variants={modelViewer.variants} />
+      </div>
     ) : null;
 
   const shouldShowJumpNav = showJumpNav && processSections.length > 1;
@@ -402,6 +416,9 @@ function CaseStudyRichLayout({ project, frameStyle }) {
                 : null}
               {extraVideosAfterSection === section.title
                 ? extraVideoSection
+                : null}
+              {modelViewerAfterSection === section.title
+                ? modelViewerSection
                 : null}
             </div>
           ))}
@@ -531,13 +548,18 @@ function CaseStudyRichLayout({ project, frameStyle }) {
         </div>
       ) : null}
 
-      <div className="mt-16 case-study-section-anchor" id="section-reflection">
-        <CaseStudySectionTitle>
-          {conclusionTitle || "Conclusion"}
-        </CaseStudySectionTitle>
-        <p className="m-0 mt-0 case-study-prose">
-          {conclusion}
-        </p>
+      <div
+        className="mt-16 case-study-section-anchor case-study-closing"
+        id="section-reflection"
+      >
+        <div>
+          <CaseStudySectionTitle>Reflection</CaseStudySectionTitle>
+          <p className="m-0 case-study-prose">{conclusion}</p>
+        </div>
+        <div>
+          <CaseStudySectionTitle>Next Steps</CaseStudySectionTitle>
+          <p className="m-0 case-study-prose">{nextSteps}</p>
+        </div>
       </div>
     </>
   );
@@ -692,7 +714,7 @@ export default async function ProjectPage({ params }) {
           </div>
         ) : null}
 
-        {pdfs.length > 0 ? (
+        {!rich && pdfs.length > 0 ? (
           <div className="mt-16">
             <p
               style={{

@@ -2307,6 +2307,104 @@ video {
   scroll-margin-top: 1.5rem;
 }
 
+.case-study-closing {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(2rem, 6vw, 5rem);
+  padding-top: clamp(2rem, 4vw, 3rem);
+  border-top: 1px solid rgba(255, 122, 41, 0.22);
+}
+
+@media (max-width: 700px) {
+  .case-study-closing {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+}
+
+.tama-model {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 122, 41, 0.28);
+  border-radius: 4px;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255, 122, 41, 0.12), transparent 45%),
+    #0c0907;
+}
+
+.tama-model__viewer {
+  display: block;
+  width: 100%;
+  height: clamp(420px, 68vw, 720px);
+  --poster-color: transparent;
+  --progress-bar-color: #ff7a29;
+}
+
+.tama-model__controls {
+  position: absolute;
+  z-index: 2;
+  top: 1rem;
+  left: 50%;
+  display: flex;
+  gap: 0.35rem;
+  padding: 0.3rem;
+  border: 1px solid rgba(255, 122, 41, 0.26);
+  border-radius: 3px;
+  background: rgba(8, 6, 5, 0.84);
+  backdrop-filter: blur(10px);
+  transform: translateX(-50%);
+}
+
+.tama-model__variant {
+  border: 0;
+  border-radius: 2px;
+  padding: 0.45rem 0.8rem;
+  background: transparent;
+  font-family: "VT323", monospace;
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 221, 196, 0.68);
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.tama-model__variant:hover,
+.tama-model__variant--active {
+  color: #fff3e9;
+  background: rgba(255, 122, 41, 0.2);
+}
+
+.tama-model__hint {
+  position: absolute;
+  right: 1rem;
+  bottom: 0.8rem;
+  margin: 0;
+  font-family: "VT323", monospace;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 221, 196, 0.58);
+  pointer-events: none;
+}
+
+@media (max-width: 640px) {
+  .tama-model__viewer {
+    height: 440px;
+  }
+
+  .tama-model__controls {
+    top: 0.75rem;
+  }
+
+  .tama-model__hint {
+    right: 0;
+    bottom: 0.65rem;
+    width: 100%;
+    text-align: center;
+  }
+}
+
 @media (max-width: 640px) {
   .case-study-browser__rec {
     display: none;

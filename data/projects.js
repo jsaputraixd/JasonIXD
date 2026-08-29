@@ -16,6 +16,7 @@ function simpleGalleryCaseStudy({
   imageFiles,
   blockParagraphs,
   conclusion,
+  nextSteps,
   sections,
   videos,
   videosPlacement,
@@ -32,7 +33,7 @@ function simpleGalleryCaseStudy({
             title: "Work",
             blocks: [
               {
-                title: "Visual overview",
+                title: "Artifacts",
                 paragraphs: blockParagraphs,
                 images: projectImages(base, imageFiles),
               },
@@ -59,6 +60,7 @@ function simpleGalleryCaseStudy({
     },
     conclusionTitle: "Reflection",
     conclusion,
+    nextSteps,
   };
 }
 
@@ -86,9 +88,9 @@ const dreamDetectiveCaseStudyRich = {
     role: "End-to-end product design",
   },
   scan: {
-    project: "A mystery alarm. Get up or today's chapter dies.",
-    problem: "Student alarms beg for willpower. Snooze always wins.",
-    role: "Solo. Research through visual system, PRD, and prototype.",
+    project: "Episodic audio mystery used as an alarm.",
+    problem: "No stake at wake-up; oversleeping costs nothing.",
+    role: null,
     hard: "Pairing story pull with real loss, not another streak counter.",
     change: "Cold Trail: snooze once and that morning's chapter is gone.",
   },
@@ -101,22 +103,10 @@ const dreamDetectiveCaseStudyRich = {
       label: "Core insight",
       value: "Sleep isn't a tracking problem for students, it's a motivation problem at wake-up time.",
     },
-    {
-      label: "Key mechanic",
-      value: "Cold Trail: snooze once and that morning's chapter locks forever.",
-    },
-    {
-      label: "Strategic gap",
-      value: "Competitors use streaks or gamification, but none pair narrative pull with loss aversion.",
-    },
-    {
-      label: "What I'd validate next",
-      value: "Whether missing story beats outperforms a standard alarm in real wake-up tests.",
-    },
   ],
   heroFirst: true,
   imagesBeforeText: true,
-  showJumpNav: true,
+  showJumpNav: false,
   showDeckEmbed: false,
   videos: [
     {
@@ -129,7 +119,7 @@ const dreamDetectiveCaseStudyRich = {
   videosAfterSection: "Design",
   videosTitle: "Interactive prototype",
   videosIntro:
-    "Two-minute walkthrough of the core loop: alarm → mini-game → Evidence Board update, plus the locked-out path when you sleep in.",
+    "Interactive Figma prototype: spatial Office navigation and both wake-up outcomes, Intel Secured or locked out.",
   processWork: {
     sections: [
       {
@@ -164,8 +154,7 @@ const dreamDetectiveCaseStudyRich = {
           {
             title: "Solution",
             paragraphs: [
-              "Replace the alarm with a daily episodic audio mystery. Each morning unlocks the next clue, unless you snooze, in which case that chapter is gone permanently.",
-              "The Cold Trail penalty isn't shame or a broken streak. You don't fall behind, you miss the beat. That distinction keeps the mechanic fair while making oversleeping costly.",
+              "Each morning unlocks the next audio clue in an ongoing case. Snooze triggers Cold Trail: that chapter locks permanently. You don't fall behind—you miss the beat.",
             ],
             images: [
               {
@@ -182,7 +171,7 @@ const dreamDetectiveCaseStudyRich = {
           {
             title: "Visual direction",
             paragraphs: [
-              "Wellness apps default to clean minimalism. Dream Detective needed atmosphere, film noir contrast, Art Deco ornament, and adventure-game UI that feels like a world, not a dashboard. Typewriter typography reinforces the case-file metaphor.",
+              "Wellness defaults to clean minimalism; this needed film-noir atmosphere and adventure-game UI. Typewriter typography reinforces the case-file metaphor.",
             ],
             images: [
               {
@@ -194,7 +183,7 @@ const dreamDetectiveCaseStudyRich = {
           {
             title: "Exploring two directions",
             paragraphs: [
-              "Version 1 was a minimal alarm + clue reveal, conceptually clear, but indistinguishable from a standard alarm app. Version 2 introduced the Office as home base, Evidence Board navigation, Stakeout sleep audio, and Detective Rank progress. That version sold the world.",
+              "Version 1 was a minimal alarm and clue reveal—indistinguishable from competitors. Version 2 sold the world through the Office, Evidence Board, and Stakeout sleep audio.",
             ],
             images: [
               {
@@ -236,7 +225,7 @@ const dreamDetectiveCaseStudyRich = {
             title: "Final screens",
             paragraphs: [
               "Environment art was generated with Gemini and Grok; UI and interaction design were built in Figma. Background illustration was scoped to AI, hand-illustrating full scenes wasn't feasible in three weeks.",
-              "The morning alarm state is deliberately tense: high contrast, pulsing waveform, copy that signals a broadcast fading fast. The Evidence Board collects clues on a corkboard with red string, where the larger mystery takes shape.",
+              "The morning alarm uses a high-contrast waveform and broadcast-fading copy.",
             ],
             images: [
               {
@@ -292,7 +281,9 @@ const dreamDetectiveCaseStudyRich = {
   },
   conclusionTitle: "Reflection",
   conclusion:
-    "I start with behavior, hunt for the angle everyone else skipped, then build a world weird enough to make the penalty feel fair. On paper Cold Trail slaps. Next up: prove narrative FOMO beats a loud beep with real sleepy humans. Also curious if a social Detective Rank helps the habit or just ruins the solo mystery.",
+    "The concept is strongest when its fiction, interaction, and visual system all support the same behavioral decision.",
+  nextSteps:
+    "Test whether narrative FOMO beats a loud beep with real sleepy humans, then study whether a social Detective Rank strengthens the habit or ruins the solo mystery.",
 };
 
 /** Eleara */
@@ -324,34 +315,17 @@ const elearaCaseStudyRich = {
     role: "PM / UX Lead, process, user flow, feedback synthesis",
   },
   scan: {
-    project: "Wearable plus app that steadies dizziness before it hits.",
+    project: "Predictive vestibular companion: ear device plus app.",
     problem: "Vestibular episodes escalate before people can get help.",
-    role: "PM and UX lead. Process, user flow, feedback synthesis. Concepts were the team's.",
+    role: null,
     hard: "Zero to user-tested prototype in 72 hours, fully remote.",
     change: "Hold-to-SOS, a predictive GVS flow, and a team that stayed on the clock.",
   },
   introParagraphs: [
     "Eleara is a predictive vestibular companion, a wearable plus app that uses galvanic vestibular stimulation to counter dizziness before episodes escalate, and alerts emergency contacts when they do.",
-    "Built in 72 hours over Zoom with Willow Munaba, Amanda Yu, and Anny Long. I led process and contributed the user flow; every concept decision was collective, but keeping us moving was on me.",
+    "Four-person design team: I led process, user-flow architecture, and feedback synthesis.",
   ],
-  highlights: [
-    {
-      label: "The constraint",
-      value: "Zero to research-backed, user-tested prototype in 72 hours, remotely.",
-    },
-    {
-      label: "My contribution",
-      value: "Sprint facilitation, PRD alignment, user flow architecture, and Day 2 feedback synthesis.",
-    },
-    {
-      label: "Key design call",
-      value: "Hold-to-trigger emergency button, prevents false SOS alerts without slowing real emergencies.",
-    },
-    {
-      label: "What we'd validate next",
-      value: "Whether GVS threshold calibration is intuitive for users during an active episode.",
-    },
-  ],
+  highlights: [],
   heroFirst: true,
   imagesBeforeText: true,
   showJumpNav: true,
@@ -367,13 +341,8 @@ const elearaCaseStudyRich = {
             paragraphs: [
               "FigBuild is a design sprint where teams go from zero to a functional prototype in three days. Our team of four worked remotely over Zoom, coordination overhead most in-person teams never face.",
               "My role was product manager and process lead. I didn't dictate the concept, ideas came from the team. I set daily agendas, ran structured ideation, delegated by strength, unblocked whoever was stuck, and made schedule calls when time slipped.",
-              "Day 1: ideation, PRD, user flow, wireframes, style guide. Day 2: first draft, user testing, iteration. Day 3: final screens, prototype recording, submission.",
             ],
             images: [
-              {
-                src: elearaSlide(1),
-                alt: "Eleara title slide, ear device hero and wordmark.",
-              },
               {
                 src: elearaSlide(3),
                 alt: "Day 1 section divider, ear device and geometric form.",
@@ -407,7 +376,7 @@ const elearaCaseStudyRich = {
             title: "PRD",
             paragraphs: [
               "In a 72-hour sprint, a PRD isn't overhead, it's the single source of truth before anyone opens Figma. Without it, four people build four different products in parallel.",
-              "It locked the problem (orthostatic challenges, vestibular mismatch), solution (GVS companion device), users, four core features (predictive warnings, emergency data collection, statistics, emergency button), and the design system upfront. Apple HIG foundation, Poppins/Inter typography, calm minimalist palette, flat illustration, dark mode, accessibility.",
+              "It locked the problem, solution, four core features, and accessibility requirements before anyone opened Figma.",
             ],
             images: [
               {
@@ -437,7 +406,7 @@ const elearaCaseStudyRich = {
           {
             title: "Wireframes",
             paragraphs: [
-              "With the flow mapped, wireframes were layout translation, content hierarchy and actions per screen, no visual styling. Covered splash, auth, home with GVS status and emergency button, profile tabs, contacts, and stats dashboard.",
+              "Grayscale layout pass: content hierarchy and actions per screen, without visual styling.",
               "The PRD's two-column card layout and persistent bottom nav were roughed in here. Grayscale intentionally, structure first, visuals in the style guide.",
             ],
             images: [
@@ -469,7 +438,7 @@ const elearaCaseStudyRich = {
             title: "First draft",
             paragraphs: [
               "Day 2 opened with a FigmaMake build from a prompt encoding the full PRD, users, GVS mechanic, two-column layout, typography, features, HIPAA requirements, and every required screen.",
-              "The draft had solid bones: Dashboard with GVS Score, episode stats, frequency chart, and trend line. Contacts with auto-notify toggles. Profile with personal info, medical records, and settings tabs. My role shifted to feedback synthesis, reviewing screens as they arrived and keeping the team aligned on what needed to change before user testing.",
+              "My role shifted to feedback synthesis, reviewing screens as they arrived and aligning the team before hour-36 testing.",
             ],
             images: [
               {
@@ -523,8 +492,7 @@ const elearaCaseStudyRich = {
             title: "Final build",
             paragraphs: [
               "Day 3 was close-out: apply the iteration list, polish visuals, record the prototype walkthrough, submit.",
-              "The final login screen shows the full system, periwinkle background, teal logo, Poppins typography, auth toggle, and HIPAA-compliant security certification visible before account creation. Hold-button emergency trigger, onboarding flow, and dynamic reminder concept all incorporated.",
-              "Credible, research-backed, user-tested prototype, built from scratch in 72 hours by a remote team of four.",
+              "The final login made HIPAA-compliant security certification visible before account creation.",
             ],
             images: [
               {
@@ -547,7 +515,9 @@ const elearaCaseStudyRich = {
   },
   conclusionTitle: "Reflection",
   conclusion:
-    "Eleara is where I learned what leading a design team actually means, not visual craft, but reading the room, making judgment calls under time pressure, and delegating to strengths instead of dividing work arbitrarily. What I'd do differently: ideation took six hours when I'd planned three. I should have capped it harder and trusted Day 2 to 3 iteration to compensate. What I'm proud of: we ran real user testing at hour 36 when most sprint teams skip it. Tamiko and Thania's feedback made the final product meaningfully better in ways we wouldn't have caught ourselves.",
+    "Eleara changed how I lead: establish shared constraints early, delegate by strength, and protect enough time for evidence to change the work.",
+  nextSteps:
+    "Cap ideation earlier and trust later iteration to compensate, then run another testing round focused on the changes prompted by the first sessions.",
 };
 
 /** Kits! */
@@ -574,34 +544,17 @@ const kitsCaseStudyRich = {
     role: "UX / product design: research through high-fidelity",
   },
   scan: {
-    project: "Kiosk and app for borrowing hobby gear instead of buying it.",
+    project: "Community hobby-kit sharing through a kiosk and app.",
     problem: "Trying a hobby dies at the checkout line for expensive kit.",
-    role: "Solo UX from research through high-fidelity.",
-    hard: "Two roles, one kiosk, one app, without fake shared screens.",
+    role: null,
+    hard: "Shared screens that pretend both roles see the same thing.",
     change: "Paper-tested borrower and lender flows before high-fidelity rework.",
   },
   introParagraphs: [
     "Kits! is a community-driven hobby sharing system, borrow curated kits from a public kiosk, or lend your own equipment for others to try. The goal is lowering the cost of entry for new hobbies without asking anyone to buy gear upfront.",
     "The design problem was service design at scale: two distinct roles, one physical touchpoint, one digital companion, and friction points like approval flows, kit processing, and motivation to participate on both sides.",
   ],
-  highlights: [
-    {
-      label: "The barrier",
-      value: "Hobbies require expensive equipment: casual experimentation dies at the checkout line.",
-    },
-    {
-      label: "Two roles",
-      value: "Borrowers want quick access; lenders need a reason to contribute kits back to the community.",
-    },
-    {
-      label: "System scope",
-      value: "Public kiosk plus mobile interface: shared access model across physical and digital.",
-    },
-    {
-      label: "What paper saved",
-      value: "Testing dual-role flows early before high-fidelity rework on approval and handoff states.",
-    },
-  ],
+  highlights: [],
   heroFirst: true,
   imagesBeforeText: true,
   showJumpNav: true,
@@ -631,21 +584,15 @@ const kitsCaseStudyRich = {
           {
             title: "The problem",
             paragraphs: [
-              "Many hobbies require expensive equipment, which creates a barrier for people who want to try new activities without committing to a purchase. Existing entry points assume you buy tools first. Kits! proposes shared access instead: temporarily borrow curated hobby kits, or contribute your own for others to use.",
-              "Research and journey mapping framed the problem around two primary user archetypes before any screens were drawn.",
+              "Existing entry points assume you buy tools first. Research and journey mapping framed the problem around two archetypes before any screens were drawn.",
             ],
-            images: [
-              {
-                src: kitsHero,
-                alt: "Kits!, hobby sharing kiosk concept cover.",
-              },
-            ],
+            images: [],
           },
           {
             title: "Borrowers & lenders",
             paragraphs: [
               "Borrowers want quick access to new activities, browse, reserve, pick up, try, return. Lenders contribute kits to the community and need clear incentives, approval paths, and processing steps that don't feel like unpaid labor.",
-              "Mapping both journeys surfaced friction early: how kits get approved, how handoffs work at the kiosk, and what keeps lenders participating after the first drop-off.",
+              "Mapping both journeys exposed where the kiosk must lead, where the app carries continuity, and which states need explicit confirmation.",
             ],
           },
         ],
@@ -703,7 +650,7 @@ const kitsCaseStudyRich = {
           {
             title: "Final screens",
             paragraphs: [
-              "High-fidelity screens bring the full system together: kiosk discovery and handoff states alongside the companion app for reservations, kit management, and role-specific tasks. The final deliverable is one voice across physical and digital touchpoints.",
+              "The high-fidelity pass unified kiosk handoff states and role-specific app tasks under one visual voice.",
             ],
             images: [
               {
@@ -718,7 +665,9 @@ const kitsCaseStudyRich = {
   },
   conclusionTitle: "Reflection",
   conclusion:
-    "Kits! reinforced how service design scales through clarity, two roles, one kiosk, one app. Testing with paper prototypes early saved high-fidelity rework later, and separating borrower vs. lender flows kept permissions and mental models honest.",
+    "The service became clearer when physical handoff and digital continuity were treated as one experience.",
+  nextSteps:
+    "Test the complete kiosk-to-app handoff with borrowers and lenders, including returns, unavailable kits, and interrupted transactions.",
 };
 
 /** Dairy Delight */
@@ -736,10 +685,7 @@ const dairyPosterFull = `${DA}/Dairy & Delight Poster 1.jpg`;
 const dairyPosterMockup = `${DA}/Gemini_Generated_Image_m0ocmkm0ocmkm0oc 2.png`;
 const dairyLanding = `${DA}/poster design used to refrence dashboard design.png`;
 const dairyMobileScreens = `${DA}/mobile designs final.png`;
-const dairyMobileDevices = `${DA}/Frame 7.png`;
 const dairyMobileDevice1 = `${DA}/iPhone 11 Render.png`;
-const dairyMobileDevice2 = `${DA}/iPhone 11 Render-1.png`;
-const dairyAllTouchpoints = `${DA}/all designs touch point final.png`;
 
 const dairyCaseStudyRich = {
   overview: {
@@ -751,32 +697,15 @@ const dairyCaseStudyRich = {
   scan: {
     project: "Organic dairy brand across poster, web, and app.",
     problem: "Farm brands default to farmer's-market cliché.",
-    role: "Solo. Identity, illustration, poster, web, and app.",
-    hard: "100+ logo sketches and one voice across print, web, and product.",
+    role: null,
+    hard: "One voice across print, web, and product without visual drift.",
     change: "A sun mark and a poster that feels like ice cream, not a lecture.",
   },
   introParagraphs: [
     "Dairy & Delight is an organic farm brand built around what they call the simple joys of nourishing living, milk, cheese, yogurt, and ice cream delivered direct to customers' homes.",
     "I chose this client over two alternatives because the brief wasn't just 'look fresh and clean.' It was a lifestyle proposition: what you eat and where it comes from matters, and pleasure and integrity belong in the same brand.",
   ],
-  highlights: [
-    {
-      label: "Brand filter",
-      value: "All-Natural, Uplifting, Communal, three words that gated every design decision.",
-    },
-    {
-      label: "Logo process",
-      value: "100+ sketch iterations before vector, two directions alive, one sun mark chosen.",
-    },
-    {
-      label: "System scope",
-      value: "Poster, landing page, and mobile app, one voice across print, web, and product.",
-    },
-    {
-      label: "What I'd extend",
-      value: "Packaging system and a fuller Recipes section where the Communal quality comes alive.",
-    },
-  ],
+  highlights: [],
   heroFirst: true,
   imagesBeforeText: true,
   showJumpNav: true,
@@ -797,7 +726,7 @@ const dairyCaseStudyRich = {
           {
             title: "Audience",
             paragraphs: [
-              "The audience I designed for values transparency, sustainability, and quality, farm-to-table culture without the pretension. They want a brand that feels like an invitation to the table, not a lecture from a shelf.",
+              "Transparency and sustainability without pretension—an invitation to the table, not a lecture from a shelf.",
             ],
             images: [
               {
@@ -828,8 +757,7 @@ const dairyCaseStudyRich = {
           {
             title: "Mood boards",
             paragraphs: [
-              "I built three boards, one per vibe word, pulling from folk art, community poster design, eco-design, botanical illustration, and bold joyful graphic work. Communal drew from people eating together outdoors. All-Natural from organic typography and botanical reference. Uplifting from the kind of design that makes you smile before you read it.",
-              "Where the three boards overlapped was where Dairy & Delight lived, and that territory informed every color, typeface, and illustration choice from here on.",
+              "Three boards pulled from folk art, community posters, botanical illustration, and bold joyful graphics. Their overlap informed every downstream choice.",
             ],
             images: [
               {
@@ -903,7 +831,7 @@ const dairyCaseStudyRich = {
             title: "The poster",
             paragraphs: [
               "The poster went through the most exploration. In class I applied ten visual principles to the same brief. Focus the Eye, Overwhelm, Simplify, Overlap, Assault the Surface, Activate the Diagonal, Manipulate Scale, Text as Image, Amplify, Tell a Story, two iterations each, twenty concepts by hand.",
-              "The principle I kept returning to was Text as Image: words becoming the visual, 'Taste Delight' as 3D Swiss cheese, or wrapping a spiraling ice cream cone. The final poster I'm most proud of: a waffle cone with a cherry on top, 'TASTE DELIGHT' in Magenta following the spiral. Typography animates the object. Joy before you've read a word.",
+              "The final uses a waffle cone, cherry, and “TASTE DELIGHT” following the spiral in Magenta. Typography animates the object.",
             ],
             images: [
               {
@@ -928,7 +856,7 @@ const dairyCaseStudyRich = {
             title: "Landing page",
             paragraphs: [
               "Translating brand energy to the web without flattening it. I sketched three layout directions before committing. The final blends doodle warmth with a cards layout: clean grid, wavy brand border, illustrations anchoring each feature section.",
-              "Hero leads with the ice cream cone poster, double duty as brand hero. Three pillars below: Fresh Dairy Delivered, Visit Our Farm, Recipes for Simple Joy. Testimonial on yellow wave. Footer grounded in Navy.",
+              "The hero reuses the poster art. Three pillars sit below it, followed by a testimonial on a yellow wave and a Navy footer.",
             ],
             images: [
               {
@@ -949,28 +877,8 @@ const dairyCaseStudyRich = {
                 alt: "Mobile app. Home, Discover, Create, and Access screens.",
               },
               {
-                src: dairyMobileDevices,
-                alt: "Mobile app, home and Access screens on device.",
-              },
-              {
                 src: dairyMobileDevice1,
                 alt: "Mobile app, home screen on iPhone.",
-              },
-              {
-                src: dairyMobileDevice2,
-                alt: "Mobile app. Discover and Create on iPhone.",
-              },
-            ],
-          },
-          {
-            title: "Final deliverable",
-            paragraphs: [
-              "Poster, landing page, and app together, one visual voice from print to pocket. The system holds because the emotional filter was set before the first pixel: all-natural, uplifting, communal.",
-            ],
-            images: [
-              {
-                src: dairyAllTouchpoints,
-                alt: "Final deliverable, poster, landing page, and mobile app together.",
               },
             ],
           },
@@ -980,7 +888,9 @@ const dairyCaseStudyRich = {
   },
   conclusionTitle: "Reflection",
   conclusion:
-    "This was my first serious brand design project, and where my fine arts training showed up in practice. Color theory isn't palette picking; it's emotional weight, relationships between hues, harmony and tension as tools. The poster is what I'm most proud of: not because it's the most structurally complex piece, but because you look at it and feel the joy of ice cream. That's the goal, not to describe the product, but to make you feel it. Next I'd design the packaging system, milk bottle, cheese wrapper, ice cream pint, the illustration system is already built for it.",
+    "This was my first serious brand design project and where my fine arts training became practical. The poster is the strongest result because it communicates the joy of ice cream before it explains the product.",
+  nextSteps:
+    "Extend the illustration system across packaging: milk bottles, cheese wrappers, and ice-cream pints.",
 };
 /** Project Pulse */
 const PL = `${P}/Pulse`;
@@ -999,32 +909,15 @@ const pulseCaseStudyRich = {
   scan: {
     project: "Adaptive fitness coaching on a smart mirror, not a phone.",
     problem: "Student athletes skip gyms because plans ignore their week and sweaty hands.",
-    role: "Lead designer. Synthesis, visual system, working prototype.",
+    role: null,
     hard: "Coaching that fits a real calendar, and gestures that work mid-workout.",
     change: "AirTap instead of touch, calendar-aware plans, a live demo of the full loop.",
   },
   introParagraphs: [
     "Pulse is a smart-mirror fitness companion for busy students: personalized plans, calendar-aware slots, and AirTap gestures so sweaty hands never have to touch the glass.",
-    "Made with Annalise and Jason W. They ran a lot of the interviews. I helped write discussion guides, talked to participants, put the screening form together, and synthesized what we were hearing. I also prototyped the live demo and pushed for AirTap once we landed on a smart mirror.",
+    "Three-person team: I led design, synthesis, the visual system, and the working prototype.",
   ],
-  highlights: [
-    {
-      label: "My role",
-      value: "Lead designer. Helped steer the concept, synthesized research, and prototyped the working demo.",
-    },
-    {
-      label: "Key design call",
-      value: "AirTap over touch. Mid-workout, hands are sweaty. The glass shouldn't be a to-do list.",
-    },
-    {
-      label: "Prototype",
-      value: "Browser demo covering onboarding, calendar sync, plans, gesture tutorial, and a full workout loop.",
-    },
-    {
-      label: "The team",
-      value: "Annalise and Jason W. on interviews. We reviewed screening together before anything went out.",
-    },
-  ],
+  highlights: [],
   heroFirst: true,
   imagesBeforeText: true,
   showJumpNav: true,
@@ -1041,12 +934,11 @@ const pulseCaseStudyRich = {
   videosAfterSection: "Build",
   videosTitle: "Prototype in motion",
   videosIntro:
-    "A short pass through the live demo: onboarding, plans, and AirTap in a workout.",
+    "Recorded browser demo with gesture friction visible at workout distance.",
   livePrototype: {
     href: "https://jsaputraixd.github.io/Pulse/",
     label: "Open live Pulse demo",
-    intro:
-      "Playable in the browser. Onboard, sync a calendar, pick a plan, and AirTap through a workout at arm's length.",
+    intro: null,
   },
   processWork: {
     sections: [
@@ -1134,8 +1026,8 @@ const pulseCaseStudyRich = {
           {
             title: "From deck to something you can play",
             paragraphs: [
-              "I prototyped the live demo: onboarding, plans, calendar, gesture tutorial, workout loop, and the visual system the deck uses.",
-              "Building it showed us the real smart-mirror problems: type that dies at 6 to 10 feet, a rest timer colliding with the nav, and gesture logic that was a little too clever. Those are bugs you only find when the thing actually runs.",
+              "I built the browser demo to stress-test ten-foot type, rest-timer collisions, and gesture logic under real interaction.",
+              "The rest timer collided with navigation, and the gesture logic was clever enough to exit workouts by accident.",
             ],
             images: [
               {
@@ -1153,7 +1045,6 @@ const pulseCaseStudyRich = {
             title: "We all ran sessions. Then we looked at the pile.",
             paragraphs: [
               "I ran usability sessions, and so did Annalise and Jason W. I synthesized what we heard: crowded UI, tiny type at workout distance, and gesture overload. People hated switching between point and pinch. They wanted one gesture, and tracking was jumpy enough to exit a workout by accident.",
-              "AirTap was still the right constraint. The first version just had too many verbs. Next pass: one selection gesture, bigger type, camera guidance so the whole body stays in frame.",
             ],
             images: [
               {
@@ -1189,10 +1080,6 @@ const pulseCaseStudyRich = {
                 src: pulseSlide(25),
                 alt: "Product-market fit survey. Only 33% would be very disappointed if Pulse went away.",
               },
-              {
-                src: pulseSlide(26),
-                alt: "Next-step recommendations across UI, gesture logic, onboarding, and camera coaching.",
-              },
             ],
           },
         ],
@@ -1201,16 +1088,16 @@ const pulseCaseStudyRich = {
   },
   conclusionTitle: "Reflection",
   conclusion:
-    "Pulse is the closest I've come to the work I want: product UX in physical space. I got to lead design on a three-person team, prototype the thing, and still hear that the first gesture set was too much. Next I'd unify AirTap into one selection, grow the type for 10-foot reading, and test whether a calendar-suggested slot actually changes whether a student works out.",
+    "Pulse confirmed that I want to keep working where interface decisions must survive distance, bodies, and physical context.",
+  nextSteps:
+    "Unify AirTap into one selection gesture, enlarge type for ten-foot reading, and test whether calendar-suggested workout slots change behavior.",
 };
 
 /** Pawfect Match */
 const PF = `${P}/Pawfect`;
 const pawfectHero = `${PF}/Pawfect Match.png`;
 const pawfectImages = [
-  "Pawfect Match.png",
   "Pawfect Match-01.png",
-  "Pawfect Match-01.jpg",
   "Pawfect Match MockUps-01.jpg",
   "PawfectMatch Mockup 2.5.jpeg",
   "Modern App Portfolio Mockup Presentation.png",
@@ -1232,17 +1119,12 @@ const pawfectCaseStudyRich = simpleGalleryCaseStudy({
     problem: "Pet hangouts are chaos. Matching on owners first makes it worse.",
     role: "Solo UX and UI.",
     hard: "Warm profiles that don't turn into LinkedIn for Labs.",
-    change: "Pets first, owners second. Mockups carry the tone until the write-up lands.",
+    change: "Pets first, owners second.",
   },
   introParagraphs: [
-    "Pawfect Match is a playful dating-style app for pet owners, swipe, match, and meet up for park hangs based on compatible pets and personalities.",
-    "Early exploration was about making pet profiles feel warm without turning into LinkedIn for Labs. Full write-up incoming. Until then, let the mockups do the talking.",
+    "Playful dating-app energy for pet people—profiles that feel warm, not corporate.",
   ],
   highlights: [
-    {
-      label: "Hook",
-      value: "Match on pets first, owners second.",
-    },
     {
       label: "Tone",
       value: "Friendly, bright, and approachable, built for dog-park energy.",
@@ -1251,17 +1133,18 @@ const pawfectCaseStudyRich = simpleGalleryCaseStudy({
   base: PF,
   imageFiles: pawfectImages,
   blockParagraphs: [
-    "Screen explorations, mockups, and presentation boards from the Pawfect Match concept. Full narrative write-up on the way.",
+    "Screens across onboarding, pet profiles, the swipe stack, and deck presentation.",
   ],
   conclusion:
-    "WIP reflection. Visual direction is solid. Next question: does matching on temperament actually make park meetups less chaotic, or just more politely chaotic?",
+    "The current concept establishes a coherent visual direction, but the matching premise still needs behavioral validation.",
+  nextSteps:
+    "Test whether matching on temperament makes park meetups less chaotic, or merely more politely chaotic.",
 });
 
 /** Safe Space */
 const SS = `${P}/Safe Space`;
 const safeSpaceHero = `${SS}/SafeSpace.png`;
 const safeSpaceImages = [
-  "SafeSpace.png",
   "SafeSpace - V1thingydadaa.jpg",
   "SafeSpace Wireframes.png",
   "SafeSpace UserFlow.png",
@@ -1282,29 +1165,26 @@ const safeSpaceCaseStudyRich = simpleGalleryCaseStudy({
     problem: "Notes apps are built for tasks. Feelings get treated like inbox zero.",
     role: "Solo UX and UI.",
     hard: "Almost no friction between 'I need to write this down' and doing it.",
-    change: "User flow, wireframes, and a calmer visual direction. Write-up still in progress.",
+    change: "User flow, wireframes, and a calmer visual direction.",
   },
   introParagraphs: [
-    "Safe Space is a note-taking and reflection app concept, a calmer place to capture thoughts, track emotional check-ins, and revisit patterns without the noise of a general-purpose notes tool.",
-    "Wireframes and user flows explore how little friction you can keep between 'I need to write this down' and actually doing it. Detailed case study text is still in progress.",
+    "A calmer notes surface for capturing thoughts and spotting patterns without the noise of a general-purpose tool.",
   ],
   highlights: [
     {
       label: "North star",
       value: "Private, gentle, and fast, journaling without performance.",
     },
-    {
-      label: "Process",
-      value: "User flow → wireframes → high-fidelity explorations.",
-    },
   ],
   base: SS,
   imageFiles: safeSpaceImages,
   blockParagraphs: [
-    "Wireframes, flows, and visual explorations from the Safe Space concept. More context coming in a future pass.",
+    "Wireframes, user flow diagrams, and high-fidelity screen explorations.",
   ],
   conclusion:
-    "Early work, placeholder reflection until the full write-up lands. The interaction model prioritizes speed and emotional safety over feature breadth.",
+    "The artifacts define a focused capture flow; they cannot yet show whether it feels supportive during a difficult moment.",
+  nextSteps:
+    "Run real writing sessions to validate the interaction before adding another visual layer.",
 });
 
 /** ShiftOff */
@@ -1332,7 +1212,6 @@ const shiftOffImages = [
   "19.png",
   "20.png",
   "21.png",
-  "iPhone 16 Pro.png",
 ];
 
 const shiftOffCaseStudyRich = simpleGalleryCaseStudy({
@@ -1350,26 +1229,18 @@ const shiftOffCaseStudyRich = simpleGalleryCaseStudy({
     change: "Rituals plus vault-locked work apps until morning review.",
   },
   introParagraphs: [
-    "ShiftOff helps knowledge workers actually disconnect, ritual builders, rumination redirects, and a morning review that closes the loop on what you carried home from work.",
-    "The concept treats 'logging off' as a designed behavior, not a willpower test. Slide deck and narrative still in progress; images below are the current artifact set.",
+    "ShiftOff treats logging off as a designed behavior, not a willpower test.",
   ],
-  highlights: [
-    {
-      label: "Problem",
-      value: "Work follows you home, notifications, open loops, and Sunday scaries.",
-    },
-    {
-      label: "Mechanic",
-      value: "End-of-day rituals + vault-locked work apps until morning review.",
-    },
-  ],
+  highlights: [],
   base: SO,
   imageFiles: shiftOffImages,
   blockParagraphs: [
     "High-fidelity screens and device mockups from the ShiftOff concept, onboarding hurdles through dashboard, settings, and handoff flows.",
   ],
   conclusion:
-    "WIP. ShiftOff tries to make logging off feel like care, not punishment. Next test: do end-of-day rituals actually cut after-hours Slack checking, or do we just invent prettier guilt?",
+    "Designing for disengagement means evaluating what people do after the interface disappears, not how long they remain inside it.",
+  nextSteps:
+    "Test whether the end-of-day rituals actually reduce after-hours Slack checking.",
 });
 
 /** CCA Pathfinding */
@@ -1386,27 +1257,19 @@ const ccaPathfindingCaseStudyRich = {
   },
   scan: {
     project: "First-floor wayfinding for a campus people get lost in.",
-    problem: "Locked front gate, two numbering systems, prefixes that mean nothing on the ground.",
-    role: "Solo. Interviews, numbering, visual language, sign family.",
-    hard: "A map that faces the entrance, and codes that match the hallways.",
-    change: "Airport-style hallway prefixes and a flipped portal map.",
+    problem: "Two numbering systems and prefixes that don't match ground-level walking.",
+    role: null,
+    hard: "Ground-level codes that match how you actually walk the hall.",
+    change: "Airport-style hallway prefixes on an entrance-facing map.",
   },
   introParagraphs: [
     "New students get lost. I did. So did a lot of the people I interviewed. The front gate is locked. You walk around to the back of the main building, which nobody tells you.",
-    "Inside, the portal map is the real system, and it's still a hunt: 21A, 21B, 21C, one by one. The second floor uses a different numbering system. I stayed on the first floor.",
+    "Inside, the portal map is the real system, and it still sends you hunting room by room. I scoped the first floor only.",
   ],
   highlights: [
     {
-      label: "My role",
-      value: "Solo. Interviews, numbering, visual language, sign family.",
-    },
-    {
-      label: "Key design call",
-      value: "Hallways are the prefixes, like an airport. Map flipped 90 degrees to face the entrance.",
-    },
-    {
       label: "What broke",
-      value: "Prefixes A, B, N, E, W don't mean anything on the ground. 4 out of 5 people said the codes cause issues.",
+      value: "4 out of 5 interviewees said room codes cause navigational issues.",
     },
   ],
   heroFirst: true,
@@ -1443,7 +1306,6 @@ const ccaPathfindingCaseStudyRich = {
             title: "A, B, N, E, W. What does A even mean.",
             paragraphs: [
               "CCA numbers by section: A, B, N, E, W. N, E, W are cardinals. A and B aren't. Standing in the hall, none of that tells you where you are.",
-              "You're also on the floor, not above it. The official map is a bird's-eye. From the entrance you rotate it 90 degrees before it matches what you see.",
             ],
             images: [
               {
@@ -1465,7 +1327,7 @@ const ccaPathfindingCaseStudyRich = {
             title: "Students and professors. Same scavenger hunt.",
             paragraphs: [
               "I interviewed 5 people, students and faculty: Anny, Peter, Dave, Leo, Willow. Same script, then I synthesized.",
-              "4 out of 5 said the codes cause issues. First visits were walking until they found it. Lost, they pull the portal map. Homeroom, bathrooms, and the Nave came up over and over.",
+              "When lost, people pull the portal map. Homeroom, bathrooms, and the Nave came up in almost every interview.",
             ],
             images: [
               {
@@ -1511,7 +1373,7 @@ const ccaPathfindingCaseStudyRich = {
           {
             title: "Kiosk, crossways, hanging signs",
             paragraphs: [
-              "Digibop for the voice, Quicksand for the read. Purple, pink, cyan. 3 objects: kiosk at the entrance, totems at the crossways, hanging signs in the long hall.",
+              "Digibop for voice, Quicksand for legibility. Purple, pink, cyan. Three sign types: entrance kiosk, crossway totem, and long-hall hanging pair.",
             ],
             images: [
               {
@@ -1555,7 +1417,9 @@ const ccaPathfindingCaseStudyRich = {
   },
   conclusionTitle: "Reflection",
   conclusion:
-    "Next I'd put a totem at full size in the Nave and watch whether a first-year stops walking aimlessly.",
+    "Interviews revealed that orientation and naming—not visual polish alone—were the core wayfinding problems.",
+  nextSteps:
+    "Install a full-size totem in the Nave and observe first-years at rush hour.",
 };
 
 /** A Fowl Play (AR) */
@@ -1577,21 +1441,13 @@ const aFowlPlayCaseStudyRich = simpleGalleryCaseStudy({
     change: "Image-anchored scenes and invisible room-to-room triggers.",
   },
   introParagraphs: [
-    "A Fowl Play turns an iPad into a detective kit. Scan the world, step into a mystery, and follow audio, light, and geometry cues like you're inside Half-Life: Alyx, just with more poultry and less gravity gloves.",
-    "Built in Reality Composer with RealityScan assets and Blender cleanup. The story does the navigating. The UI stays quiet.",
+    "A Fowl Play turns an iPad into a detective kit—scan the room, step into a mystery, and catch the cook.",
+    "Built in Reality Composer with RealityScan assets and Blender cleanup.",
   ],
   highlights: [
     {
-      label: "Mechanic",
-      value: "Image-anchored AR scenes with invisible triggers between rooms.",
-    },
-    {
-      label: "Wayfinding",
-      value: "Audio, visual, and spatial cues, borrowed from game design, not UI chrome.",
-    },
-    {
-      label: "Tools",
-      value: "Reality Composer, RealityScan, Blender, ElevenLabs VO.",
+      label: "VO",
+      value: "ElevenLabs narration for scene handoffs.",
     },
   ],
   showJumpNav: true,
@@ -1606,8 +1462,6 @@ const aFowlPlayCaseStudyRich = simpleGalleryCaseStudy({
           ],
           images: projectImages(AFP, [
             "Half-Life_Alyx_Navigational_Cues_Screenshot.png",
-            "Half-Life_Alyx_Navigational_Cues.webp",
-            "Half-Life_Alyx_Navigational_Cues_(1).webp",
           ]),
         },
       ],
@@ -1635,10 +1489,9 @@ const aFowlPlayCaseStudyRich = simpleGalleryCaseStudy({
         {
           title: "Detective's office",
           paragraphs: [
-            "Tone-setter. Look around, hear the monologue, walk to the door. Invisible trigger, next scene. No menu required.",
+            "Tone-setter: look around, hear the monologue, walk to the door.",
           ],
           images: projectImages(AFP, [
-            "355a7d22-b1c8-4402-9d86-dc0a92061da8.png",
             "IMG_0182_from_Notion.jpg",
           ]),
         },
@@ -1692,9 +1545,11 @@ const aFowlPlayCaseStudyRich = simpleGalleryCaseStudy({
   videosPlacement: "afterSection",
   videosAfterSection: "Scenes",
   videosTitle: "Playthroughs",
-  videosIntro: "Scenes, anchors, and live playtests. Watch the mystery before reading more about it.",
+  videosIntro: "Playthroughs from restaurant exploration through in-person testing.",
   conclusion:
-    "Simple tools plus clear cues beat complicated systems. Watching people solve the mystery with only intuition was the whole point. AR works when the world does the explaining.",
+    "Watching people solve the mystery through intuition showed that the environmental cues were carrying the experience.",
+  nextSteps:
+    "Stress-test the image anchors in brighter, busier rooms.",
 });
 
 /** The Adherence Project */
@@ -1711,13 +1566,12 @@ const adherenceCaseStudyRich = simpleGalleryCaseStudy({
   scan: {
     project: "Voice and screen companion wired to a physical pill dispenser.",
     problem: "Missed doses are a system problem, not a willpower poster.",
-    role: "Solo. Product, interaction, and the physical prototype.",
+    role: null,
     hard: "Bridging app logic to hardware without turning it into a lecture.",
     change: "Soft reminders and a swinging door that hands you the dose.",
   },
   introParagraphs: [
-    "Half of people with chronic conditions miss doses. Adherence is not a willpower poster. It is a system problem.",
-    "This project pairs a soft digital companion with a physical pill dispenser: voice, screen, LEDs, and a door that hands you the dose instead of lecturing you about it.",
+    "Half of people with chronic conditions miss doses.",
   ],
   highlights: [
     {
@@ -1725,12 +1579,8 @@ const adherenceCaseStudyRich = simpleGalleryCaseStudy({
       value: "Flexibility beats rigid schedules for messy real routines.",
     },
     {
-      label: "Build",
-      value: "ProtoPie + Blokdots bridging app logic to Arduino hardware.",
-    },
-    {
       label: "Form",
-      value: "Funnel refill, swinging door dispense, status through an LED window.",
+      value: "Funnel refill and status through an LED window.",
     },
   ],
   showJumpNav: true,
@@ -1810,9 +1660,11 @@ const adherenceCaseStudyRich = simpleGalleryCaseStudy({
   videosPlacement: "afterSection",
   videosAfterSection: "Prototype",
   videosTitle: "Prototype in motion",
-  videosIntro: "Hardware dispense, voice loops, and the finished companion flow.",
+  videosIntro: "Prototype dispense and voice loops.",
   conclusion:
-    "Multi-sensory beats app-only nagging. Voice wants patience. Hardware wants cable management. Next: a tighter industrial design pass once the interaction model stops surprising the servos.",
+    "Voice interactions demand patience, while physical prototypes expose constraints that screen flows can hide.",
+  nextSteps:
+    "Complete a tighter industrial-design pass after the interaction model and servo behavior stabilize.",
 });
 
 /** Concrete — The Price for Concrete */
@@ -1842,35 +1694,27 @@ const concreteCaseStudyRich = simpleGalleryCaseStudy({
   scan: {
     project: "A systems deck on what streets cost when people aren't the point.",
     problem: "Car-first design, then blame the pedestrian.",
-    role: "Solo. Systems research and visual narrative.",
+    role: null,
     hard: "Making leverage points readable without a policy lecture.",
     change: "Iceberg models and a goal flip: safe human access over throughput.",
   },
   introParagraphs: [
     "The Price for Concrete asks what we actually pay when streets are engineered for cars first and people second. Not the asphalt invoice. The human one.",
-    "A systems-thinking deck: iceberg models, mental models, and leverage points. Boards first. The argument is in the sequence.",
+    "Boards first—the argument is in the sequence.",
   ],
   highlights: [
     {
       label: "Spark",
       value: "Raquel Nelson's case: a family crossing after dark, and a system that criminalized the pedestrian.",
     },
-    {
-      label: "Lens",
-      value: "Pattern → structure → mental model. Cars as 'normal' is the deepest layer.",
-    },
-    {
-      label: "Leverage",
-      value: "Rewrite the rules: safe human access over maximum throughput.",
-    },
   ],
   base: CN,
-  imageFiles: concreteSlides,
-  blockParagraphs: [
-    "Full board sequence from The Price for Concrete. Scroll the argument before you skim the labels.",
-  ],
+  imageFiles: concreteSlides.slice(1),
+  blockParagraphs: [],
   conclusion:
-    "If pedestrians stay 'criminals' in the mental model, concrete keeps getting poured for the wrong stakeholder. Change the goal, and the budget follows.",
+    "Slide 11, “Changing the Goal,” is where the deck stops diagnosing and starts prescribing.",
+  nextSteps:
+    "Test whether the sequence persuades readers without a presenter supplying the argument.",
 });
 
 /** Flippy */
@@ -1887,31 +1731,21 @@ const flippyCaseStudyRich = simpleGalleryCaseStudy({
   scan: {
     project: "Your photo, sliced into a pop-up book you can tilt around.",
     problem: "A still image keeps the look and throws away the feeling of standing there.",
-    role: "Solo. Product design, front-end, on-device ML.",
+    role: null,
     hard: "Depth on the phone. Nothing leaves the device.",
     change: "Capture to paper cutouts in the browser, WebGPU with a WASM fallback.",
   },
-  introParagraphs: [
-    "A photo captures what a moment looked like. Flippy captures what it felt like to stand there.",
-    "Point the camera, estimate depth on-device, slice the frame into paper cutouts, and tilt to look around a pop-up book of your own life. Nothing leaves the phone.",
-  ],
-  highlights: [
-    {
-      label: "Pipeline",
-      value: "Capture → Depth Anything V2 → FG/mid/BG cutouts → CSS 3D stand-up.",
-    },
-    {
-      label: "Constraint",
-      value: "On-device only. WebGPU with WASM fallback.",
-    },
-  ],
+  introParagraphs: [],
+  highlights: [],
   base: FL,
-  imageFiles: ["flippy-hero.png", "flippy-flow.png", "flippy-tech.png"],
+  imageFiles: ["flippy-flow.png", "flippy-tech.png"],
   blockParagraphs: [
     "Process boards for the Flippy loop. Drop real device captures into this folder anytime. The live app is the proof.",
   ],
   conclusion:
-    "Depth models finally make casual 3D memories feel possible in the browser. Next polish: tighter cutouts, richer paper textures, and a shareable moment format.",
+    "The browser prototype proved that estimated depth can become an interaction rather than a post-processing effect.",
+  nextSteps:
+    "Refine the cutouts, add richer paper textures, and design a shareable moment format.",
 });
 
 /** Who Fiddled? */
@@ -1929,27 +1763,14 @@ const whoFiddledCaseStudyRich = {
   scan: {
     project: "Daily bluffing trivia inside a Reddit post. One truth, three lies.",
     problem: "A game that has to read in a feed and still feel like a party when you expand it.",
-    role: "Solo. Concept, visual system, interaction, identity.",
+    role: null,
     hard: "Fair daily play for a public sub under 200 people, and lies that don't give themselves away.",
     change: "A sequential ten, a sticker system, and a writer that stopped wrapping tells in parentheses.",
   },
   introParagraphs: [
-    "Who Fiddled? is a daily bluffing game that lives inside a Reddit post. Ten ranked questions. One truth, three lies. Fool the crowd or catch the fiddler.",
-    "I designed the loop, the sticker system, and the identity for Reddit's Games with a Hook. It had to read on a phone inside a post, and still feel like a party game when you expand it.",
+    "Designed for Reddit's Games with a Hook hackathon: loop, sticker system, and identity.",
   ],
   highlights: [
-    {
-      label: "My role",
-      value: "Solo. Concept, visual system, interaction, identity, and the UI inside the Reddit post.",
-    },
-    {
-      label: "Key design call",
-      value: "One pinned daily hub with a sequential 10. Community posts stay optional and unranked.",
-    },
-    {
-      label: "Constraint",
-      value: "The whole game has to read in a Reddit post, on a phone, without looking like a shrunk desktop.",
-    },
     {
       label: "Look",
       value: "Cyan field, pink as the one primary action, navy outlines, Noot on the wordmark only.",
@@ -1973,13 +1794,11 @@ const whoFiddledCaseStudyRich = {
   livePrototype: {
     href: "https://www.reddit.com/r/who_fiddled_dev",
     label: "Open r/who_fiddled_dev",
-    intro:
-      "Play inside a Reddit post. Expand the pinned Daily Trivia hub and run today's 10.",
+    intro: "Play today's ranked 10 in r/who_fiddled_dev.",
   },
   extraVideosAfterSection: "Playing it",
   extraVideosTitle: "The tap, the miss, the hit",
-  extraVideosIntro:
-    "Radio stickers press down. Miss, and fiddles eat the post. Hit the truth and confetti does the talking.",
+  extraVideosIntro: null,
   extraVideos: [
     {
       kind: "file",
@@ -2008,7 +1827,7 @@ const whoFiddledCaseStudyRich = {
           {
             title: "It has to look like a Reddit post first",
             paragraphs: [
-              "The game lives in a custom post, not a standalone site. Expand it, hit Play, then you're on the cyan. If that first card doesn't feel like a thing you tap, nobody reaches Today's 10.",
+              "If the first card does not feel tappable, nobody reaches Today's 10.",
             ],
             images: [
               {
@@ -2099,7 +1918,230 @@ const whoFiddledCaseStudyRich = {
   },
   conclusionTitle: "Reflection",
   conclusion:
-    "Hackathon rules wanted a 60-second demo inside a live post, public sub under 200 people. I seeded trivia so judges could play without waiting for a crowd. Generated lies used to give themselves away with parentheses. I made the writer stop doing that. Next I'd grow the prompt packs and watch which lies actually fool people. The game is only as good as the lie that almost sounded true.",
+    "The quality of the lies, not additional mechanics, is the game's central content challenge.",
+  nextSteps:
+    "Grow the prompt packs and study which lies actually fool people.",
+};
+
+/** Tama desk companion */
+const TM = `${P}/Tama`;
+const tamaHero = `${TM}/tama-hero-desk.jpg`;
+const tamaAsset = (name) => `${TM}/${name}`;
+
+const tamaCaseStudyRich = {
+  overview: {
+    client: "Independent project · CCA Hybrid Lab",
+    industry: "Physical computing · Ambient interaction",
+    timeline: "August 11 to 28, 2026 · Solo",
+    role: "Product design, interaction, industrial design, prototyping",
+  },
+  scan: {
+    project: "A physical companion with the presence of an object and the intelligence of a computer.",
+    problem: null,
+    role: null,
+    hard: null,
+    change: null,
+  },
+  introParagraphs: [],
+  highlights: [],
+  heroFirst: true,
+  imagesBeforeText: true,
+  showJumpNav: true,
+  showDeckEmbed: false,
+  videos: [
+    {
+      kind: "file",
+      src: `${TM}/tama-demo-illustrator.mp4`,
+      label: "Tama responds to work in Adobe Illustrator",
+      layout: "wide",
+    },
+    {
+      kind: "file",
+      src: `${TM}/tama-demo-outfit.mp4`,
+      label: "Tama gives contextual outfit feedback",
+      layout: "wide",
+    },
+  ],
+  videosPlacement: "afterSection",
+  videosAfterSection: "In use",
+  videosTitle: "Contextual responses",
+  videosIntro: null,
+  extraVideos: [
+    {
+      kind: "file",
+      src: `${TM}/tama-face-demo.mp4`,
+      label: "Face states in motion",
+      layout: "wide",
+    },
+  ],
+  extraVideosAfterSection: "States and physical controls",
+  extraVideosTitle: "Interaction in motion",
+  extraVideosIntro: null,
+  modelViewerAfterSection: "In use",
+  modelViewer: {
+    title: "Explore Tama",
+    intro:
+      "Rotate the product or switch to the cutaway to inspect its internal construction.",
+    variants: [
+      {
+        label: "Exterior",
+        src: `${TM}/tama-body-v6.glb`,
+        alt: "Interactive 3D model of Tama's complete exterior.",
+      },
+      {
+        label: "Cutaway",
+        src: `${TM}/tama-cutaway-v6.glb`,
+        alt: "Interactive cutaway model showing Tama's internal components and numbered callouts.",
+      },
+    ],
+  },
+  processWork: {
+    sections: [
+      {
+        title: "States and physical controls",
+        blocks: [],
+      },
+      {
+        title: "In use",
+        blocks: [],
+      },
+      {
+        title: "The starting point",
+        blocks: [
+          {
+            title: "Giving visual intelligence a body",
+            paragraphs: [
+              "Gemini Robotics made it possible to recognize objects and understand a changing scene, not just respond to text. My first question was not how to make another assistant. It was how that kind of awareness could become a companion you can see, hear, and interact with in the same space.",
+              "Tama began as an experiment in embodiment. The goal was to connect visual understanding, conversation, expression, and physical form so the intelligence felt like one character rather than a collection of features.",
+            ],
+            images: [],
+          },
+        ],
+      },
+      {
+        title: "Initial prototype",
+        blocks: [
+          {
+            title: "Sketching the first form",
+            paragraphs: [
+              "The first prototype sketch established Tama as a compact character built around a face, one clear action button, and a stable desk base. It gave me an initial proportion and interaction hierarchy to develop in CAD.",
+            ],
+            images: [
+              {
+                src: tamaAsset("tama-cad-early.jpg"),
+                alt: "Early orthographic: cream body, coral base, red top button. The first form, before the printed green shell.",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        title: "Why physical",
+        blocks: [
+          {
+            title: "Presence cannot be pinned to a corner",
+            paragraphs: [
+              "I considered making Tama a digital character that lived in the corner of the desktop. That would have been easier, but it would permanently consume screen space and compete with the work it was supposed to support.",
+              "A physical companion creates a different relationship. Its face can meet your gaze, its voice comes from a place in the room, and it remains present even when the screen changes. That spatial continuity makes an exchange feel more personal than talking to another panel inside the computer.",
+            ],
+            images: [
+              {
+                src: tamaAsset("tama-digital-vs-physical.png"),
+                alt: "Comparison between a digital companion occupying the laptop screen and Tama existing as a separate presence in the room.",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        title: "Designing behavior",
+        blocks: [
+          {
+            title: "Every state needed an answer",
+            paragraphs: [
+              "I mapped the end-to-end behavior before designing the expressions. The flowchart exposed every transition, fallback, and control response the face system needed to communicate.",
+              "I then designed each expression in Figma and mapped it to a system state. An open-source robotics face framework provided the animation foundation, and I used AI-assisted coding to integrate the state logic into the working software.",
+            ],
+            images: [
+              {
+                src: tamaAsset("tama-behavior-flow-hifi.png"),
+                alt: "Early Tama behavior flowchart connecting observing, wake and push-to-talk listening, transcription, thinking, speaking, and recovery states.",
+              },
+              {
+                src: tamaAsset("tama-face-states.png"),
+                alt: "Complete Tama face system: idle, listening, thinking, speaking, blink, directional glances, sleep, wake, and wake-look reactions.",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        title: "Conversation design",
+        blocks: [
+          {
+            title: "Latency is part of the personality",
+            paragraphs: [
+              "Long pauses break the feeling of a conversation, so response time became a design constraint rather than a background metric. I used Edge TTS for fast, natural speech and tuned the response pipeline to keep the delay as short as possible without sacrificing the quality of the answer.",
+              "When Tama does need longer, it acknowledges the wait instead of going silent. I also constrained responses to stay concise, personal, and expressive. BMO from Adventure Time was the personality reference: playful and emotionally present, but still useful.",
+            ],
+            images: [
+              {
+                src: tamaAsset("tama-face-mouths.jpg"),
+                alt: "Mouth states used to give Tama a restrained speaking animation.",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        title: "Building the body",
+        blocks: [
+          {
+            title: "Nine passes to make the form work",
+            paragraphs: [
+              "This was my first time designing a complete object in 3D. I worked through the front, sides, base, button opening, speaker grilles, and rear access as one form rather than treating the enclosure as a box around the electronics.",
+            ],
+            images: [
+              {
+                src: tamaAsset("tama-cad-iterations.jpg"),
+                alt: "Nine CAD iterations developing Tama's enclosure, base, openings, speaker grilles, and rear hatch.",
+              },
+            ],
+          },
+          {
+            title: "Designing from the inside out",
+            paragraphs: [
+              "I modeled every physical component at its real dimensions before printing. The display, Pico, speaker, controls, and wiring space became constraints inside the CAD model. I also checked the real display against its digital stand-in before committing to the shell.",
+              "The rear hatch became a removable access panel and a sticky-note holder, turning a maintenance requirement into part of the desk experience.",
+            ],
+            images: [
+              {
+                src: tamaAsset("tama-hardware-development-v2.jpg"),
+                alt: "Component-fit process from internal CAD and scale checks to the wired display and rear hatch.",
+              },
+            ],
+          },
+          {
+            title: "From model to first fit",
+            paragraphs: [
+              "I printed the enclosure, learned to solder at the CCA Hybrid Lab, assembled the electronics, and installed everything in the shell. The first full print fit correctly, validating the component measurements and internal layout before final assembly.",
+            ],
+            images: [
+              {
+                src: tamaAsset("tama-fabrication-sequence.jpg"),
+                alt: "The enclosure moving from the first printed layers to the completed bare shell from four angles.",
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  conclusionTitle: "Reflection",
+  conclusion:
+    "Building Tama forced interaction design, industrial design, electronics, and conversation timing to work as one system.",
+  nextSteps:
+    "Compare Tama with a screen-based version to test whether physical form changes how people engage with the same intelligence.",
 };
 
 export const projects = [
@@ -2310,25 +2352,40 @@ export const projects = [
     caseStudyGallery: [],
     caseStudyRich: whoFiddledCaseStudyRich,
   },
+  {
+    id: 15,
+    title: "Tama",
+    category: "Desk Companion",
+    tagline: "A pet on the desk, not another tab.",
+    cardLine: "Contextual feedback without leaving the work in front of you.",
+    description:
+      "A physical desk companion that can understand the workspace, answer aloud, and make its attention and privacy states visible.",
+    tags: ["Product Design", "Interaction Design", "Physical Computing", "Voice UX"],
+    slug: "tama",
+    thumb: tamaHero,
+    caseStudyHero: tamaHero,
+    caseStudyGallery: [],
+    caseStudyRich: tamaCaseStudyRich,
+  },
 ];
 
 const FEATURED_SLUGS = [
+  "tama",
   "pulse",
   "eleara",
   "cca-pathfinding",
   "adherence",
   "kits",
-  "dairy-delight",
 ];
 
 /** Desktop 2×3: original 2×2 on the left, newer cards in the right column. */
 const DESKTOP_FEATURED_SLUGS = [
   "eleara",
   "pulse",
-  "cca-pathfinding",
+  "tama",
   "adherence",
   "kits",
-  "dairy-delight",
+  "cca-pathfinding",
 ];
 
 export const featuredProjects = FEATURED_SLUGS.map((slug) =>

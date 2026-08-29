@@ -45,6 +45,13 @@ export default function CaseStudyVideos({
     if (!root) return;
     const els = [...root.querySelectorAll("video")];
     if (!els.length) return;
+    const reducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+    if (reducedMotion) {
+      els.forEach((video) => video.pause());
+      return;
+    }
 
     const io = new IntersectionObserver(
       ([entry]) => {
@@ -184,6 +191,7 @@ export default function CaseStudyVideos({
                     muted
                     playsInline
                     preload="metadata"
+                    aria-label={item.label || `Clip ${i + 1}`}
                     className="case-study-video"
                     style={{
                       width: "100%",
