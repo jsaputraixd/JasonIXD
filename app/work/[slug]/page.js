@@ -8,7 +8,13 @@ import ProjectPageListen from "@/components/ProjectPageListen";
 import CaseStudyVideos from "@/components/CaseStudyVideos";
 import CaseStudyEndcap from "@/components/CaseStudyEndcap";
 import CaseStudyBrowserShell from "@/components/CaseStudyBrowserShell";
+import CaseStudyScrollSection, {
+  CaseStudyReveal,
+} from "@/components/CaseStudyScrollSection";
 import TamaModelViewer from "@/components/TamaModelViewer";
+import TamaConversationSkim from "@/components/TamaConversationSkim";
+import CaseStudyImageGallery from "@/components/CaseStudyImageGallery";
+import TamaBehaviorFlow from "@/components/TamaBehaviorFlow";
 import { projectCaseStudyHeroSrc } from "@/lib/projectMedia";
 
 const ACCENT = "#FF7A29";
@@ -84,24 +90,6 @@ function sectionAnchor(title) {
     .replace(/(^-|-$)/g, "");
 }
 
-function CaseStudyJumpNav({ sections, hasPrototype }) {
-  const links = [
-    ...sections.map((s) => ({ label: s.title, href: `#section-${sectionAnchor(s.title)}` })),
-    ...(hasPrototype ? [{ label: "Prototype", href: "#section-prototype" }] : []),
-    { label: "Reflection", href: "#section-reflection" },
-  ];
-
-  return (
-    <nav className="case-study-jump-nav" aria-label="Case study sections">
-      {links.map((link) => (
-        <a key={link.href} href={link.href} data-cursor="hover" className="case-study-jump-nav__link">
-          {link.label}
-        </a>
-      ))}
-    </nav>
-  );
-}
-
 function CaseStudyLivePrototype({ proto }) {
   if (!proto?.href) return null;
 
@@ -165,8 +153,18 @@ function normalizeCaseStudyImage(entry) {
   return { src: entry.src, alt: entry.alt ?? "" };
 }
 
-function CaseStudyProcessBlock({ block, frameStyle, imagesFirst = true }) {
+function CaseStudyProcessBlock({
+  block,
+  frameStyle,
+  imagesFirst = true,
+  hideFirstParagraph = false,
+}) {
   const images = (block.images ?? []).length > 0 ? (
+    block.gallery ? (
+      <div className={imagesFirst ? "mb-8" : "-mt-2 mb-4"}>
+        <CaseStudyImageGallery images={block.images} />
+      </div>
+    ) : (
     <div className={`flex flex-col gap-10 ${imagesFirst ? "mb-8" : "-mt-2 mb-4"}`}>
       {(block.images ?? []).map((entry) => {
         const { src, alt } = normalizeCaseStudyImage(entry);
@@ -186,29 +184,65 @@ function CaseStudyProcessBlock({ block, frameStyle, imagesFirst = true }) {
         );
       })}
     </div>
+    )
   ) : null;
 
-  const paragraphs = (block.paragraphs ?? []).map((text, i) => (
+  const videos =
+    (block.videos ?? []).length > 0 ? (
+      <div className={imagesFirst ? "mb-8" : "-mt-2 mb-4"}>
+        <CaseStudyVideos
+          videos={block.videos}
+          frameStyle={frameStyle}
+          hideHeader
+        />
+      </div>
+    ) : null;
+
+  const skim = block.skim ? (
+    <div className={imagesFirst ? "mb-8" : "-mt-2 mb-4"}>
+      <TamaConversationSkim kind={block.skim} />
+    </div>
+  ) : null;
+
+  const diagram =
+    block.diagram === "behavior" ? (
+      <div className={imagesFirst ? "mb-8" : "-mt-2 mb-4"}>
+        <TamaBehaviorFlow />
+      </div>
+    ) : null;
+
+  const visibleParagraphs = hideFirstParagraph
+    ? (block.paragraphs ?? []).slice(1)
+    : (block.paragraphs ?? []);
+  const paragraphs = visibleParagraphs.map((text, i) => (
     <p key={i} className="m-0 mb-8 last:mb-0 case-study-prose">
       {text}
     </p>
   ));
 
   return (
-    <div key={block.title}>
-      <CaseStudySubTitle>{block.title}</CaseStudySubTitle>
-      {imagesFirst ? (
-        <>
-          {images}
-          {paragraphs}
-        </>
-      ) : (
-        <>
-          {paragraphs}
-          {images}
-        </>
-      )}
-    </div>
+    <>
+      {imagesFirst ? videos : null}
+      <CaseStudyReveal>
+        <CaseStudySubTitle>{block.title}</CaseStudySubTitle>
+        {imagesFirst ? (
+          <>
+            {skim}
+            {diagram}
+            {images}
+            {paragraphs}
+          </>
+        ) : (
+          <>
+            {paragraphs}
+            {videos}
+            {skim}
+            {diagram}
+            {images}
+          </>
+        )}
+      </CaseStudyReveal>
+    </>
   );
 }
 
@@ -248,7 +282,6 @@ function CaseStudyRichLayout({ project, frameStyle }) {
     videosIntro,
     imagesBeforeText = true,
     highlights,
-    showJumpNav = false,
     showDeckEmbed = true,
     livePrototype,
     extraVideos,
@@ -299,8 +332,9 @@ function CaseStudyRichLayout({ project, frameStyle }) {
           videos={videos}
           frameStyle={frameStyle}
           title={videosTitle}
-        intro={videosIntro}
-      />
+          intro={videosIntro}
+          hideHeader={!videosTitle}
+        />
       </div>
     ) : null;
 
@@ -311,6 +345,17 @@ function CaseStudyRichLayout({ project, frameStyle }) {
         frameStyle={frameStyle}
         title={extraVideosTitle}
         intro={extraVideosIntro}
+      />
+    ) : null;
+
+  const standaloneVideoSection =
+    videos && videos.length > 0 ? (
+      <CaseStudyVideos
+        videos={videos}
+        frameStyle={frameStyle}
+        title={videosTitle}
+        intro={videosIntro}
+        hideHeader
       />
     ) : null;
 
@@ -325,22 +370,33 @@ function CaseStudyRichLayout({ project, frameStyle }) {
       </div>
     ) : null;
 
-  const shouldShowJumpNav = showJumpNav && processSections.length > 1;
+  const hasFinalDesign = (finalDesign?.images ?? []).length > 0;
+  const hasStandaloneVideo =
+    Boolean(videos?.length) && videosPlacement === "afterIntro";
+  const standaloneVideoIndex = hasFinalDesign ? 3 : 2;
+  const processStartIndex =
+    2 + Number(hasFinalDesign) + Number(hasStandaloneVideo);
 
   return (
     <>
-      {(introParagraphs ?? []).length > 0 ? (
-      <div className="mt-10 flex flex-col gap-6">
-        {(introParagraphs ?? []).map((text, i) => (
-          <p key={i} className="m-0 case-study-prose case-study-summary">
-            {text}
-          </p>
-        ))}
-      </div>
-      ) : null}
-
-      <div className={(introParagraphs ?? []).length > 0 ? "mt-12" : "mt-12"}>
-        <CaseStudySectionTitle>Project Overview</CaseStudySectionTitle>
+      <CaseStudyScrollSection
+        id="section-overview"
+        index={1}
+        title="Overview"
+        eyebrow={project.title}
+        summary={(introParagraphs ?? [])[0]}
+        sticky={false}
+        className="case-study-scroll-section--overview"
+      >
+        {(introParagraphs ?? []).length > 1 ? (
+          <div className="flex flex-col gap-6 mb-12">
+            {(introParagraphs ?? []).slice(1).map((text, i) => (
+              <p key={i} className="m-0 case-study-prose case-study-summary">
+                {text}
+              </p>
+            ))}
+          </div>
+        ) : null}
         <div
           className="case-study-prose grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-8"
         >
@@ -352,23 +408,17 @@ function CaseStudyRichLayout({ project, frameStyle }) {
           ))}
         </div>
         <CaseStudyHighlights items={highlights} />
-      </div>
-
-      {shouldShowJumpNav ? (
-        <CaseStudyJumpNav
-          sections={processSections}
-          hasPrototype={
-            (Boolean(videos?.length) && videosPlacement === "afterSection") ||
-            Boolean(livePrototype?.href)
-          }
-        />
-      ) : null}
+      </CaseStudyScrollSection>
 
       {livePrototype?.href ? <CaseStudyLivePrototype proto={livePrototype} /> : null}
 
-      {(finalDesign?.images ?? []).length > 0 ? (
-      <div className="mt-16">
-        <CaseStudySectionTitle>Final Design</CaseStudySectionTitle>
+      {hasFinalDesign ? (
+      <CaseStudyScrollSection
+        id="section-final-design"
+        index={2}
+        title="Final Design"
+        eyebrow={project.title}
+      >
         <div className="flex flex-col gap-10">
           {(finalDesign.images ?? []).map((entry) => {
             const { src, alt } = normalizeCaseStudyImage(entry);
@@ -388,26 +438,40 @@ function CaseStudyRichLayout({ project, frameStyle }) {
             );
           })}
         </div>
-      </div>
+      </CaseStudyScrollSection>
       ) : null}
 
-      {videosPlacement === "afterIntro" ? videoSection : null}
+      {hasStandaloneVideo ? (
+        <CaseStudyScrollSection
+          id="section-prototype"
+          index={standaloneVideoIndex}
+          title={videosTitle || "Prototype"}
+          eyebrow={project.title}
+          summary={videosIntro}
+        >
+          {standaloneVideoSection}
+        </CaseStudyScrollSection>
+      ) : null}
 
       {processSections.length > 0 ? (
-        <div className={processWork?.sections?.length > 0 ? "mt-16 flex flex-col gap-16" : "mt-16"}>
-          {processSections.map((section) => (
-            <div
+        <div>
+          {processSections.map((section, sectionIndex) => (
+            <CaseStudyScrollSection
               key={section.title}
               id={`section-${sectionAnchor(section.title)}`}
+              index={processStartIndex + sectionIndex}
+              title={section.title}
+              eyebrow={project.title}
+              summary={section.blocks?.[0]?.paragraphs?.[0]}
               className="case-study-section-anchor"
             >
-              <CaseStudySectionTitle>{section.title}</CaseStudySectionTitle>
-              {section.blocks.map((block) => (
+              {section.blocks.map((block, blockIndex) => (
                 <CaseStudyProcessBlock
                   key={block.title}
                   block={block}
                   frameStyle={frameStyle}
                   imagesFirst={imagesBeforeText}
+                  hideFirstParagraph={blockIndex === 0}
                 />
               ))}
               {videosPlacement === "afterSection" &&
@@ -420,7 +484,7 @@ function CaseStudyRichLayout({ project, frameStyle }) {
               {modelViewerAfterSection === section.title
                 ? modelViewerSection
                 : null}
-            </div>
+            </CaseStudyScrollSection>
           ))}
         </div>
       ) : null}
@@ -428,8 +492,12 @@ function CaseStudyRichLayout({ project, frameStyle }) {
       {videosPlacement === "afterProcess" ? videoSection : null}
 
       {designSolution?.length > 0 ? (
-        <div className="mt-16">
-          <CaseStudySectionTitle>Design Solution</CaseStudySectionTitle>
+        <CaseStudyScrollSection
+          id="section-design-solution"
+          index={processStartIndex + processSections.length}
+          title="Design Solution"
+          eyebrow={project.title}
+        >
           {designSolution.map((block) => (
             <div key={block.title}>
               <CaseStudySubTitle>{block.title}</CaseStudySubTitle>
@@ -454,7 +522,7 @@ function CaseStudyRichLayout({ project, frameStyle }) {
               </div>
             </div>
           ))}
-        </div>
+        </CaseStudyScrollSection>
       ) : null}
 
       {project.caseStudyDeckPdf ? (

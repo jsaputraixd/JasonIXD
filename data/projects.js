@@ -1936,17 +1936,21 @@ const tamaCaseStudyRich = {
     role: "Product design, interaction, industrial design, prototyping",
   },
   scan: {
-    project: "A physical companion with the presence of an object and the intelligence of a computer.",
-    problem: null,
-    role: null,
+    project:
+      "I built a physical companion with the presence of an object and the intelligence of a computer.",
+    problem:
+      "A corner-of-the-screen assistant would eat the workspace it was supposed to help with.",
+    role: "I designed the behavior, the body, and the conversation loop so vision, voice, and face felt like one character.",
     hard: null,
     change: null,
   },
-  introParagraphs: [],
+  introParagraphs: [
+    "Tama sits on the desk, watches the work in front of you, and answers out loud. I built it to test whether intelligence feels different when it has a body, a face, and a place in the room.",
+  ],
   highlights: [],
   heroFirst: true,
   imagesBeforeText: true,
-  showJumpNav: true,
+  showJumpNav: false,
   showDeckEmbed: false,
   videos: [
     {
@@ -1954,34 +1958,65 @@ const tamaCaseStudyRich = {
       src: `${TM}/tama-demo-illustrator.mp4`,
       label: "Tama responds to work in Adobe Illustrator",
       layout: "wide",
+      autoplaySound: true,
     },
     {
       kind: "file",
       src: `${TM}/tama-demo-outfit.mp4`,
       label: "Tama gives contextual outfit feedback",
       layout: "wide",
+      autoplaySound: true,
     },
   ],
   videosPlacement: "afterSection",
-  videosAfterSection: "In use",
-  videosTitle: "Contextual responses",
+  videosAfterSection: "Final product",
+  videosTitle: null,
   videosIntro: null,
   extraVideos: [
     {
       kind: "file",
-      src: `${TM}/tama-face-demo.mp4`,
-      label: "Face states in motion",
-      layout: "wide",
+      src: `${TM}/tama-state-idle.mp4`,
+      label: "Idle / observing",
+      layout: "tile",
+      loop: true,
+    },
+    {
+      kind: "file",
+      src: `${TM}/tama-state-listening.mp4`,
+      label: "Listening",
+      layout: "tile",
+      loop: true,
+    },
+    {
+      kind: "file",
+      src: `${TM}/tama-state-thinking.mp4`,
+      label: "Thinking",
+      layout: "tile",
+      loop: true,
+    },
+    {
+      kind: "file",
+      src: `${TM}/tama-state-speaking.mp4`,
+      label: "Speaking",
+      layout: "tile",
+      loop: true,
+    },
+    {
+      kind: "file",
+      src: `${TM}/tama-state-sleep.mp4`,
+      label: "Mute / sleep",
+      layout: "tile",
+      loop: true,
     },
   ],
-  extraVideosAfterSection: "States and physical controls",
-  extraVideosTitle: "Interaction in motion",
+  extraVideosAfterSection: "Final product",
+  extraVideosTitle: "States and physical controls",
   extraVideosIntro: null,
-  modelViewerAfterSection: "In use",
+  modelViewerAfterSection: "Final product",
   modelViewer: {
     title: "Explore Tama",
     intro:
-      "Rotate the product or switch to the cutaway to inspect its internal construction.",
+      "I included an exterior and a cutaway so you can rotate the product or inspect its internal construction.",
     variants: [
       {
         label: "Exterior",
@@ -1998,11 +2033,7 @@ const tamaCaseStudyRich = {
   processWork: {
     sections: [
       {
-        title: "States and physical controls",
-        blocks: [],
-      },
-      {
-        title: "In use",
+        title: "Final product",
         blocks: [],
       },
       {
@@ -2011,25 +2042,18 @@ const tamaCaseStudyRich = {
           {
             title: "Giving visual intelligence a body",
             paragraphs: [
-              "Gemini Robotics made it possible to recognize objects and understand a changing scene, not just respond to text. My first question was not how to make another assistant. It was how that kind of awareness could become a companion you can see, hear, and interact with in the same space.",
-              "Tama began as an experiment in embodiment. The goal was to connect visual understanding, conversation, expression, and physical form so the intelligence felt like one character rather than a collection of features.",
+              "I started from Gemini Robotics because it could recognize objects and understand a changing scene, not just respond to text. I asked how that awareness could become a companion you can see, hear, and interact with in the same space — not another assistant.",
+              "I built Tama as an experiment in embodiment. I connected visual understanding, conversation, expression, and physical form so the intelligence felt like one character rather than a collection of features.",
             ],
             images: [],
-          },
-        ],
-      },
-      {
-        title: "Initial prototype",
-        blocks: [
-          {
-            title: "Sketching the first form",
-            paragraphs: [
-              "The first prototype sketch established Tama as a compact character built around a face, one clear action button, and a stable desk base. It gave me an initial proportion and interaction hierarchy to develop in CAD.",
-            ],
-            images: [
+            videos: [
               {
-                src: tamaAsset("tama-cad-early.jpg"),
-                alt: "Early orthographic: cream body, coral base, red top button. The first form, before the printed green shell.",
+                kind: "file",
+                src: `${tamaAsset("tama-first-software-test.mp4")}?v=2`,
+                poster: tamaAsset("tama-first-software-test.jpg"),
+                label: "First software test",
+                layout: "wide",
+                autoplaySound: true,
               },
             ],
           },
@@ -2042,7 +2066,7 @@ const tamaCaseStudyRich = {
             title: "Presence cannot be pinned to a corner",
             paragraphs: [
               "I considered making Tama a digital character that lived in the corner of the desktop. That would have been easier, but it would permanently consume screen space and compete with the work it was supposed to support.",
-              "A physical companion creates a different relationship. Its face can meet your gaze, its voice comes from a place in the room, and it remains present even when the screen changes. That spatial continuity makes an exchange feel more personal than talking to another panel inside the computer.",
+              "I made Tama physical so its face could meet your gaze, its voice could come from a place in the room, and it could stay present when the screen changed. That spatial continuity made the exchange feel more personal than talking to another panel inside the computer.",
             ],
             images: [
               {
@@ -2059,14 +2083,11 @@ const tamaCaseStudyRich = {
           {
             title: "Every state needed an answer",
             paragraphs: [
-              "I mapped the end-to-end behavior before designing the expressions. The flowchart exposed every transition, fallback, and control response the face system needed to communicate.",
-              "I then designed each expression in Figma and mapped it to a system state. An open-source robotics face framework provided the animation foundation, and I used AI-assisted coding to integrate the state logic into the working software.",
+              "I mapped the end-to-end behavior before designing the expressions so every transition, fallback, and control response had a face state to communicate it.",
+              "I designed each expression in Figma and mapped it to a system state. I used an open-source robotics face framework as the animation foundation, then used AI-assisted coding to integrate the state logic into the working software.",
             ],
+            diagram: "behavior",
             images: [
-              {
-                src: tamaAsset("tama-behavior-flow-hifi.png"),
-                alt: "Early Tama behavior flowchart connecting observing, wake and push-to-talk listening, transcription, thinking, speaking, and recovery states.",
-              },
               {
                 src: tamaAsset("tama-face-states.png"),
                 alt: "Complete Tama face system: idle, listening, thinking, speaking, blink, directional glances, sleep, wake, and wake-look reactions.",
@@ -2081,15 +2102,28 @@ const tamaCaseStudyRich = {
           {
             title: "Latency is part of the personality",
             paragraphs: [
-              "Long pauses break the feeling of a conversation, so response time became a design constraint rather than a background metric. I used Edge TTS for fast, natural speech and tuned the response pipeline to keep the delay as short as possible without sacrificing the quality of the answer.",
-              "When Tama does need longer, it acknowledges the wait instead of going silent. I also constrained responses to stay concise, personal, and expressive. BMO from Adventure Time was the personality reference: playful and emotionally present, but still useful.",
+              "I treated response time as a design constraint because long pauses break the feeling of a conversation. I used Edge TTS and tuned the pipeline to keep the delay as short as possible without sacrificing the quality of the answer.",
+              "I made Tama acknowledge the wait instead of going silent. I constrained responses to stay concise, personal, and expressive, using BMO from Adventure Time as the personality reference: playful and emotionally present, but still useful.",
             ],
-            images: [
-              {
-                src: tamaAsset("tama-face-mouths.jpg"),
-                alt: "Mouth states used to give Tama a restrained speaking animation.",
-              },
+            skim: "wait",
+            images: [],
+          },
+          {
+            title: "Measured wait",
+            paragraphs: [
+              "I timed the first successful Gemini call at 9.97 seconds of model time. I set thinking to minimal on the same frame to cut that to 4.05 seconds — about 59% faster thinking, with thinner scene detail as the tradeoff.",
+              "I did not make the cloud faster by making Tama physical. I used trigger-only vision, a downscaled screenshot, local STT, and a face plus fillers so an 8–10 second wait felt like a creature thinking instead of a spinner.",
             ],
+            skim: "latency",
+            images: [],
+          },
+          {
+            title: "API footprint",
+            paragraphs: [
+              "I kept the cloud cheap so Tama could stay a prototype. 40 requests over 28 days, every one succeeded, 9 cents on the chart.",
+            ],
+            skim: "api",
+            images: [],
           },
         ],
       },
@@ -2099,7 +2133,7 @@ const tamaCaseStudyRich = {
           {
             title: "Nine passes to make the form work",
             paragraphs: [
-              "This was my first time designing a complete object in 3D. I worked through the front, sides, base, button opening, speaker grilles, and rear access as one form rather than treating the enclosure as a box around the electronics.",
+              "This was my first time designing a complete object in 3D. I worked through the front, sides, base, button opening, speaker grilles, and rear access as one form so the enclosure was not just a box around the electronics.",
             ],
             images: [
               {
@@ -2111,8 +2145,8 @@ const tamaCaseStudyRich = {
           {
             title: "Designing from the inside out",
             paragraphs: [
-              "I modeled every physical component at its real dimensions before printing. The display, Pico, speaker, controls, and wiring space became constraints inside the CAD model. I also checked the real display against its digital stand-in before committing to the shell.",
-              "The rear hatch became a removable access panel and a sticky-note holder, turning a maintenance requirement into part of the desk experience.",
+              "I modeled every physical component at its real dimensions before printing so the display, Pico, speaker, controls, and wiring space became constraints inside the CAD model. I checked the real display against its digital stand-in before committing to the shell.",
+              "I turned the rear hatch into a removable access panel and a sticky-note holder so a maintenance requirement became part of the desk experience.",
             ],
             images: [
               {
@@ -2124,12 +2158,15 @@ const tamaCaseStudyRich = {
           {
             title: "From model to first fit",
             paragraphs: [
-              "I printed the enclosure, learned to solder at the CCA Hybrid Lab, assembled the electronics, and installed everything in the shell. The first full print fit correctly, validating the component measurements and internal layout before final assembly.",
+              "I printed the enclosure, learned to solder at the CCA Hybrid Lab, assembled the electronics, and installed everything in the shell. The first full print fit correctly, which validated the component measurements and internal layout before final assembly.",
             ],
-            images: [
+            images: [],
+            videos: [
               {
-                src: tamaAsset("tama-fabrication-sequence.jpg"),
-                alt: "The enclosure moving from the first printed layers to the completed bare shell from four angles.",
+                kind: "file",
+                src: tamaAsset("tama-printing.mp4"),
+                label: "Printing the enclosure",
+                layout: "wide",
               },
             ],
           },
@@ -2139,9 +2176,9 @@ const tamaCaseStudyRich = {
   },
   conclusionTitle: "Reflection",
   conclusion:
-    "Building Tama forced interaction design, industrial design, electronics, and conversation timing to work as one system.",
+    "I had to make interaction design, industrial design, electronics, and conversation timing work as one system.",
   nextSteps:
-    "Compare Tama with a screen-based version to test whether physical form changes how people engage with the same intelligence.",
+    "I want to compare Tama with a screen-based version to test whether physical form changes how people engage with the same intelligence.",
 };
 
 export const projects = [
