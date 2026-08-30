@@ -913,7 +913,7 @@ const PL = `${P}/Pulse`;
 function pulseSlide(n) {
   return `${PL}/slides/pulse-slide-${String(n).padStart(2, "0")}.jpg`;
 }
-const pulseHero = `${PL}/Pulse-hero.png`;
+const pulseHero = `${PL}/Pulse-hero-v2.png`;
 
 const pulseCaseStudyRich = {
   overview: {

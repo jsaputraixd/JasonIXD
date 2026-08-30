@@ -15,6 +15,7 @@ import TamaModelViewer from "@/components/TamaModelViewer";
 import TamaConversationSkim from "@/components/TamaConversationSkim";
 import CaseStudyImageGallery from "@/components/CaseStudyImageGallery";
 import TamaBehaviorFlow from "@/components/TamaBehaviorFlow";
+import CaseStudyZoomImage from "@/components/CaseStudyZoomImage";
 import { projectCaseStudyHeroSrc } from "@/lib/projectMedia";
 
 const ACCENT = "#FF7A29";
@@ -153,6 +154,20 @@ function normalizeCaseStudyImage(entry) {
   return { src: entry.src, alt: entry.alt ?? "" };
 }
 
+const zoomImgStyle = {
+  width: "100%",
+  height: "auto",
+  display: "block",
+};
+
+function FramedCaseStudyImage({ src, alt, frameStyle }) {
+  return (
+    <div style={frameStyle}>
+      <CaseStudyZoomImage src={src} alt={alt} imgStyle={zoomImgStyle} />
+    </div>
+  );
+}
+
 function CaseStudyProcessBlock({
   block,
   frameStyle,
@@ -169,18 +184,12 @@ function CaseStudyProcessBlock({
       {(block.images ?? []).map((entry) => {
         const { src, alt } = normalizeCaseStudyImage(entry);
         return (
-          <div key={src} style={frameStyle}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={encodeURI(src)}
-              alt={alt}
-              style={{
-                width: "100%",
-                height: "auto",
-                display: "block",
-              }}
-            />
-          </div>
+          <FramedCaseStudyImage
+            key={src}
+            src={src}
+            alt={alt}
+            frameStyle={frameStyle}
+          />
         );
       })}
     </div>
@@ -248,18 +257,16 @@ function CaseStudyProcessBlock({
 
 function CaseStudyHeroFade({ hero, slug }) {
   return (
-    <div
+    <CaseStudyZoomImage
+      src={hero}
+      displaySrc={projectCaseStudyHeroSrc(hero)}
+      alt=""
       className="case-study-hero-fade"
       style={{ viewTransitionName: projectHeroTransitionName(slug) }}
+      imgClassName="case-study-hero-fade__img"
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        className="case-study-hero-fade__img"
-        src={projectCaseStudyHeroSrc(hero)}
-        alt=""
-      />
       <div className="case-study-hero-fade__overlay" aria-hidden />
-    </div>
+    </CaseStudyZoomImage>
   );
 }
 
@@ -423,18 +430,12 @@ function CaseStudyRichLayout({ project, frameStyle }) {
           {(finalDesign.images ?? []).map((entry) => {
             const { src, alt } = normalizeCaseStudyImage(entry);
             return (
-              <div key={src} style={frameStyle}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={encodeURI(src)}
-                  alt={alt}
-                  style={{
-                    width: "100%",
-                    height: "auto",
-                    display: "block",
-                  }}
-                />
-              </div>
+              <FramedCaseStudyImage
+                key={src}
+                src={src}
+                alt={alt}
+                frameStyle={frameStyle}
+              />
             );
           })}
         </div>
@@ -505,18 +506,12 @@ function CaseStudyRichLayout({ project, frameStyle }) {
                 {(block.images ?? []).map((entry) => {
                   const { src, alt } = normalizeCaseStudyImage(entry);
                   return (
-                    <div key={src} style={frameStyle}>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={encodeURI(src)}
-                        alt={alt}
-                        style={{
-                          width: "100%",
-                          height: "auto",
-                          display: "block",
-                        }}
-                      />
-                    </div>
+                    <FramedCaseStudyImage
+                      key={src}
+                      src={src}
+                      alt={alt}
+                      frameStyle={frameStyle}
+                    />
                   );
                 })}
               </div>
@@ -718,11 +713,11 @@ export default async function ProjectPage({ params }) {
               viewTransitionName: projectHeroTransitionName(project.slug),
             }}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={projectCaseStudyHeroSrc(hero)}
+            <CaseStudyZoomImage
+              src={hero}
+              displaySrc={projectCaseStudyHeroSrc(hero)}
               alt=""
-              style={{
+              imgStyle={{
                 width: "100%",
                 height: "auto",
                 display: "block",
@@ -766,18 +761,12 @@ export default async function ProjectPage({ params }) {
         {!rich && gallery.length > 0 ? (
           <div className="mt-12 flex flex-col gap-10">
             {gallery.map((src, i) => (
-              <div key={src} style={frameStyle}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={encodeURI(src)}
-                  alt={`${project.title}, frame ${i + 1}`}
-                  style={{
-                    width: "100%",
-                    height: "auto",
-                    display: "block",
-                  }}
-                />
-              </div>
+              <FramedCaseStudyImage
+                key={src}
+                src={src}
+                alt={`${project.title}, frame ${i + 1}`}
+                frameStyle={frameStyle}
+              />
             ))}
           </div>
         ) : null}
