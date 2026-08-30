@@ -11,7 +11,7 @@ const FOLLOW_X = 0.05;
 const FOLLOW_Y = 0.16;
 const LERP = 0.18;
 const LEAVE_MS = 90;
-const PEEK_W = 286;
+const PEEK_W = 400;
 
 function clamp(n, lo, hi) {
   return Math.max(lo, Math.min(hi, n));
@@ -20,12 +20,37 @@ function clamp(n, lo, hi) {
 function peekSize(layoutScale) {
   const s = layoutScale;
   return {
-    width: Math.round(PEEK_W * Math.min(1, Math.max(0.86, s))),
-    title: Math.max(11, Math.round(13 * s)),
-    body: Math.max(12, Math.round(13 * s)),
-    tags: Math.max(10, Math.round(11 * s)),
-    pad: Math.max(8, Math.round(10 * s)),
+    width: Math.round(PEEK_W * Math.min(1, Math.max(0.88, s))),
+    title: Math.max(14, Math.round(16 * s)),
+    body: Math.max(15, Math.round(16 * s)),
+    tags: Math.max(12, Math.round(13 * s)),
+    pad: Math.max(12, Math.round(14 * s)),
   };
+}
+
+function targetAboveCard(rect, cursor, width, height, vw, vh) {
+  const followX = clamp(
+    (cursor.x - (rect.left + rect.width / 2)) * FOLLOW_X,
+    -12,
+    12
+  );
+  const followY = clamp(
+    (cursor.y - (rect.top + rect.height / 2)) * FOLLOW_Y,
+    -10,
+    10
+  );
+
+  let x = rect.left + (rect.width - width) / 2 + followX;
+  let y = rect.top - GAP - height + followY;
+
+  if (y < 10) {
+    return targetBesideCard(rect, cursor, width, height, vw, vh);
+  }
+
+  x = clamp(x, 10, Math.max(10, vw - width - 10));
+  y = clamp(y, 10, Math.max(10, vh - height - 10));
+
+  return { x, y, placeRight: true, fromAbove: true };
 }
 
 function targetBesideCard(rect, cursor, width, height, vw, vh) {
@@ -117,16 +142,30 @@ export default function ProjectHoverPeek({
       }
 
       const rect = hit.getBoundingClientRect();
-      const nextTarget = targetBesideCard(
-        rect,
-        { x: e.clientX, y: e.clientY },
-        size.width,
-        measureHeight(),
-        window.innerWidth,
-        window.innerHeight
-      );
+      const preferAbove = hit.getAttribute("data-peek-placement") === "above";
+      const nextTarget = preferAbove
+        ? targetAboveCard(
+            rect,
+            { x: e.clientX, y: e.clientY },
+            size.width,
+            measureHeight(),
+            window.innerWidth,
+            window.innerHeight
+          )
+        : targetBesideCard(
+            rect,
+            { x: e.clientX, y: e.clientY },
+            size.width,
+            measureHeight(),
+            window.innerWidth,
+            window.innerHeight
+          );
       target.current = nextTarget;
-      originRef.current = nextTarget.placeRight ? "left center" : "right center";
+      originRef.current = nextTarget.fromAbove
+        ? "bottom center"
+        : nextTarget.placeRight
+          ? "left center"
+          : "right center";
 
       if (slugRef.current !== next) {
         setSlug(next);

@@ -465,7 +465,7 @@ function CaseStudyRichLayout({ project, frameStyle }) {
               summary={section.blocks?.[0]?.paragraphs?.[0]}
               className="case-study-section-anchor"
             >
-              {section.blocks.map((block, blockIndex) => (
+              {(section.blocks ?? []).map((block, blockIndex) => (
                 <CaseStudyProcessBlock
                   key={block.title}
                   block={block}

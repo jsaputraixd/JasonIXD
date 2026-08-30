@@ -6,6 +6,9 @@ import { projectCardThumbSrc, projectCarouselThumbSrc } from "@/lib/projectMedia
 import { DESKTOP_PROJECT_CARD_ASPECT } from "@/lib/projectDesktopCards";
 import { playClick, notePointerHover } from "@/lib/typingSound";
 
+/** Per-project crop so wordmarks land in the card instead of getting clipped. */
+const PROJECT_CARD_CROP = {};
+
 export const PROJECT_CARD_GRADIENTS = [
   "linear-gradient(135deg, #4a1f0a 0%, #1a0a05 60%, #0a0505 100%)",
   "linear-gradient(135deg, #4a2818 0%, #1f0e08 60%, #0a0505 100%)",
@@ -70,6 +73,7 @@ export default function ProjectFlipCard({
   const cardH = frameHeight ?? Math.round(innerW / aspect);
 
   const heroSrc = project.thumb ?? project.caseStudyHero ?? null;
+  const crop = PROJECT_CARD_CROP[project.slug] ?? null;
   const hoverTimerRef = useRef(null);
 
   const clearHoverTimer = () => {
@@ -155,7 +159,9 @@ export default function ProjectFlipCard({
                   width: "100%",
                   height: "100%",
                   objectFit: "cover",
-                  objectPosition: "center",
+                  objectPosition: crop?.objectPosition ?? "center",
+                  transform: crop?.scale ? `scale(${crop.scale})` : undefined,
+                  transformOrigin: crop?.objectPosition ?? "center",
                 }}
               />
               <div

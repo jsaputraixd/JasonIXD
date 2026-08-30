@@ -104,6 +104,10 @@ export default function Window({
           dragMomentum={false}
           dragElastic={0}
           dragConstraints={dragConstraints}
+          onPointerEnter={() => {
+            if (!interactive) return;
+            onFocus?.(id);
+          }}
           onPointerDown={() => {
             if (!interactive) return;
             playClick();
@@ -162,6 +166,9 @@ export default function Window({
             style={{
               position: "relative",
               zIndex: 1,
+              height: height != null ? "100%" : undefined,
+              display: height != null ? "flex" : undefined,
+              flexDirection: height != null ? "column" : undefined,
               background: "rgba(18, 12, 8, 0.92)",
               border: "1px solid rgba(255, 122, 41, 0.55)",
               borderRadius: 3,
@@ -184,6 +191,7 @@ export default function Window({
               style={{
                 display: "flex",
                 alignItems: "center",
+                flexShrink: 0,
                 width: "100%",
                 boxSizing: "border-box",
                 background: isHeld
@@ -259,7 +267,12 @@ export default function Window({
               )}
             </div>
 
-            <div style={{ position: "relative" }}>{children}</div>
+            <div
+              className={height != null ? "os-window-body os-window-body--fill" : "os-window-body"}
+              style={{ position: "relative" }}
+            >
+              {children}
+            </div>
           </div>
           </div>
         </motion.div>

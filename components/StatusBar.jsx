@@ -15,14 +15,7 @@ const FOOTER_MUTED = "#FFC896";
 const MOBILE_BREAK = 900;
 const BUILD_LABEL = "JS-OS · v1.6";
 
-/**
- * @param {{ id: string, title: string }[]} [minimizedWindows]
- * @param {(id: string) => void} [onRestoreWindow]
- */
-export default function StatusBar({
-  minimizedWindows = [],
-  onRestoreWindow,
-}) {
+export default function StatusBar() {
   const [time, setTime] = useState("--:--:--");
   const [isMobile, setIsMobile] = useState(false);
   const quote = useMemo(() => getQuoteOfDay(), []);
@@ -151,63 +144,6 @@ export default function StatusBar({
           </>
         ) : null}
       </motion.div>
-
-      {minimizedWindows.length > 0 ? (
-        <motion.div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-            padding: isMobile ? "6px 10px 5px" : "6px 12px 5px",
-            borderBottom: "1px solid rgba(255, 122, 41, 0.2)",
-            background: "rgba(0, 0, 0, 0.35)",
-            overflowX: "auto",
-            pointerEvents: "auto",
-          }}
-        >
-          <span
-            style={{
-              flexShrink: 0,
-              fontFamily: "'VT323', monospace",
-              fontSize: isMobile ? 11 : 13,
-              letterSpacing: "0.2em",
-              textTransform: "uppercase",
-              color: "#FF9F5A",
-            }}
-          >
-            ▢ Minimized
-          </span>
-          {minimizedWindows.map(({ id, title }) => (
-            <button
-              key={id}
-              type="button"
-              data-cursor="hover"
-              onClick={() => onRestoreWindow?.(id)}
-              style={{
-                flexShrink: 0,
-                margin: 0,
-                padding: isMobile ? "3px 8px" : "4px 10px",
-                border: "1px solid rgba(255, 122, 41, 0.45)",
-                borderRadius: 2,
-                background: "rgba(255, 122, 41, 0.12)",
-                fontFamily: "'VT323', monospace",
-                fontSize: isMobile ? 12 : 13,
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-                color: ACCENT,
-                cursor: "pointer",
-                textShadow: "0 0 6px rgba(255, 122, 41, 0.4)",
-                maxWidth: isMobile ? 120 : 160,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {title}
-            </button>
-          ))}
-        </motion.div>
-      ) : null}
 
       {!isMobile ? (
         <motion.div

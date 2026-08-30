@@ -25,7 +25,8 @@ import { projectHeroTransitionName } from "@/lib/viewTransition";
 import DesktopIdleLayer from "./DesktopIdleLayer";
 import SkillsPlanet, { desktopGlobeBox, portraitOrbitBox } from "./SkillsPlanet";
 import ProjectHoverPeek from "./ProjectHoverPeek";
-import { desktopFeaturedProjects } from "@/data/projects";
+import { carouselProjects, desktopFeaturedProjects } from "@/data/projects";
+import ProjectDockCarousel from "@/components/ProjectDockCarousel";
 import { about } from "@/data/about";
 import WelcomeReadAloud from "@/components/WelcomeReadAloud";
 import DesktopFolderIcon from "@/components/DesktopFolderIcon";
@@ -37,14 +38,15 @@ import ProjectFlipCard, {
 import { otherStuff } from "@/data/otherStuff";
 import { otherProjects } from "@/data/otherProjects";
 import {
-  BOTTOM_RESERVE,
   DESKTOP_FOLDER_ICON_W,
   getDeterministicDesktopPositions,
+  identityWindowHeight,
   LEFT_COLUMN_INSET,
+  PROJECT_DOCK_H,
   PROJECT_GRID_LEFT_GAP,
-  PROJECT_GRID_LIFT,
   PROJECT_WINDOW_GAP,
   RIGHT_RESERVE,
+  STATUS_BAR_RESERVE,
 } from "@/lib/desktopWindowPlacement";
 import {
   fitProjectCardsToBounds,
@@ -83,8 +85,6 @@ const EASE = [0.16, 1, 0.3, 1];
 const SKILLS_FOCUS_BACKDROP_Z = 480;
 const SKILLS_FOCUS_GLOBE_Z = 481;
 const SKILLS_FOCUS_HINT_Z = 482;
-
-const WELCOME_HEIGHT_GUESS = 380;
 
 function getWindowTitle(id) {
   switch (id) {
@@ -169,12 +169,15 @@ function getDesktopLayout(vw, vh) {
   const gridMinLeft = edge + leftColumnInset + W.me + projectLeftGap;
   const gridMaxRight = vw - edge - RIGHT_RESERVE;
   const maxGridW = Math.max(0, gridMaxRight - gridMinLeft);
+  const identityH = identityWindowHeight(layoutScale);
   const maxGridH = Math.max(
     0,
     vh -
-      BOTTOM_RESERVE -
-      Math.round(PROJECT_GRID_LIFT * layoutScale) -
-      topBand
+      STATUS_BAR_RESERVE -
+      PROJECT_DOCK_H -
+      identityH -
+      topBand -
+      32
   );
   projectCards = fitProjectCardsToBounds(projectCards, layoutScale, {
     maxGridW,
@@ -445,11 +448,6 @@ export default function Desktop() {
     [minimizedIds]
   );
 
-  const minimizedTaskbarItems = useMemo(
-    () => minimizedIds.map((id) => ({ id, title: getWindowTitle(id) })),
-    [minimizedIds]
-  );
-
   const zOf = (id, base) => zMap[id] ?? base;
 
   useEffect(() => {
@@ -508,6 +506,7 @@ export default function Desktop() {
     () => getDesktopLayout(vwSafe, vhSafe),
     [vwSafe, vhSafe]
   );
+  const identityH = identityWindowHeight(layoutScale);
 
   const otherStuffWindowWidth = otherStuffBrowsing
     ? Math.round(W.otherStuff * 1.55)
@@ -668,7 +667,7 @@ export default function Desktop() {
               x:
                 pos.welcome.left + W.welcome / 2 - vw / 2,
               y:
-                pos.welcome.top + WELCOME_HEIGHT_GUESS / 2 - vh / 2,
+                pos.welcome.top + identityH / 2 - vh / 2,
             }}
           />
         )}
@@ -682,6 +681,7 @@ export default function Desktop() {
           left={pos.welcome.left}
           top={pos.welcome.top}
           width={W.welcome}
+          height={identityH}
           delay={0}
           playOpenSound={false}
           zIndex={zOf("welcome", 12)}
@@ -710,6 +710,7 @@ export default function Desktop() {
           left={pos.me.left}
           top={pos.me.top}
           width={W.me}
+          height={identityH}
           delay={cascadeDelay(0.45)}
           zIndex={skillsFocused ? 36 : zOf("me", 13)}
           onFocus={bringToFront}
@@ -723,6 +724,7 @@ export default function Desktop() {
         >
           <MeTxtBody
             frameWidth={W.me}
+            frameHeight={identityH}
             layoutScale={layoutScale}
             portraitActive={skillsFocused}
             onPortraitHoverStart={openSkillsFocus}
@@ -879,8 +881,7 @@ export default function Desktop() {
           zIndex={zOf("otherStuff", 22)}
           onFocus={bringToFront}
           interactive
-          minimized={isMinimized("otherStuff")}
-          onMinimize={() => minimizeWindow("otherStuff")}
+          onMinimize={() => setOtherStuffOpen(false)}
           dragConstraints={stageRef}
           parallaxDepth={depth.otherStuff}
           uiScale={layoutScale}
@@ -906,8 +907,7 @@ export default function Desktop() {
           zIndex={zOf("otherProjects", 22)}
           onFocus={bringToFront}
           interactive
-          minimized={isMinimized("otherProjects")}
-          onMinimize={() => minimizeWindow("otherProjects")}
+          onMinimize={() => setOtherProjectsOpen(false)}
           dragConstraints={stageRef}
           parallaxDepth={depth.otherProjects}
           uiScale={layoutScale}
@@ -947,19 +947,21 @@ export default function Desktop() {
         </Window>
       ) : null}
       {showOtherWindows ? (
+        <ProjectDockCarousel
+          leftInset={
+            pos.otherProjectsIcon.left + pos.otherProjectsIcon.width + 16
+          }
+          layoutScale={layoutScale}
+        />
+      ) : null}
+      {showOtherWindows ? (
         <ProjectHoverPeek
-          projects={desktopFeaturedProjects}
+          projects={[...desktopFeaturedProjects, ...carouselProjects]}
           enabled={phase === "dashboard"}
           layoutScale={layoutScale}
         />
       ) : null}
-      <StatusBar
-        minimizedWindows={minimizedTaskbarItems}
-        onRestoreWindow={(id) => {
-          restoreWindow(id);
-          bringToFront(id);
-        }}
-      />
+      <StatusBar />
       {phase === "dashboard" && <DesktopIdleLayer />}
     </div>
   );
@@ -1030,6 +1032,7 @@ function WelcomeIntroMorph({ phase, typed, targetOffset }) {
 
 function MeTxtBody({
   frameWidth,
+  frameHeight,
   layoutScale = 1,
   onPortraitHoverStart,
   onPortraitHoverEnd,
@@ -1038,11 +1041,18 @@ function MeTxtBody({
   const s = layoutScale;
   const inset = Math.max(18, Math.round(26 * s));
   const isDesktop = frameWidth != null;
+  const titleBar = Math.max(26, Math.round(28 * s));
+  const padY = Math.round(12 * s) + Math.round(14 * s);
+  const captionH = Math.round(28 * s);
+  const maxPortrait =
+    frameHeight != null
+      ? Math.max(96, frameHeight - titleBar - padY - captionH)
+      : Math.round(200 * s);
   const inner =
     frameWidth != null
       ? Math.max(
           Math.round(118 * s),
-          Math.min(Math.round(200 * s), frameWidth - inset)
+          Math.min(maxPortrait, frameWidth - inset)
         )
       : null;
   const box =
@@ -1050,19 +1060,19 @@ function MeTxtBody({
       ? { width: `${inner}px`, height: `${inner}px` }
       : { width: "min(220px, 72vw)", height: "min(220px, 72vw)" };
   const bioSize = isDesktop ? Math.max(13, Math.round(15 * s)) : 14;
-  const bioPad = isDesktop ? Math.round(8 * s) : 12;
+  const bioPad = isDesktop ? Math.round(10 * s) : 12;
   const portraitInteractive = typeof onPortraitHoverStart === "function";
   const reduceMotion = useReducedMotion();
   const orbitBox = inner != null ? portraitOrbitBox(inner) : null;
 
   return (
     <div
+      className="me-txt-body"
       style={{
         padding: `${Math.round(12 * s)}px ${Math.round(10 * s)}px ${Math.round(14 * s)}px`,
-        overflow: "visible",
       }}
     >
-      <div style={{ textAlign: "center", overflow: "visible" }}>
+      <div className="me-txt-portrait-wrap" style={{ overflow: "visible" }}>
         <div
           style={{
             ...box,
@@ -1152,7 +1162,8 @@ function MeTxtBody({
         </div>
         <p
           style={{
-            margin: `${Math.round(10 * s)}px 0 0`,
+            margin: `${Math.round(8 * s)}px 0 0`,
+            flexShrink: 0,
             fontFamily: "'VT323', monospace",
             fontSize: Math.max(10, Math.round(13 * s)),
             letterSpacing: "0.32em",
@@ -1164,18 +1175,23 @@ function MeTxtBody({
           It&apos;s me :D
         </p>
       </div>
-      <p
-        style={{
-          margin: `${bioPad}px 0 0`,
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: bioSize,
-          lineHeight: 1.65,
-          color: "rgba(255, 255, 255, 0.92)",
-          textAlign: "left",
-        }}
-      >
-        {about.bioDesktop ?? about.bio}
-      </p>
+      <div className="me-txt-drawer">
+        <div className="me-txt-drawer__panel">
+          <p
+            style={{
+              margin: 0,
+              padding: `${bioPad}px ${Math.round(12 * s)}px ${Math.round(12 * s)}px`,
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: bioSize,
+              lineHeight: 1.6,
+              color: "rgba(255, 255, 255, 0.92)",
+              textAlign: "left",
+            }}
+          >
+            {about.bioDesktop ?? about.bio}
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
@@ -1204,6 +1220,8 @@ function WelcomeBody({
     <div
       style={{
         position: "relative",
+        boxSizing: "border-box",
+        height: "100%",
         padding: `${px(20 * s)}px ${px(22 * s)}px ${px(22 * s)}px`,
       }}
     >

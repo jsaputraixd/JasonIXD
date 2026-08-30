@@ -48,7 +48,7 @@ function simpleGalleryCaseStudy({
     scan: scan ?? null,
     heroFirst: true,
     imagesBeforeText: true,
-    showJumpNav,
+    showJumpNav: false,
     showDeckEmbed: false,
     videos: videos ?? [],
     videosPlacement: videosPlacement ?? "afterIntro",
@@ -88,22 +88,17 @@ const dreamDetectiveCaseStudyRich = {
     role: "End-to-end product design",
   },
   scan: {
-    project: "Episodic audio mystery used as an alarm.",
-    problem: "No stake at wake-up; oversleeping costs nothing.",
-    role: null,
-    hard: "Pairing story pull with real loss, not another streak counter.",
-    change: "Cold Trail: snooze once and that morning's chapter is gone.",
+    project:
+      "I built an alarm that unlocks the next chapter of a mystery, so waking up is the only way to hear what happens next.",
+    problem: "Oversleeping costs nothing, so snooze always wins.",
+    role: "I designed the behavior, the Office world, and Cold Trail so missing the morning means missing the beat.",
+    hard: null,
+    change: null,
   },
   introParagraphs: [
-    "Most alarm apps beg for willpower. Dream Detective bribes you with plot. Miss the wake-up and today's chapter dies. No snooze. No spoilers. No mercy.",
-    "I owned this solo from research and behavioral framing through visual system, AI-assisted art direction, PRD, and interactive prototype.",
+    "Most alarms ask for willpower. I used plot instead. Miss the wake-up and that morning's chapter dies.",
   ],
-  highlights: [
-    {
-      label: "Core insight",
-      value: "Sleep isn't a tracking problem for students, it's a motivation problem at wake-up time.",
-    },
-  ],
+  highlights: [],
   heroFirst: true,
   imagesBeforeText: true,
   showJumpNav: false,
@@ -116,20 +111,23 @@ const dreamDetectiveCaseStudyRich = {
     },
   ],
   videosPlacement: "afterSection",
-  videosAfterSection: "Design",
-  videosTitle: "Interactive prototype",
-  videosIntro:
-    "Interactive Figma prototype: spatial Office navigation and both wake-up outcomes, Intel Secured or locked out.",
+  videosAfterSection: "Final product",
+  videosTitle: null,
+  videosIntro: null,
   processWork: {
     sections: [
       {
-        title: "Overview",
+        title: "Final product",
+        blocks: [],
+      },
+      {
+        title: "The starting point",
         blocks: [
           {
-            title: "Problem",
+            title: "Nothing is at stake at 7am",
             paragraphs: [
-              "College students know sleep matters, but staying up late feels low-stakes, and alarms offer no reason to get up early. Snooze wins because nothing is at stake.",
-              "The brief: design an app that creates lasting behavior change. I reframed it as motivation design, not notification design.",
+              "College students know sleep matters, but staying up late feels cheap, and alarms give you no reason to get up. Snooze wins because nothing is lost.",
+              "The brief asked for lasting behavior change. I treated it as a motivation problem at wake-up, not a better notification.",
             ],
             images: [
               {
@@ -139,10 +137,10 @@ const dreamDetectiveCaseStudyRich = {
             ],
           },
           {
-            title: "Competitor analysis",
+            title: "What already works, and what doesn't",
             paragraphs: [
-              "I mapped behavioral patterns across Duolingo, Forest, Pokémon Sleep, Finch, and others. Duolingo's streak loss hurts more than consistency feels good (loss aversion). Forest makes you protect something you've built. Pokémon Sleep and Finch turn sleep into collectible output.",
-              "The gap: no one combined narrative pull with irreversible consequence. Data and cute mascots exist, but nothing makes waking up the only way to find out what happens next.",
+              "I mapped Duolingo, Forest, Pokémon Sleep, and Finch. Streak loss and protecting something you've built both work. Cute sleep output exists too.",
+              "Nobody combined story pull with an irreversible miss. Nothing made waking up the only way to find out what happens next.",
             ],
             images: [
               {
@@ -152,9 +150,9 @@ const dreamDetectiveCaseStudyRich = {
             ],
           },
           {
-            title: "Solution",
+            title: "Miss the morning, miss the beat",
             paragraphs: [
-              "Each morning unlocks the next audio clue in an ongoing case. Snooze triggers Cold Trail: that chapter locks permanently. You don't fall behind—you miss the beat.",
+              "Each morning unlocks the next audio clue. Snooze triggers Cold Trail: that chapter locks for good. You don't fall behind. You miss the beat.",
             ],
             images: [
               {
@@ -166,12 +164,12 @@ const dreamDetectiveCaseStudyRich = {
         ],
       },
       {
-        title: "Ideation",
+        title: "Building the world",
         blocks: [
           {
-            title: "Visual direction",
+            title: "Not another wellness app",
             paragraphs: [
-              "Wellness defaults to clean minimalism; this needed film-noir atmosphere and adventure-game UI. Typewriter typography reinforces the case-file metaphor.",
+              "Wellness defaults to clean minimalism. I needed film-noir atmosphere and adventure-game UI, with typewriter type so it reads like a case file.",
             ],
             images: [
               {
@@ -181,9 +179,9 @@ const dreamDetectiveCaseStudyRich = {
             ],
           },
           {
-            title: "Exploring two directions",
+            title: "Two directions, one world",
             paragraphs: [
-              "Version 1 was a minimal alarm and clue reveal—indistinguishable from competitors. Version 2 sold the world through the Office, Evidence Board, and Stakeout sleep audio.",
+              "Version 1 was a thin alarm and clue reveal, too close to everything else. Version 2 sold the world through the Office, Evidence Board, and Stakeout sleep audio.",
             ],
             images: [
               {
@@ -193,9 +191,9 @@ const dreamDetectiveCaseStudyRich = {
             ],
           },
           {
-            title: "Wireframes",
+            title: "Structure before the noir",
             paragraphs: [
-              "Low-fidelity frames for home, stats, navigation, and the morning alert, structure before style. The goal was hierarchy: where sleep data lives, how users move between Office, Evidence Board, and Stakeout, and what the wake-up moment actually looks like.",
+              "I framed home, stats, navigation, and the morning alert in low fidelity first, so I could lock hierarchy before style: where sleep data lives, how you move through the Office, and what wake-up looks like.",
             ],
             images: [
               {
@@ -210,9 +208,9 @@ const dreamDetectiveCaseStudyRich = {
         title: "Design",
         blocks: [
           {
-            title: "UI system",
+            title: "The case file is the UI",
             paragraphs: [
-              "Art Deco card frames, gold-on-crimson actions, and a handwritten navigation notebook carry the detective world across screens. Sleep stats become case metrics. Rest Logged, Evidence Secured, Cases Solved, so data feels native to the fiction.",
+              "Art Deco frames, gold-on-crimson actions, and a handwritten notebook carry the world across screens. Sleep stats become case metrics — Rest Logged, Evidence Secured, Cases Solved — so the data belongs to the fiction.",
             ],
             images: [
               {
@@ -222,9 +220,9 @@ const dreamDetectiveCaseStudyRich = {
             ],
           },
           {
-            title: "Final screens",
+            title: "What I could draw, what I generated",
             paragraphs: [
-              "Environment art was generated with Gemini and Grok; UI and interaction design were built in Figma. Background illustration was scoped to AI, hand-illustrating full scenes wasn't feasible in three weeks.",
+              "I built the UI and interaction in Figma. I generated environment art with Gemini and Grok because hand-illustrating full scenes was not feasible in three weeks.",
               "The morning alarm uses a high-contrast waveform and broadcast-fading copy.",
             ],
             images: [
@@ -235,9 +233,9 @@ const dreamDetectiveCaseStudyRich = {
             ],
           },
           {
-            title: "User flow",
+            title: "Day and night, one Office",
             paragraphs: [
-              "Day and night modes split at 6pm, the Office changes, and different actions unlock. Night path: Stakeout sleep audio → wake-up check → briefing + mini-game or Cold Trail. Day path: stats, alarm settings, and case notebook. Everything anchors back to the Office.",
+              "The Office flips at 6pm. Night is Stakeout audio, then a wake-up check, then briefing or Cold Trail. Day is stats, alarm, and the notebook. Everything still anchors back to the Office.",
             ],
             images: [
               {
@@ -247,9 +245,9 @@ const dreamDetectiveCaseStudyRich = {
             ],
           },
           {
-            title: "When AI wasn't enough",
+            title: "When the tool couldn't walk the room",
             paragraphs: [
-              "FigmaMake accelerated individual UI elements, but couldn't handle the core interaction, spatial, first-person navigation through the Office. I built that prototype manually in Figma, covering both wake-up outcomes: Intel Secured vs. locked out.",
+              "FigmaMake sped up UI pieces, but it could not do first-person navigation through the Office. I built that loop by hand, both wake-up outcomes: Intel Secured and locked out.",
             ],
             images: [
               {
@@ -261,12 +259,12 @@ const dreamDetectiveCaseStudyRich = {
         ],
       },
       {
-        title: "Process",
+        title: "Keeping scope honest",
         blocks: [
           {
-            title: "PRD",
+            title: "Write the product before the polish",
             paragraphs: [
-              "I wrote a full PRD before high-fidelity screens, problem, features, user flow, and design specs. It kept scope honest: gamify curiosity, not guilt.",
+              "I wrote a full PRD before high-fidelity screens — problem, features, flow, specs — so I would gamify curiosity, not guilt.",
             ],
             images: [
               {
@@ -281,9 +279,9 @@ const dreamDetectiveCaseStudyRich = {
   },
   conclusionTitle: "Reflection",
   conclusion:
-    "The concept is strongest when its fiction, interaction, and visual system all support the same behavioral decision.",
+    "The concept only works when the fiction, the interaction, and the visuals all push the same wake-up decision.",
   nextSteps:
-    "Test whether narrative FOMO beats a loud beep with real sleepy humans, then study whether a social Detective Rank strengthens the habit or ruins the solo mystery.",
+    "I want to test whether narrative FOMO beats a loud beep with real sleepy people.",
 };
 
 /** Eleara */
@@ -315,32 +313,57 @@ const elearaCaseStudyRich = {
     role: "PM / UX Lead, process, user flow, feedback synthesis",
   },
   scan: {
-    project: "Predictive vestibular companion: ear device plus app.",
-    problem: "Vestibular episodes escalate before people can get help.",
-    role: null,
-    hard: "Zero to user-tested prototype in 72 hours, fully remote.",
-    change: "Hold-to-SOS, a predictive GVS flow, and a team that stayed on the clock.",
+    project:
+      "I led a four-person remote sprint to a wearable plus app that counters dizziness before an episode escalates.",
+    problem: "Vestibular episodes get worse before people can get help.",
+    role: "I ran the clock, the user flow, and the feedback so four people shipped one product.",
+    hard: null,
+    change: null,
   },
   introParagraphs: [
-    "Eleara is a predictive vestibular companion, a wearable plus app that uses galvanic vestibular stimulation to counter dizziness before episodes escalate, and alerts emergency contacts when they do.",
-    "Four-person design team: I led process, user-flow architecture, and feedback synthesis.",
+    "Eleara uses galvanic vestibular stimulation to steady you, and it can alert emergency contacts when that is not enough.",
   ],
   highlights: [],
   heroFirst: true,
   imagesBeforeText: true,
-  showJumpNav: true,
+  showJumpNav: false,
   showDeckEmbed: false,
   videos: [],
   processWork: {
     sections: [
       {
-        title: "The sprint",
+        title: "Final product",
+        blocks: [
+          {
+            title: "Ear device, app, and a hold-to-SOS",
+            paragraphs: [
+              "We shipped a predictive vestibular companion in 72 hours: daily monitoring, a GVS flow, and an emergency path that does not look like the rest of the app.",
+            ],
+            images: [
+              {
+                src: elearaSlide(17),
+                alt: "Lifestyle shot with the Eleara ear device.",
+              },
+              {
+                src: elearaSlide(18),
+                alt: "Final login screen with HIPAA certification.",
+              },
+              {
+                src: elearaSlide(19),
+                alt: "Final screens from the completed prototype.",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        title: "The starting point",
         blocks: [
           {
             title: "72 hours, four people, one product",
             paragraphs: [
-              "FigBuild is a design sprint where teams go from zero to a functional prototype in three days. Our team of four worked remotely over Zoom, coordination overhead most in-person teams never face.",
-              "My role was product manager and process lead. I didn't dictate the concept, ideas came from the team. I set daily agendas, ran structured ideation, delegated by strength, unblocked whoever was stuck, and made schedule calls when time slipped.",
+              "FigBuild asks a team to go from zero to a working prototype in three days. We did it over Zoom, which meant coordination most in-person teams never face.",
+              "I was product manager and process lead. I did not pick the concept. I set the agendas, ran ideation, delegated by strength, and made the schedule calls when time slipped.",
             ],
             images: [
               {
@@ -355,11 +378,10 @@ const elearaCaseStudyRich = {
         title: "Day 1",
         blocks: [
           {
-            title: "Brainstorming",
+            title: "Hidden signals, not surface metrics",
             paragraphs: [
-              "Day 1 opened with a timed sticky-note sprint, 15 minutes, no filtering. Ideas ranged from ADHD fixation tools to chronoception tracking to a cave-diving-inspired CO₂ monitor for interoception.",
-              "The shared instinct: work in the body's hidden signals, not surface metrics. That narrowed us to interoception, internal states including balance. Two concepts emerged: a Smart Sole for gait instability, and an ear-worn device using galvanic vestibular stimulation to counter vestibular mismatch. The Ear Thing won.",
-              "Willow identified the core mechanic: dizziness on standing happens when inner-ear fluid shifts with blood pressure drops. GVS sends tiny currents to the vestibular nerve, muting the dizziness signal, replacing it with steadiness. Target users: anemic people, Meniere's patients, and women with period-linked vestibular episodes.",
+              "We opened with 15 minutes of unfiltered sticky notes. Ideas ran from ADHD tools to a cave-diving CO₂ monitor. The shared instinct was interoception, the body's hidden states, including balance.",
+              "Two concepts survived: a Smart Sole for gait, and an ear device using galvanic vestibular stimulation. The Ear Thing won. Willow named the mechanic: GVS sends a tiny current to the vestibular nerve so standing-up dizziness reads as steadiness.",
             ],
             images: [
               {
@@ -373,10 +395,9 @@ const elearaCaseStudyRich = {
             ],
           },
           {
-            title: "PRD",
+            title: "Write the product before Figma",
             paragraphs: [
-              "In a 72-hour sprint, a PRD isn't overhead, it's the single source of truth before anyone opens Figma. Without it, four people build four different products in parallel.",
-              "It locked the problem, solution, four core features, and accessibility requirements before anyone opened Figma.",
+              "In a 72-hour sprint, a PRD is the only way four people do not build four products. I locked the problem, the solution, four features, and accessibility before anyone opened a frame.",
             ],
             images: [
               {
@@ -390,11 +411,10 @@ const elearaCaseStudyRich = {
             ],
           },
           {
-            title: "User flow",
+            title: "One question after login",
             paragraphs: [
-              "I led the user flow, one of my direct design contributions alongside PM work. Eleara had to handle daily use and emergency response without confusion between the two paths.",
-              "Core logic branches on one question after login: is the user having an episode now? If yes → alert screen and optional emergency services notification. A persistent Emergency Button on home provides manual override anytime.",
-              "Normal use flows through Profile (medical info, device settings, GVS threshold calibration), Contacts (emergency list with auto-notify toggles), and Dashboard (episode stats and pattern insights). Mapping this before wireframes meant nobody built a screen without a logical place in the system.",
+              "I led the user flow. After login the product asks one thing: are you having an episode now? Yes goes to an alert and optional emergency services. Home keeps a persistent Emergency Button for override.",
+              "Daily use is Profile, Contacts, and Dashboard. Mapping that first meant nobody designed a screen without a place in the system.",
             ],
             images: [
               {
@@ -404,10 +424,9 @@ const elearaCaseStudyRich = {
             ],
           },
           {
-            title: "Wireframes",
+            title: "Structure first, color later",
             paragraphs: [
-              "Grayscale layout pass: content hierarchy and actions per screen, without visual styling.",
-              "The PRD's two-column card layout and persistent bottom nav were roughed in here. Grayscale intentionally, structure first, visuals in the style guide.",
+              "I roughed login, home, dashboard, profile, and contacts in grayscale so hierarchy and the two-column cards could settle before style.",
             ],
             images: [
               {
@@ -417,10 +436,10 @@ const elearaCaseStudyRich = {
             ],
           },
           {
-            title: "Style guide",
+            title: "A system four people could share",
             paragraphs: [
-              "Built in parallel with wireframes so the team could produce high-fidelity screens independently without visual drift. Poppins for headings and data (geometric, confident at a glance), Inter for body text (legible at small sizes during an episode).",
-              "Palette: soft periwinkle background, dusty blue primary, warm amber accent, deep teal for positive states, clinical but not cold. 8pt grid, 24pt margins, 20pt card gaps, 20pt drop shadows for depth without noise.",
+              "I built the style guide next to the wireframes so screens would not drift. Poppins for headings and data. Inter for body text you can still read during an episode.",
+              "Soft periwinkle, dusty blue, warm amber, deep teal. Clinical enough to trust, not cold enough to scare.",
             ],
             images: [
               {
@@ -435,10 +454,10 @@ const elearaCaseStudyRich = {
         title: "Day 2",
         blocks: [
           {
-            title: "First draft",
+            title: "Prompt the PRD, then synthesize",
             paragraphs: [
-              "Day 2 opened with a FigmaMake build from a prompt encoding the full PRD, users, GVS mechanic, two-column layout, typography, features, HIPAA requirements, and every required screen.",
-              "My role shifted to feedback synthesis, reviewing screens as they arrived and aligning the team before hour-36 testing.",
+              "Day 2 started with a FigmaMake build from a prompt that encoded the PRD, the GVS mechanic, the layout, HIPAA, and every required screen.",
+              "My job shifted to feedback. I reviewed screens as they landed and aligned the team before hour-36 testing.",
             ],
             images: [
               {
@@ -452,11 +471,10 @@ const elearaCaseStudyRich = {
             ],
           },
           {
-            title: "User testing",
+            title: "Hour 36, two people, think-aloud",
             paragraphs: [
-              "At hour 36 of 72, we tested with two participants. Tamiko R. and Thania R., navigating key flows while thinking aloud.",
-              "Tamiko valued the home screen status color system but found dashboard cards too visually similar, she wanted distinct identities for GVS Score, Episodes, Duration, and Severe Events so she could scan without reading every label. She also suggested dynamic reminders: if dehydration triggers episodes, the app should suggest hydration, not just display data.",
-              "Thania found the interface 'simple in the best way' and valued episode tracking for reflecting on health behavior, not just monitoring it. Both confirmed the core hypothesis: approachable interface, sensible information structure. Refinement problems, not structural ones, exactly what we needed to hear at hour 36.",
+              "We tested with Tamiko R. and Thania R. Tamiko liked the home status colors but could not scan dashboard cards that all looked the same. She also wanted the app to suggest hydration if dehydration triggers her episodes, not just chart them.",
+              "Thania called the interface simple in the best way. Both confirmed the structure. The problems were refinement, which is what you want to hear at hour 36.",
             ],
             images: [
               {
@@ -470,11 +488,10 @@ const elearaCaseStudyRich = {
             ],
           },
           {
-            title: "Iterations",
+            title: "Six changes before the last night",
             paragraphs: [
-              "Six targeted changes before the final build:",
-              "Softer color scheme throughout, less clinical, more companion-like. Proper onboarding flow added (skipped in first draft; essential for health data and device permissions). Emergency button changed to hold-to-trigger, prevents accidental SOS in public without slowing genuine emergencies.",
-              "Explicit alert screen for episode detection, visually distinct from passive monitoring. 'Medical records' renamed to 'clinical documents' for clearer data sensitivity expectations. Dashboard card visual identity adjusted per Tamiko's scanning feedback.",
+              "We softened the palette so it felt like a companion. We added onboarding we had skipped. We changed SOS to hold-to-trigger so a pocket press would not call help in public.",
+              "We made the episode alert look unlike monitoring. We renamed medical records to clinical documents. We gave dashboard cards distinct identities after Tamiko's scan test.",
             ],
             images: [
               {
@@ -489,25 +506,11 @@ const elearaCaseStudyRich = {
         title: "Day 3",
         blocks: [
           {
-            title: "Final build",
+            title: "Apply the list, then submit",
             paragraphs: [
-              "Day 3 was close-out: apply the iteration list, polish visuals, record the prototype walkthrough, submit.",
-              "The final login made HIPAA-compliant security certification visible before account creation.",
+              "Day 3 was close-out. We applied the iteration list, polished, recorded the walkthrough, and submitted. The login now shows HIPAA-compliant security certification before you create an account.",
             ],
-            images: [
-              {
-                src: elearaSlide(17),
-                alt: "Day 3, lifestyle shot with ear device.",
-              },
-              {
-                src: elearaSlide(18),
-                alt: "Final login screen with HIPAA certification.",
-              },
-              {
-                src: elearaSlide(19),
-                alt: "Final screens, completed prototype.",
-              },
-            ],
+            images: [],
           },
         ],
       },
@@ -515,9 +518,9 @@ const elearaCaseStudyRich = {
   },
   conclusionTitle: "Reflection",
   conclusion:
-    "Eleara changed how I lead: establish shared constraints early, delegate by strength, and protect enough time for evidence to change the work.",
+    "Eleara changed how I lead: lock shared constraints early, delegate by strength, and leave time for evidence to change the work.",
   nextSteps:
-    "Cap ideation earlier and trust later iteration to compensate, then run another testing round focused on the changes prompted by the first sessions.",
+    "I want to cap ideation earlier next time, then run a second test focused on the changes the first sessions asked for.",
 };
 
 /** Kits! */
@@ -544,20 +547,20 @@ const kitsCaseStudyRich = {
     role: "UX / product design: research through high-fidelity",
   },
   scan: {
-    project: "Community hobby-kit sharing through a kiosk and app.",
-    problem: "Trying a hobby dies at the checkout line for expensive kit.",
-    role: null,
-    hard: "Shared screens that pretend both roles see the same thing.",
-    change: "Paper-tested borrower and lender flows before high-fidelity rework.",
+    project:
+      "I designed a kiosk and app so you can try a hobby kit without buying the gear first.",
+    problem: "A new hobby dies at the checkout for an expensive kit.",
+    role: "I mapped borrower and lender as two products that share one physical handoff.",
+    hard: null,
+    change: null,
   },
   introParagraphs: [
-    "Kits! is a community-driven hobby sharing system, borrow curated kits from a public kiosk, or lend your own equipment for others to try. The goal is lowering the cost of entry for new hobbies without asking anyone to buy gear upfront.",
-    "The design problem was service design at scale: two distinct roles, one physical touchpoint, one digital companion, and friction points like approval flows, kit processing, and motivation to participate on both sides.",
+    "Kits! lets you borrow a curated hobby kit from a public kiosk, or lend your own gear so someone else can try it.",
   ],
   highlights: [],
   heroFirst: true,
   imagesBeforeText: true,
-  showJumpNav: true,
+  showJumpNav: false,
   showDeckEmbed: false,
   videos: [
     {
@@ -572,39 +575,55 @@ const kitsCaseStudyRich = {
     },
   ],
   videosPlacement: "afterSection",
-  videosAfterSection: "Design",
-  videosTitle: "Prototype walkthrough",
-  videosIntro:
-    "Borrower and lender flows through the kiosk and companion app, from kit discovery to return and contribution.",
+  videosAfterSection: "Final product",
+  videosTitle: null,
+  videosIntro: null,
   processWork: {
     sections: [
       {
-        title: "Overview",
+        title: "Final product",
         blocks: [
           {
-            title: "The problem",
+            title: "One kiosk, two roles, one voice",
             paragraphs: [
-              "Existing entry points assume you buy tools first. Research and journey mapping framed the problem around two archetypes before any screens were drawn.",
+              "I unified kiosk handoff states and role-specific app tasks so borrower and lender feel like one service, not two apps taped together.",
             ],
-            images: [],
-          },
-          {
-            title: "Borrowers & lenders",
-            paragraphs: [
-              "Borrowers want quick access to new activities, browse, reserve, pick up, try, return. Lenders contribute kits to the community and need clear incentives, approval paths, and processing steps that don't feel like unpaid labor.",
-              "Mapping both journeys exposed where the kiosk must lead, where the app carries continuity, and which states need explicit confirmation.",
+            images: [
+              {
+                src: kitsHighFidelity,
+                alt: "High-fidelity screens, kiosk and mobile app final designs.",
+              },
             ],
           },
         ],
       },
       {
-        title: "Process",
+        title: "The starting point",
         blocks: [
           {
-            title: "Paper prototypes",
+            title: "Buy the tools first, or don't start",
             paragraphs: [
-              "Paper prototyping came before pixel polish. I walked through borrower and lender tasks on physical screens, reservation, pickup, kit intake, and return, to stress-test the flows without high-fidelity distraction.",
-              "That pass clarified where the kiosk needed to lead vs. where the app should carry continuity, and which states needed explicit confirmation before moving on.",
+              "Existing entry points assume you purchase gear before you know if you like the hobby. I framed the problem around two archetypes before I drew a screen.",
+            ],
+            images: [],
+          },
+          {
+            title: "Borrowers and lenders are not the same person",
+            paragraphs: [
+              "Borrowers want browse, reserve, pick up, try, return. Lenders need incentives, approval, and processing that does not feel like unpaid labor.",
+              "Mapping both journeys showed where the kiosk must lead, where the app carries continuity, and which states need an explicit yes before you move on.",
+            ],
+          },
+        ],
+      },
+      {
+        title: "Paper before pixels",
+        blocks: [
+          {
+            title: "Walk the desk, not the file",
+            paragraphs: [
+              "I paper-prototyped reservation, pickup, kit intake, and return so I could break the flows without high-fidelity distraction.",
+              "That pass locked where the kiosk leads versus where the app continues, and which states needed confirmation first.",
             ],
             images: [
               {
@@ -619,10 +638,10 @@ const kitsCaseStudyRich = {
         title: "Design",
         blocks: [
           {
-            title: "Wireframing",
+            title: "Two paths, no shared lie",
             paragraphs: [
-              "Low-fidelity wireframes established screen hierarchy and navigation, structure before visual style. Medium-fidelity passes added layout density, component placement, and clearer content blocks for both kiosk and mobile contexts.",
-              "Separating borrower and lender paths in wireframes kept permissions and mental models honest, no shared screen pretending two roles see the same thing.",
+              "Low-fidelity locked hierarchy. Medium-fidelity added density for kiosk reach and phone thumbs.",
+              "I kept borrower and lender on separate paths so no screen pretended both roles see the same thing.",
             ],
             images: [
               {
@@ -636,26 +655,14 @@ const kitsCaseStudyRich = {
             ],
           },
           {
-            title: "Style guide",
+            title: "Bright at arm's length",
             paragraphs: [
-              "The visual system needed to feel approachable and community-forward, bright enough for a public kiosk, legible at arm's length, consistent across touch and mobile. Typography, color, and component rules kept the two interfaces reading as one product.",
+              "I needed a public kiosk that still felt like a community, not a ticket machine. Type, color, and components keep touch and mobile reading as one product.",
             ],
             images: [
               {
                 src: kitsStyleGuide,
                 alt: "Style guide, color, typography, and UI components.",
-              },
-            ],
-          },
-          {
-            title: "Final screens",
-            paragraphs: [
-              "The high-fidelity pass unified kiosk handoff states and role-specific app tasks under one visual voice.",
-            ],
-            images: [
-              {
-                src: kitsHighFidelity,
-                alt: "High-fidelity screens, kiosk and mobile app final designs.",
               },
             ],
           },
@@ -665,9 +672,9 @@ const kitsCaseStudyRich = {
   },
   conclusionTitle: "Reflection",
   conclusion:
-    "The service became clearer when physical handoff and digital continuity were treated as one experience.",
+    "The service got clear when I treated the physical handoff and the app as one experience.",
   nextSteps:
-    "Test the complete kiosk-to-app handoff with borrowers and lenders, including returns, unavailable kits, and interrupted transactions.",
+    "I want to test the full kiosk-to-app handoff with borrowers and lenders, including returns, empty kits, and interrupted transactions.",
 };
 
 /** Dairy Delight */
@@ -695,38 +702,87 @@ const dairyCaseStudyRich = {
     role: "Brand identity, illustration, poster, web & app",
   },
   scan: {
-    project: "Organic dairy brand across poster, web, and app.",
+    project:
+      "I built an organic dairy brand that has to hold together on a poster, a site, and a phone.",
     problem: "Farm brands default to farmer's-market cliché.",
-    role: null,
-    hard: "One voice across print, web, and product without visual drift.",
-    change: "A sun mark and a poster that feels like ice cream, not a lecture.",
+    role: "I designed the sun mark and the touchpoints so pleasure and integrity read as one voice.",
+    hard: null,
+    change: null,
   },
   introParagraphs: [
-    "Dairy & Delight is an organic farm brand built around what they call the simple joys of nourishing living, milk, cheese, yogurt, and ice cream delivered direct to customers' homes.",
-    "I chose this client over two alternatives because the brief wasn't just 'look fresh and clean.' It was a lifestyle proposition: what you eat and where it comes from matters, and pleasure and integrity belong in the same brand.",
+    "Dairy & Delight delivers milk, cheese, yogurt, and ice cream to your door. I chose the brief because it asked for lifestyle, not just look fresh.",
   ],
   highlights: [],
   heroFirst: true,
   imagesBeforeText: true,
-  showJumpNav: true,
+  showJumpNav: false,
   showDeckEmbed: false,
   videos: [],
   processWork: {
     sections: [
       {
-        title: "The client",
+        title: "Final product",
         blocks: [
           {
-            title: "Getting to know Dairy & Delight",
+            title: "Taste Delight before you read the farm",
             paragraphs: [
-              "Before opening Figma, I studied who buys from a farm like this, what they already believe, what it feels like to open their fridge in the morning. Foodies who love the outdoors: people who care about what they eat, feel drawn to the natural world, and treat food as communal, not just functional.",
-              "The mission is rooted in real, all-natural food connecting people to the earth and to each other. That richness, lifestyle, not just category, is what made this a design problem worth choosing.",
+              "The poster is a waffle cone, a cherry, and TASTE DELIGHT following the spiral in Magenta. Type animates the object. It should feel like ice cream before it explains the product.",
+            ],
+            images: [
+              {
+                src: dairyPosterFull,
+                alt: "Final poster, ice cream cone with spiral typography.",
+              },
+              {
+                src: dairyPosterMockup,
+                alt: "Poster in context, framed print in a cafe setting.",
+              },
             ],
           },
           {
-            title: "Audience",
+            title: "The same voice on the web",
             paragraphs: [
-              "Transparency and sustainability without pretension—an invitation to the table, not a lecture from a shelf.",
+              "I sketched three layouts, then kept doodle warmth on a clean card grid. The hero reuses the poster. Three pillars sit below it, then a testimonial on a yellow wave and a Navy footer.",
+            ],
+            images: [
+              {
+                src: dairyLanding,
+                alt: "Landing page, layout sketches, poster reference, and full scroll mockup.",
+              },
+            ],
+          },
+          {
+            title: "Discover, cook, then join",
+            paragraphs: [
+              "The app is Discover, Create, and Access: products and farm process, recipes, then member tours and seasonal boxes. Sky-blue home, large pill CTAs, and a wavy header that ties the phone to the poster.",
+            ],
+            images: [
+              {
+                src: dairyMobileScreens,
+                alt: "Mobile app. Home, Discover, Create, and Access screens.",
+              },
+              {
+                src: dairyMobileDevice1,
+                alt: "Mobile app, home screen on iPhone.",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        title: "The starting point",
+        blocks: [
+          {
+            title: "Lifestyle, not a category",
+            paragraphs: [
+              "Before Figma I studied who buys from a farm like this. Foodies who love the outdoors, treat food as communal, and already care where it comes from.",
+              "That richness is why I picked this brief over two alternatives. Pleasure and integrity had to live in the same brand.",
+            ],
+          },
+          {
+            title: "An invitation, not a lecture",
+            paragraphs: [
+              "Transparency and sustainability without pretension. I wanted a seat at the table, not a lecture from a shelf.",
             ],
             images: [
               {
@@ -741,11 +797,10 @@ const dairyCaseStudyRich = {
         title: "Brand",
         blocks: [
           {
-            title: "Defining the vibe",
+            title: "All-Natural, Uplifting, Communal",
             paragraphs: [
-              "Three words became the filter: All-Natural, Uplifting, and Communal.",
-              "All-Natural is a visual language, organic textures, earth-born color, forms that aren't perfectly geometric. Uplifting means the brand should make you feel something, actually joyful, not just trustworthy. Communal means inviting you in: a family table, not a store shelf.",
-              "If it felt cold or corporate, it failed. If it felt generic-natural, it wasn't uplifting enough. Everything had to land in the overlap of all three.",
+              "Three words became the filter. All-Natural is texture and earth-born color, not perfect geometry. Uplifting means actually joyful, not just trustworthy. Communal means a family table, not a store shelf.",
+              "If it felt cold, it failed. If it felt generic-natural, it was not uplifting enough.",
             ],
             images: [
               {
@@ -755,9 +810,9 @@ const dairyCaseStudyRich = {
             ],
           },
           {
-            title: "Mood boards",
+            title: "Three boards, one overlap",
             paragraphs: [
-              "Three boards pulled from folk art, community posters, botanical illustration, and bold joyful graphics. Their overlap informed every downstream choice.",
+              "I pulled folk art, community posters, botanical illustration, and bold joyful graphics. Their overlap drove every choice after.",
             ],
             images: [
               {
@@ -774,15 +829,15 @@ const dairyCaseStudyRich = {
           {
             title: "100 sketches to one mark",
             paragraphs: [
-              "I don't start in software. I start in a sketchbook and don't stop until I've explored enough angles to know which direction is right. For Dairy & Delight, that meant over 100 iterations before a single vector: logotypes, icons, literal and abstract marks, dairy and natural imagery, combinations I knew wouldn't work, because exhausting the obvious is how the interesting stuff shows up.",
-              "Two directions felt alive. A circular badge with a hand-drawn cow, warm, vintage, inviting. And a sun mark from alternating yellow and magenta rays, reading as both sun and the top of a dairy product. The sun won: bold at any scale, directly Uplifting, joyful without being precious.",
+              "I start in a sketchbook. For Dairy & Delight that meant over 100 iterations before a single vector, because exhausting the obvious is how the interesting stuff shows up.",
+              "Two directions felt alive: a circular cow badge, and a sun from alternating yellow and magenta rays. The sun won. Bold at any scale, joyful without being precious.",
             ],
           },
           {
-            title: "Refinement & lockups",
+            title: "Then lock it to a bottle and a header",
             paragraphs: [
-              "Multiple refinement rounds on ray count, proportions, yellow-magenta balance, and wordmark integration. The final system includes the core mark plus five lockups for different contexts.",
-              "The wordmark uses a rounded, slightly bouncy serif, warmth without childishness. The ampersand in 'Dairy & Delight' gets hand-lettered treatment. Every round was tested on a milk bottle, app icon, poster, and web header.",
+              "I refined ray count, proportions, yellow-magenta balance, and the wordmark. The system is the core mark plus five lockups.",
+              "Rounded serif, hand-lettered ampersand. Every round had to survive a milk bottle, an app icon, a poster, and a web header.",
             ],
             images: [
               {
@@ -797,11 +852,10 @@ const dairyCaseStudyRich = {
         title: "Brand system",
         blocks: [
           {
-            title: "Color, type & illustration",
+            title: "Five colors, each with a job",
             paragraphs: [
-              "Five colors, each doing specific work: Navy (#06327D) anchors legibility. Cyan (#74DEE6) is air, outdoors, morning light. Magenta (#E01C6F) carries energy and personality. Yellow (#FFD545) is warmth, sunlight, butter, cheese. Milk White (#FFF9EF) is the canvas, warm, never sterile.",
-              "Headlines: Sausage Semibold, chunky, friendly, retro joy. Secondary: Poppins Regular. Body: Quicksand Light, airy and legible.",
-              "The illustration system, rotary phone, cheese wedge, sunrise, heart, uses Yellow and Magenta two-color pairings so assets read instantly as Dairy & Delight. Playful without cartoonish; built for a kitchen wall or picnic blanket.",
+              "Navy for legibility. Cyan for morning air. Magenta for energy. Yellow for butter and sun. Milk White for a canvas that is never sterile.",
+              "Sausage Semibold for headlines, Poppins for secondary, Quicksand Light for body. Illustrations pair Yellow and Magenta so a cheese wedge or a sunrise reads as the brand on a kitchen wall.",
             ],
             images: [
               {
@@ -813,7 +867,7 @@ const dairyCaseStudyRich = {
           {
             title: "Three touchpoints, one voice",
             paragraphs: [
-              "With the system set, I designed three touchpoints: a print poster, a mobile app, and a landing page. Each serves a different format and purpose, but everything had to feel unmistakably like the same brand across contexts. That consistency across wildly different media is one of the harder problems in brand design.",
+              "With the system set I designed a poster, a landing page, and an app. Different formats. Same brand. That consistency across media is the hard part.",
             ],
             images: [
               {
@@ -828,10 +882,10 @@ const dairyCaseStudyRich = {
         title: "Design",
         blocks: [
           {
-            title: "The poster",
+            title: "Twenty posters by hand",
             paragraphs: [
-              "The poster went through the most exploration. In class I applied ten visual principles to the same brief. Focus the Eye, Overwhelm, Simplify, Overlap, Assault the Surface, Activate the Diagonal, Manipulate Scale, Text as Image, Amplify, Tell a Story, two iterations each, twenty concepts by hand.",
-              "The final uses a waffle cone, cherry, and “TASTE DELIGHT” following the spiral in Magenta. Typography animates the object.",
+              "In class I applied ten visual principles to the same brief, two iterations each. Focus the Eye, Overwhelm, Simplify, Overlap, Assault the Surface, Activate the Diagonal, Manipulate Scale, Text as Image, Amplify, Tell a Story.",
+              "Three directions made the short list: cheese as type, a diagonal lockup, and the cone. The cone is the one I shipped.",
             ],
             images: [
               {
@@ -842,44 +896,6 @@ const dairyCaseStudyRich = {
                 src: dairyPosterFinals,
                 alt: "Three final poster designs, cheese text, ice cream cone, and diagonal type.",
               },
-              {
-                src: dairyPosterFull,
-                alt: "Final poster, ice cream cone with spiral typography.",
-              },
-              {
-                src: dairyPosterMockup,
-                alt: "Poster in context, framed print in a cafe setting.",
-              },
-            ],
-          },
-          {
-            title: "Landing page",
-            paragraphs: [
-              "Translating brand energy to the web without flattening it. I sketched three layout directions before committing. The final blends doodle warmth with a cards layout: clean grid, wavy brand border, illustrations anchoring each feature section.",
-              "The hero reuses the poster art. Three pillars sit below it, followed by a testimonial on a yellow wave and a Navy footer.",
-            ],
-            images: [
-              {
-                src: dairyLanding,
-                alt: "Landing page, layout sketches, poster reference, and full scroll mockup.",
-              },
-            ],
-          },
-          {
-            title: "Mobile app",
-            paragraphs: [
-              "Three core sections: Discover (products and farm process), Create (recipes and guides using Dairy & Delight products), and Access (member privileges, early releases, farm tours, seasonal boxes).",
-              "Natural progression: discover the brand, engage through cooking, deepen through membership. Sky-blue home with cloud quality, large pill CTAs, full-bleed illustrations per section, wavy header border tying app to web and poster.",
-            ],
-            images: [
-              {
-                src: dairyMobileScreens,
-                alt: "Mobile app. Home, Discover, Create, and Access screens.",
-              },
-              {
-                src: dairyMobileDevice1,
-                alt: "Mobile app, home screen on iPhone.",
-              },
             ],
           },
         ],
@@ -888,16 +904,16 @@ const dairyCaseStudyRich = {
   },
   conclusionTitle: "Reflection",
   conclusion:
-    "This was my first serious brand design project and where my fine arts training became practical. The poster is the strongest result because it communicates the joy of ice cream before it explains the product.",
+    "This was my first serious brand project, and where fine arts training became practical. The poster is the strongest piece because it sells joy before it explains dairy.",
   nextSteps:
-    "Extend the illustration system across packaging: milk bottles, cheese wrappers, and ice-cream pints.",
+    "I want to put the illustration system on packaging: milk bottles, cheese wrappers, and ice-cream pints.",
 };
 /** Project Pulse */
 const PL = `${P}/Pulse`;
 function pulseSlide(n) {
   return `${PL}/slides/pulse-slide-${String(n).padStart(2, "0")}.jpg`;
 }
-const pulseHero = `${PL}/Pulse-hero.jpg`;
+const pulseHero = `${PL}/Pulse-hero.png`;
 
 const pulseCaseStudyRich = {
   overview: {
@@ -907,20 +923,20 @@ const pulseCaseStudyRich = {
     role: "Lead designer, synthesis, visual system, prototype",
   },
   scan: {
-    project: "Adaptive fitness coaching on a smart mirror, not a phone.",
-    problem: "Student athletes skip gyms because plans ignore their week and sweaty hands.",
-    role: null,
-    hard: "Coaching that fits a real calendar, and gestures that work mid-workout.",
-    change: "AirTap instead of touch, calendar-aware plans, a live demo of the full loop.",
+    project:
+      "I led the design of a smart-mirror coach so a packed week still has a workout you never have to touch.",
+    problem: "Plans ignore the calendar, and sweaty hands cannot poke glass.",
+    role: "I owned synthesis, the visual system, and the browser prototype the team could play.",
+    hard: null,
+    change: null,
   },
   introParagraphs: [
-    "Pulse is a smart-mirror fitness companion for busy students: personalized plans, calendar-aware slots, and AirTap gestures so sweaty hands never have to touch the glass.",
-    "Three-person team: I led design, synthesis, the visual system, and the working prototype.",
+    "Pulse is a mirror in the room, not another phone app: calendar-aware slots and AirTap so you never have to touch the glass mid-set.",
   ],
   highlights: [],
   heroFirst: true,
   imagesBeforeText: true,
-  showJumpNav: true,
+  showJumpNav: false,
   showDeckEmbed: false,
   videos: [
     {
@@ -931,10 +947,9 @@ const pulseCaseStudyRich = {
     },
   ],
   videosPlacement: "afterSection",
-  videosAfterSection: "Build",
-  videosTitle: "Prototype in motion",
-  videosIntro:
-    "Recorded browser demo with gesture friction visible at workout distance.",
+  videosAfterSection: "Final product",
+  videosTitle: null,
+  videosIntro: null,
   livePrototype: {
     href: "https://jsaputraixd.github.io/Pulse/",
     label: "Open live Pulse demo",
@@ -943,26 +958,22 @@ const pulseCaseStudyRich = {
   processWork: {
     sections: [
       {
-        title: "The brief",
+        title: "Final product",
+        blocks: [],
+      },
+      {
+        title: "The starting point",
         blocks: [
           {
-            title: "A fitness problem with no product yet",
+            title: "A fitness problem with no object yet",
             paragraphs: [
-              "We started with a how-might-we, not a screen: how might we give busy students and professionals a low-friction fitness experience that actually survives a packed week.",
-              "We stalled for a bit. Lots of problem, no object. I floated a few directions until a smart mirror felt right, a coach in the room instead of another phone app. It wasn't a finished idea I handed over. We talked it through until we had something we could actually build.",
+              "We started with a how-might-we, not a screen: how might busy students keep a workout that survives a packed week.",
+              "We stalled. Lots of problem, no product. I floated directions until a smart mirror felt right, a coach in the room instead of another app. We talked it through until we had something we could build.",
             ],
             images: [
               {
-                src: pulseSlide(1),
-                alt: "Pulse title slide, 0-1 product project.",
-              },
-              {
                 src: pulseSlide(5),
                 alt: "Problem statement. How might we remove time and procrastination barriers to a lasting workout rhythm.",
-              },
-              {
-                src: pulseSlide(6),
-                alt: "Project timeline from framing through discovery, scoping, synthesis, and validation.",
               },
             ],
           },
@@ -974,14 +985,22 @@ const pulseCaseStudyRich = {
           {
             title: "Interviews together, synthesis after",
             paragraphs: [
-              "Annalise and Jason W. ran most of the interviews. I wrote discussion guides, talked to people too, sent emails, and put the screening form together, then ran it by them before it went out.",
-              "Crazy 8s and expert interviews (yoga, health-tech, fitness) gave us a pile of directions. I pulled that into personas and a plan we could design against: feature priority, how dense the mirror UI should be, how you'd interact, and where the thing would even live in a dorm or apartment.",
+              "Annalise and Jason W. ran most of the interviews. I wrote the guides, talked to people too, sent the emails, and built the screening form before it went out.",
+              "I pulled Crazy 8s and expert interviews into a plan we could design against: feature priority, how dense the mirror UI should be, how you interact, and where it lives in a dorm.",
             ],
             images: [
               {
                 src: pulseSlide(7),
                 alt: "Research goals. Feature priorities, interface design, interaction methods, physical setup.",
               },
+            ],
+          },
+          {
+            title: "Eight sketches and three experts",
+            paragraphs: [
+              "Crazy 8s put an early workout-assistant mirror on paper. Yoga, health-tech, and fitness instructors told us what a coach in the room would actually have to do.",
+            ],
+            images: [
               {
                 src: pulseSlide(11),
                 alt: "Crazy 8s sketches, including an early workout-assistant mirror concept.",
@@ -990,6 +1009,14 @@ const pulseCaseStudyRich = {
                 src: pulseSlide(12),
                 alt: "Expert interviews with a yoga instructor, health-tech advisor, and fitness instructor.",
               },
+            ],
+          },
+          {
+            title: "Marin falls off after one miss",
+            paragraphs: [
+              "I wrote Marin as the person we were designing for: a software engineer in SF who loses the gym the week after she skips one session.",
+            ],
+            images: [
               {
                 src: pulseSlide(8),
                 alt: "Persona Marin, a software engineer in SF who falls off after one missed gym session.",
@@ -1004,14 +1031,21 @@ const pulseCaseStudyRich = {
           {
             title: "AirTap, because sweat is a constraint",
             paragraphs: [
-              "Once we had a mirror, the interaction question was sweaty hands on glass. I pushed for AirTap, point, pinch, dwell, so you never have to poke the screen mid-set.",
-              "We mapped the service from onboarding through coaching and recovery, then concept-tested calendar sync, facial tracking, and posture coaching with five people at CCA. Calendar-aware micro workouts landed. Camera tracking was useful and a little invasive. That tension is still in the prototype on purpose.",
+              "Once we had a mirror, the question was sweaty hands on glass. I pushed for AirTap, point, pinch, dwell, so you never poke the screen mid-set.",
             ],
             images: [
               {
                 src: pulseSlide(14),
                 alt: "Prototype mapping worksheet from onboarding through in-workout coaching and recovery.",
               },
+            ],
+          },
+          {
+            title: "Useful, and a little invasive",
+            paragraphs: [
+              "We concept-tested calendar sync, facial tracking, and posture coaching with five people at CCA. Calendar-aware micro workouts landed. Camera tracking was useful and a little invasive. That tension is still in the prototype on purpose.",
+            ],
+            images: [
               {
                 src: pulseSlide(15),
                 alt: "MVP concept testing. Calendar sync, facial tracking, and AI posture with five CCA participants.",
@@ -1026,8 +1060,8 @@ const pulseCaseStudyRich = {
           {
             title: "From deck to something you can play",
             paragraphs: [
-              "I built the browser demo to stress-test ten-foot type, rest-timer collisions, and gesture logic under real interaction.",
-              "The rest timer collided with navigation, and the gesture logic was clever enough to exit workouts by accident.",
+              "I built the browser demo to stress-test ten-foot type, rest-timer collisions, and gesture logic under real use.",
+              "The rest timer collided with navigation. The gesture logic was clever enough to exit a workout by accident.",
             ],
             images: [
               {
@@ -1042,9 +1076,9 @@ const pulseCaseStudyRich = {
         title: "Testing",
         blocks: [
           {
-            title: "We all ran sessions. Then we looked at the pile.",
+            title: "We all ran sessions. Then I looked at the pile.",
             paragraphs: [
-              "I ran usability sessions, and so did Annalise and Jason W. I synthesized what we heard: crowded UI, tiny type at workout distance, and gesture overload. People hated switching between point and pinch. They wanted one gesture, and tracking was jumpy enough to exit a workout by accident.",
+              "I ran usability sessions, and so did Annalise and Jason W. I synthesized what we heard: crowded UI, tiny type at workout distance, and gesture overload.",
             ],
             images: [
               {
@@ -1055,10 +1089,26 @@ const pulseCaseStudyRich = {
                 src: pulseSlide(19),
                 alt: "Executive summary. Crowded UI and unintuitive gestures, versus larger type and unified gesture logic.",
               },
+            ],
+          },
+          {
+            title: "One gesture, not a switch",
+            paragraphs: [
+              "People hated switching between point and pinch. They wanted one gesture. Tracking was jumpy enough to exit a workout by accident.",
+            ],
+            images: [
               {
                 src: pulseSlide(21),
                 alt: "Interaction friction. Users wanted one pinch gesture instead of switching between point and pinch.",
               },
+            ],
+          },
+          {
+            title: "Onboarding that talks too much",
+            paragraphs: [
+              "Too much text up front, dead rest screens, and exercises that were hard to identify from the mirror.",
+            ],
+            images: [
               {
                 src: pulseSlide(22),
                 alt: "Onboarding fatigue. Too much text, dead rest screens, and exercises that were hard to identify.",
@@ -1068,12 +1118,12 @@ const pulseCaseStudyRich = {
         ],
       },
       {
-        title: "What's next",
+        title: "What we learned",
         blocks: [
           {
             title: "Honest about fit",
             paragraphs: [
-              "A Sean Ellis-style survey put essential-to-disappointed at 33%. Not a product people would riot over losing yet. Half the group hadn't wired Pulse into a real week. That's the next design problem, not a branding problem: make the calendar slot so obviously the path of least resistance that skipping feels worse than starting.",
+              "A Sean Ellis-style survey put essential-to-disappointed at 33%. Half the group had not wired Pulse into a real week. That is the next design problem: make the calendar slot the path of least resistance.",
             ],
             images: [
               {
@@ -1088,24 +1138,14 @@ const pulseCaseStudyRich = {
   },
   conclusionTitle: "Reflection",
   conclusion:
-    "Pulse confirmed that I want to keep working where interface decisions must survive distance, bodies, and physical context.",
+    "Pulse confirmed that I want to keep working where interface decisions have to survive distance, bodies, and a real room.",
   nextSteps:
-    "Unify AirTap into one selection gesture, enlarge type for ten-foot reading, and test whether calendar-suggested workout slots change behavior.",
+    "I want to unify AirTap into one gesture, enlarge type for ten-foot reading, and test whether a calendar-suggested slot changes behavior.",
 };
 
 /** Pawfect Match */
 const PF = `${P}/Pawfect`;
 const pawfectHero = `${PF}/Pawfect Match.png`;
-const pawfectImages = [
-  "Pawfect Match-01.png",
-  "Pawfect Match MockUps-01.jpg",
-  "PawfectMatch Mockup 2.5.jpeg",
-  "Modern App Portfolio Mockup Presentation.png",
-  "mockuuups-free-iphone-15-pro-hand-mockup.png",
-  "Screenshot 2024-12-18 at 2.01.16\u202fPM.png",
-  "Screenshot 2025-01-14 at 1.03.51\u202fPM.png",
-  "Screenshot 2025-01-14 at 1.05.28\u202fPM.png",
-];
 
 const pawfectCaseStudyRich = simpleGalleryCaseStudy({
   overview: {
@@ -1115,43 +1155,82 @@ const pawfectCaseStudyRich = simpleGalleryCaseStudy({
     role: "UX / UI design",
   },
   scan: {
-    project: "A pet meetup app. Swipe on dogs, then meet at the park.",
-    problem: "Pet hangouts are chaos. Matching on owners first makes it worse.",
-    role: "Solo UX and UI.",
-    hard: "Warm profiles that don't turn into LinkedIn for Labs.",
-    change: "Pets first, owners second.",
+    project:
+      "I designed a pet app that leads with the animal: profiles, a missing-pets map, and an AR preview in your living room.",
+    problem: "Pet hangouts get chaotic when the owner profile comes first.",
+    role: "I designed the quiz, the home, and the AR loop so the pet stays the subject.",
+    hard: null,
+    change: null,
   },
   introParagraphs: [
-    "Playful dating-app energy for pet people—profiles that feel warm, not corporate.",
+    "Warm profiles and park energy, not a corporate dog-food feed. I wanted the animal on screen before the owner resume.",
   ],
-  highlights: [
+  highlights: [],
+  sections: [
     {
-      label: "Tone",
-      value: "Friendly, bright, and approachable, built for dog-park energy.",
+      title: "Final product",
+      blocks: [
+        {
+          title: "Pets first, owners second",
+          paragraphs: [
+            "I designed onboarding, home, and pet profiles so you meet Lui the Maine Coon before you meet whoever listed them.",
+          ],
+          images: projectImages(PF, [
+            "Pawfect Match-01.png",
+            "Pawfect Match MockUps-01.jpg",
+            "PawfectMatch Mockup 2.5.jpeg",
+            "mockuuups-free-iphone-15-pro-hand-mockup.png",
+          ]),
+        },
+      ],
+    },
+    {
+      title: "The starting point",
+      blocks: [
+        {
+          title: "Eight frames before the orange",
+          paragraphs: [
+            "I sketched onboarding, home, profiles, an adoption form, an AR viewer, community, a post-adoption hub, and a browse grid before I picked a palette.",
+          ],
+          images: projectImages(PF, [
+            "Screenshot 2024-12-18 at 2.01.16\u202fPM.png",
+          ]),
+        },
+      ],
+    },
+    {
+      title: "Design",
+      blocks: [
+        {
+          title: "Missing pets on a map you can scan",
+          paragraphs: [
+            "I put last-seen pins and pet cards on one screen so you can scan Nearby, Recent, and Urgent without opening a thread.",
+          ],
+          images: projectImages(PF, [
+            "Screenshot 2025-01-14 at 1.03.51\u202fPM.png",
+          ]),
+        },
+        {
+          title: "See the dog on your rug first",
+          paragraphs: [
+            "I designed an AR loop that finds the floor, then drops a shepherd or a cat into the room so scale is a fact, not a guess.",
+          ],
+          images: projectImages(PF, [
+            "Screenshot 2025-01-14 at 1.05.28\u202fPM.png",
+          ]),
+        },
+      ],
     },
   ],
-  base: PF,
-  imageFiles: pawfectImages,
-  blockParagraphs: [
-    "Screens across onboarding, pet profiles, the swipe stack, and deck presentation.",
-  ],
   conclusion:
-    "The current concept establishes a coherent visual direction, but the matching premise still needs behavioral validation.",
+    "The visual direction holds. The matching premise still needs people at a real park.",
   nextSteps:
-    "Test whether matching on temperament makes park meetups less chaotic, or merely more politely chaotic.",
+    "I want to test whether leading with the pet makes a meetup less chaotic, or just more politely chaotic.",
 });
 
 /** Safe Space */
 const SS = `${P}/Safe Space`;
 const safeSpaceHero = `${SS}/SafeSpace.png`;
-const safeSpaceImages = [
-  "SafeSpace - V1thingydadaa.jpg",
-  "SafeSpace Wireframes.png",
-  "SafeSpace UserFlow.png",
-  "Screenshot 2025-01-17 at 3.44.37\u202fPM.png",
-  "mockuuups-female-hand-holding-iphone-14-pro-mockup.png",
-  "1_JasonSaputra.jpg",
-];
 
 const safeSpaceCaseStudyRich = simpleGalleryCaseStudy({
   overview: {
@@ -1161,86 +1240,151 @@ const safeSpaceCaseStudyRich = simpleGalleryCaseStudy({
     role: "UX / UI design",
   },
   scan: {
-    project: "A private notebook for check-ins, not streak counters.",
+    project:
+      "I designed a private check-in app so a hard day does not have to become an inbox.",
     problem: "Notes apps are built for tasks. Feelings get treated like inbox zero.",
-    role: "Solo UX and UI.",
-    hard: "Almost no friction between 'I need to write this down' and doing it.",
-    change: "User flow, wireframes, and a calmer visual direction.",
+    role: "I designed the flow, the wireframes, and a calmer visual direction.",
+    hard: null,
+    change: null,
   },
   introParagraphs: [
-    "A calmer notes surface for capturing thoughts and spotting patterns without the noise of a general-purpose tool.",
+    "A quieter surface for how the day went, then exercises and people if you want them. Not a streak counter.",
   ],
-  highlights: [
+  highlights: [],
+  sections: [
     {
-      label: "North star",
-      value: "Private, gentle, and fast, journaling without performance.",
+      title: "Final product",
+      blocks: [
+        {
+          title: "How was your day, then keep going",
+          paragraphs: [
+            "I designed a three-beat loop: mood, stress, and energy sliders, a home that says you are doing great, then an exercise list you can search.",
+          ],
+          images: projectImages(SS, [
+            "SafeSpace UserFlow.png",
+            "1_JasonSaputra.jpg",
+            "mockuuups-female-hand-holding-iphone-14-pro-mockup.png",
+          ]),
+        },
+      ],
+    },
+    {
+      title: "The starting point",
+      blocks: [
+        {
+          title: "Structure before the planets",
+          paragraphs: [
+            "I framed home, a non-invasive daily quiz, exercises, and campus connections in grayscale first, with Roboto for body and Lato for headings.",
+          ],
+          images: projectImages(SS, ["SafeSpace Wireframes.png"]),
+        },
+      ],
     },
   ],
-  base: SS,
-  imageFiles: safeSpaceImages,
-  blockParagraphs: [
-    "Wireframes, user flow diagrams, and high-fidelity screen explorations.",
-  ],
   conclusion:
-    "The artifacts define a focused capture flow; they cannot yet show whether it feels supportive during a difficult moment.",
+    "The flow is focused. I still need to know if it feels supportive in a difficult moment, not just pretty on a desk.",
   nextSteps:
-    "Run real writing sessions to validate the interaction before adding another visual layer.",
+    "I want to run real writing sessions before I add another visual layer.",
 });
 
 /** ShiftOff */
 const SO = `${P}/ShiftOff`;
 const shiftOffHero = `${SO}/iPhone 16 Pro.png`;
-const shiftOffImages = [
-  "1.png",
-  "1.5.png",
-  "2.png",
-  "3.png",
-  "4.png",
-  "6.png",
-  "7.png",
-  "8.png",
-  "9.png",
-  "10.png",
-  "11.png",
-  "12.png",
-  "13.png",
-  "14.png",
-  "15.png",
-  "16.png",
-  "17.png",
-  "18.png",
-  "19.png",
-  "20.png",
-  "21.png",
-];
 
 const shiftOffCaseStudyRich = simpleGalleryCaseStudy({
   overview: {
     client: "Concept · Work-life Boundaries (Academic)",
     industry: "Wellness · Productivity · Service Design",
-    timeline: "Multi-week · Solo",
+    timeline: "April 2026 · Solo",
     role: "UX / product design",
   },
   scan: {
-    project: "End-of-day rituals so logging off actually means it.",
-    problem: "Work follows you home: notifications, open loops, Sunday scaries.",
-    role: "Solo UX and product design.",
-    hard: "Making disconnect feel like care, not a prettier guilt trip.",
-    change: "Rituals plus vault-locked work apps until morning review.",
+    project:
+      "I designed an end-of-day companion so logging off is a handoff, not a willpower test.",
+    problem: "The desk stays in sight from the couch, and work thoughts come with you.",
+    role: "I researched the pull, then designed a ritual that offloads open loops before the vault locks.",
+    hard: null,
+    change: null,
   },
   introParagraphs: [
-    "ShiftOff treats logging off as a designed behavior, not a willpower test.",
+    "ShiftOff replaces a missing commute with a psychological threshold: offload, disconnect, recover.",
   ],
   highlights: [],
-  base: SO,
-  imageFiles: shiftOffImages,
-  blockParagraphs: [
-    "High-fidelity screens and device mockups from the ShiftOff concept, onboarding hurdles through dashboard, settings, and handoff flows.",
+  sections: [
+    {
+      title: "Final product",
+      blocks: [
+        {
+          title: "The Great Reset, then the morning",
+          paragraphs: [
+            "I designed a decompression sequence you tap into after the shift, and a morning dashboard that is ready to begin again without reopening Slack.",
+          ],
+          images: projectImages(SO, ["21.png", "iPhone 16 Pro.png"]),
+        },
+      ],
+    },
+    {
+      title: "Research",
+      blocks: [
+        {
+          title: "Design the right thing first",
+          paragraphs: [
+            "I asked about the workday, shared devices, leftover rituals, and a recent time they were off the clock but still at work. Evidence before a prettier guilt trip.",
+          ],
+          images: projectImages(SO, ["4.png"]),
+        },
+        {
+          title: "Four people, same square meter",
+          paragraphs: [
+            "I talked to a UX architect, an analyst, a creative director, and an engineer in a 350-square-foot studio. The desk and the bed share a room.",
+          ],
+          images: projectImages(SO, ["6.png"]),
+        },
+        {
+          title: "The desk is still in the shot",
+          paragraphs: [
+            "7 of 8 worked in a space visible from the couch or bed. That sightline is a low-level pull even when they are not working.",
+          ],
+          images: projectImages(SO, ["7.png"]),
+        },
+        {
+          title: "Eight of eight still at work",
+          paragraphs: [
+            "All eight had involuntary work thoughts after hours: replaying conversations, or solving unfinished tasks. Both wreck sleep and presence.",
+          ],
+          images: projectImages(SO, ["10.png"]),
+        },
+      ],
+    },
+    {
+      title: "Direction",
+      blocks: [
+        {
+          title: "A commute you can still take",
+          paragraphs: [
+            "I framed Karya as a psychological threshold. Cognitive offloading, not digital deprivation. Capture the open loops, then a definitive end-of-day handoff so guilt does not follow you to the couch.",
+          ],
+          images: projectImages(SO, ["14.png"]),
+        },
+      ],
+    },
+    {
+      title: "Design",
+      blocks: [
+        {
+          title: "Splash, ritual, seal the day",
+          paragraphs: [
+            "I wired splash to onboarding to dashboard to a three-step handoff: brain dump, a fake commute, then Day Complete. Evening capture and morning review sit on the other side of the seal.",
+          ],
+          images: projectImages(SO, ["18.png"]),
+        },
+      ],
+    },
   ],
   conclusion:
-    "Designing for disengagement means evaluating what people do after the interface disappears, not how long they remain inside it.",
+    "Disengagement is what people do after the interface disappears, not how long they stay inside it.",
   nextSteps:
-    "Test whether the end-of-day rituals actually reduce after-hours Slack checking.",
+    "I want to test whether the handoff actually cuts after-hours Slack checking.",
 });
 
 /** CCA Pathfinding */
@@ -1256,35 +1400,55 @@ const ccaPathfindingCaseStudyRich = {
     role: "Research, numbering system, visual language, signage",
   },
   scan: {
-    project: "First-floor wayfinding for a campus people get lost in.",
-    problem: "Two numbering systems and prefixes that don't match ground-level walking.",
-    role: null,
-    hard: "Ground-level codes that match how you actually walk the hall.",
-    change: "Airport-style hallway prefixes on an entrance-facing map.",
+    project:
+      "I designed first-floor wayfinding for a campus people get lost in, including me.",
+    problem: "Two numbering systems and prefixes that do not match how you walk the hall.",
+    role: "I researched the scavenger hunt, then numbered rooms like an airport and put the signs in the building.",
+    hard: null,
+    change: null,
   },
   introParagraphs: [
-    "New students get lost. I did. So did a lot of the people I interviewed. The front gate is locked. You walk around to the back of the main building, which nobody tells you.",
-    "Inside, the portal map is the real system, and it still sends you hunting room by room. I scoped the first floor only.",
+    "New students get lost. I did. The front gate is locked, you walk around to the back, and the portal map still sends you hunting room by room. I scoped the first floor only.",
   ],
-  highlights: [
-    {
-      label: "What broke",
-      value: "4 out of 5 interviewees said room codes cause navigational issues.",
-    },
-  ],
+  highlights: [],
   heroFirst: true,
-  imagesBeforeText: false,
-  showJumpNav: true,
+  imagesBeforeText: true,
+  showJumpNav: false,
   showDeckEmbed: false,
   processWork: {
     sections: [
+      {
+        title: "Final product",
+        blocks: [
+          {
+            title: "Put it in the hall, not in a vacuum",
+            paragraphs: [
+              "Kiosk by the desk. Totem at the studio crossing, where IXD already has a taped arrow. Hanging pair over the Nave: EXIT one way, homeroom and toilets the other.",
+            ],
+            images: [
+              {
+                src: ccaSlide(56),
+                alt: "Entrance kiosk mocked into the lobby corridor.",
+              },
+              {
+                src: ccaSlide(57),
+                alt: "Crossways totem in the studio, pointing to toilets, IXD homeroom, and the Nave.",
+              },
+              {
+                src: ccaSlide(58),
+                alt: "Hanging signs in the Nave. EXIT, IXD HR, toilets.",
+              },
+            ],
+          },
+        ],
+      },
       {
         title: "The campus",
         blocks: [
           {
             title: "The building got a renovation. The signs didn't.",
             paragraphs: [
-              "1111 8th St used to be a warehouse. The Nave is the postcard. Wayfinding is tape, floor stickers, silver plaques, and a number painted on wired glass. Some signs still point at rooms that don't exist.",
+              "1111 8th St used to be a warehouse. The Nave is the postcard. I found wayfinding as tape, floor stickers, silver plaques, and a number painted on wired glass. Some signs still point at rooms that do not exist.",
             ],
             images: [
               {
@@ -1305,7 +1469,7 @@ const ccaPathfindingCaseStudyRich = {
           {
             title: "A, B, N, E, W. What does A even mean.",
             paragraphs: [
-              "CCA numbers by section: A, B, N, E, W. N, E, W are cardinals. A and B aren't. Standing in the hall, none of that tells you where you are.",
+              "CCA numbers by section: A, B, N, E, W. N, E, W are cardinals. A and B are not. Standing in the hall, none of that told me where I was.",
             ],
             images: [
               {
@@ -1352,7 +1516,7 @@ const ccaPathfindingCaseStudyRich = {
           {
             title: "Number like an airport.",
             paragraphs: [
-              "The hallway is the code. Flip the map 90 degrees so it faces you at the entrance. Hallways become A, B, C. If the door opens onto hallway A, you're A1, A2, A3. Next to A but the door dumps into B? That's B.",
+              "I made the hallway the code. I flipped the map 90 degrees so it faces you at the entrance. Hallways become A, B, C. If the door opens onto hallway A, you are A1, A2, A3. Next to A but the door dumps into B? That is B.",
             ],
             images: [
               {
@@ -1373,7 +1537,7 @@ const ccaPathfindingCaseStudyRich = {
           {
             title: "Kiosk, crossways, hanging signs",
             paragraphs: [
-              "Digibop for voice, Quicksand for legibility. Purple, pink, cyan. Three sign types: entrance kiosk, crossway totem, and long-hall hanging pair.",
+              "I used Digibop for voice and Quicksand for legibility. Purple, pink, cyan. Three sign types: entrance kiosk, crossway totem, and a long-hall hanging pair.",
             ],
             images: [
               {
@@ -1388,38 +1552,13 @@ const ccaPathfindingCaseStudyRich = {
           },
         ],
       },
-      {
-        title: "In the building",
-        blocks: [
-          {
-            title: "Put it in the hall, not in a vacuum",
-            paragraphs: [
-              "Kiosk by the desk. Totem at the studio crossing, where IXD already has a taped arrow. Hanging pair over the Nave: EXIT one way, homeroom and toilets the other.",
-            ],
-            images: [
-              {
-                src: ccaSlide(56),
-                alt: "Entrance kiosk mocked into the lobby corridor.",
-              },
-              {
-                src: ccaSlide(57),
-                alt: "Crossways totem in the studio, pointing to toilets, IXD homeroom, and the Nave.",
-              },
-              {
-                src: ccaSlide(58),
-                alt: "Hanging signs in the Nave. EXIT, IXD HR, toilets.",
-              },
-            ],
-          },
-        ],
-      },
     ],
   },
   conclusionTitle: "Reflection",
   conclusion:
-    "Interviews revealed that orientation and naming—not visual polish alone—were the core wayfinding problems.",
+    "Interviews showed that orientation and naming, not polish, were the wayfinding problem.",
   nextSteps:
-    "Install a full-size totem in the Nave and observe first-years at rush hour.",
+    "I want to install a full-size totem in the Nave and watch first-years at rush hour.",
 };
 
 /** A Fowl Play (AR) */
@@ -1434,32 +1573,30 @@ const aFowlPlayCaseStudyRich = simpleGalleryCaseStudy({
     role: "Narrative, 3D, AR interaction design",
   },
   scan: {
-    project: "An iPad AR mystery. Scan the room, follow the cues, catch the cook.",
+    project:
+      "I built an iPad AR mystery you solve by scanning the room, not by reading a menu.",
     problem: "AR that explains itself with UI chrome instead of the world.",
-    role: "Solo. Narrative, 3D, AR interaction.",
-    hard: "Wayfinding with audio, light, and geometry. Almost no menus.",
-    change: "Image-anchored scenes and invisible room-to-room triggers.",
+    role: "I wrote the story, built the scenes, and hid the wayfinding in audio, light, and geometry.",
+    hard: null,
+    change: null,
   },
   introParagraphs: [
-    "A Fowl Play turns an iPad into a detective kit—scan the room, step into a mystery, and catch the cook.",
-    "Built in Reality Composer with RealityScan assets and Blender cleanup.",
+    "A Fowl Play turns an iPad into a detective kit. I built it in Reality Composer with RealityScan props and Blender cleanup.",
   ],
-  highlights: [
-    {
-      label: "VO",
-      value: "ElevenLabs narration for scene handoffs.",
-    },
-  ],
-  showJumpNav: true,
+  highlights: [],
   sections: [
+    {
+      title: "Final product",
+      blocks: [],
+    },
     {
       title: "Inspiration",
       blocks: [
         {
-          title: "Navigation as storytelling",
-          paragraphs: [
-            "Before any scan, I studied how games push you forward without a giant arrow. Alyx won: environment, sound, and geometry do the pointing.",
-          ],
+            title: "Navigation as storytelling",
+            paragraphs: [
+              "Before any scan I studied how games push you forward without a giant arrow. Alyx won. Environment, sound, and geometry do the pointing.",
+            ],
           images: projectImages(AFP, [
             "Half-Life_Alyx_Navigational_Cues_Screenshot.png",
           ]),
@@ -1470,10 +1607,10 @@ const aFowlPlayCaseStudyRich = simpleGalleryCaseStudy({
       title: "World build",
       blocks: [
         {
-          title: "Scan, clean, place",
-          paragraphs: [
-            "Sketchfab filled gaps. RealityScan pulled real props into the scene. Blender kept the polycount from melting the iPad.",
-          ],
+            title: "Scan, clean, place",
+            paragraphs: [
+              "I used Sketchfab for gaps, RealityScan for real props, and Blender so the polycount would not melt the iPad.",
+            ],
           images: projectImages(AFP, [
             "image.png",
             "image 1.png",
@@ -1487,19 +1624,19 @@ const aFowlPlayCaseStudyRich = simpleGalleryCaseStudy({
       title: "Scenes",
       blocks: [
         {
-          title: "Detective's office",
-          paragraphs: [
-            "Tone-setter: look around, hear the monologue, walk to the door.",
-          ],
+            title: "Detective's office",
+            paragraphs: [
+              "I used the office as a tone-setter: look around, hear the monologue, walk to the door.",
+            ],
           images: projectImages(AFP, [
             "IMG_0182_from_Notion.jpg",
           ]),
         },
         {
-          title: "Restaurant of suspicion",
-          paragraphs: [
-            "Three spaces, three cue types. Players stretch their legs and solve with instinct, not a checklist.",
-          ],
+            title: "Restaurant of suspicion",
+            paragraphs: [
+              "Three spaces, three cue types. I wanted players to stretch their legs and solve with instinct, not a checklist.",
+            ],
           images: projectImages(AFP, [
             "7b6affab-7070-469b-bed3-d1cc959b25d6.png",
             "a607895c-bc9b-44a8-9cd5-d1ae70aebfaa.png",
@@ -1511,10 +1648,10 @@ const aFowlPlayCaseStudyRich = simpleGalleryCaseStudy({
       title: "Anchor",
       blocks: [
         {
-          title: "Make the marker part of the joke",
-          paragraphs: [
-            "Horizontal plane anchors fought crowded rooms. An image anchor locked the scene, and version 2 swapped a wall of text for a face doodle Reality Composer could actually see.",
-          ],
+            title: "Make the marker part of the joke",
+            paragraphs: [
+              "Horizontal plane anchors fought crowded rooms. I locked the scene to an image, then swapped a wall of text for a face doodle Reality Composer could actually see.",
+            ],
           images: projectImages(AFP, ["Untitled-1.jpg", "Ver2.jpg"]),
         },
       ],
@@ -1543,13 +1680,13 @@ const aFowlPlayCaseStudyRich = simpleGalleryCaseStudy({
     },
   ],
   videosPlacement: "afterSection",
-  videosAfterSection: "Scenes",
-  videosTitle: "Playthroughs",
-  videosIntro: "Playthroughs from restaurant exploration through in-person testing.",
+  videosAfterSection: "Final product",
+  videosTitle: null,
+  videosIntro: null,
   conclusion:
-    "Watching people solve the mystery through intuition showed that the environmental cues were carrying the experience.",
+    "Watching people solve it by instinct showed the environmental cues were carrying the experience.",
   nextSteps:
-    "Stress-test the image anchors in brighter, busier rooms.",
+    "I want to stress-test the image anchors in brighter, busier rooms.",
 });
 
 /** The Adherence Project */
@@ -1564,35 +1701,30 @@ const adherenceCaseStudyRich = simpleGalleryCaseStudy({
     role: "Product, interaction, physical prototype",
   },
   scan: {
-    project: "Voice and screen companion wired to a physical pill dispenser.",
+    project:
+      "I built a voice and screen companion wired to a physical pill dispenser.",
     problem: "Missed doses are a system problem, not a willpower poster.",
-    role: null,
-    hard: "Bridging app logic to hardware without turning it into a lecture.",
-    change: "Soft reminders and a swinging door that hands you the dose.",
+    role: "I designed the reminders, the flow, and a swinging door that hands you the dose.",
+    hard: null,
+    change: null,
   },
   introParagraphs: [
-    "Half of people with chronic conditions miss doses.",
+    "Half of people with chronic conditions miss doses. I designed soft reminders and an accessible path from refill to dispense.",
   ],
-  highlights: [
-    {
-      label: "Insight",
-      value: "Flexibility beats rigid schedules for messy real routines.",
-    },
-    {
-      label: "Form",
-      value: "Funnel refill and status through an LED window.",
-    },
-  ],
-  showJumpNav: true,
+  highlights: [],
   sections: [
+    {
+      title: "Final product",
+      blocks: [],
+    },
     {
       title: "Problem",
       blocks: [
         {
-          title: "Missed doses, real cost",
-          paragraphs: [
-            "~125,000 preventable deaths a year in the US alone. The brief: soft reminders and an accessible path from refill to dispense.",
-          ],
+            title: "Missed doses, real cost",
+            paragraphs: [
+              "About 125,000 preventable deaths a year in the US alone. The brief asked for soft reminders and an accessible path from refill to dispense.",
+            ],
           images: projectImages(ADH, [
             "aa8e76d0-0dca-4b3d-9e7f-abf760410230.png",
             "persona-letter.png",
@@ -1604,10 +1736,10 @@ const adherenceCaseStudyRich = simpleGalleryCaseStudy({
       title: "Flow",
       blocks: [
         {
-          title: "Map the ritual",
-          paragraphs: [
-            "User flows clarified where voice helps and where it just slows people down. Clarity over speed. Fewer back-and-forths.",
-          ],
+            title: "Map the ritual",
+            paragraphs: [
+              "I mapped the ritual so I could see where voice helps and where it just slows people down. Clarity over speed. Fewer back-and-forths.",
+            ],
           images: projectImages(ADH, ["flowchart.png"]),
         },
       ],
@@ -1616,10 +1748,10 @@ const adherenceCaseStudyRich = simpleGalleryCaseStudy({
       title: "Prototype",
       blocks: [
         {
-          title: "Digital meets door servo",
-          paragraphs: [
-            "ProtoPie talked to Blokdots. Loose wires lied. Wi-Fi lagged. Three hardware iterations later, the funnel angle and cable routing finally behaved.",
-          ],
+            title: "Digital meets door servo",
+            paragraphs: [
+              "I connected ProtoPie to Blokdots. Loose wires lied. Wi-Fi lagged. Three hardware iterations later, the funnel angle and cable routing finally behaved.",
+            ],
           images: projectImages(ADH, [
             "2865bf62-a8ff-4e12-a53d-a0ca5a1369cc.png",
             "image.png",
@@ -1658,31 +1790,18 @@ const adherenceCaseStudyRich = simpleGalleryCaseStudy({
     },
   ],
   videosPlacement: "afterSection",
-  videosAfterSection: "Prototype",
-  videosTitle: "Prototype in motion",
-  videosIntro: "Prototype dispense and voice loops.",
+  videosAfterSection: "Final product",
+  videosTitle: null,
+  videosIntro: null,
   conclusion:
-    "Voice interactions demand patience, while physical prototypes expose constraints that screen flows can hide.",
+    "Voice needs patience. Hardware shows the constraints a screen flow can hide.",
   nextSteps:
-    "Complete a tighter industrial-design pass after the interaction model and servo behavior stabilize.",
+    "I want a tighter industrial-design pass once the servo behavior stays honest.",
 });
 
 /** Concrete — The Price for Concrete */
 const CN = `${P}/Concrete`;
 const concreteHero = `${CN}/slides/concrete-slide-02.png`;
-const concreteSlides = [
-  "slides/concrete-slide-02.png", // title
-  "slides/concrete-slide-01.png", // Raquel Nelson
-  "slides/concrete-slide-03.png",
-  "slides/concrete-slide-04.png",
-  "slides/concrete-slide-05.png", // iceberg / the System
-  "slides/concrete-slide-06.png",
-  "slides/concrete-slide-07.png",
-  "slides/concrete-slide-08.png",
-  "slides/concrete-slide-09.png",
-  "slides/concrete-slide-10.png",
-  "slides/concrete-slide-11.png", // Changing the Goal
-];
 
 const concreteCaseStudyRich = simpleGalleryCaseStudy({
   overview: {
@@ -1692,29 +1811,99 @@ const concreteCaseStudyRich = simpleGalleryCaseStudy({
     role: "Systems research · visual narrative",
   },
   scan: {
-    project: "A systems deck on what streets cost when people aren't the point.",
+    project:
+      "I built a systems deck on what streets cost when people are not the point.",
     problem: "Car-first design, then blame the pedestrian.",
-    role: null,
-    hard: "Making leverage points readable without a policy lecture.",
-    change: "Iceberg models and a goal flip: safe human access over throughput.",
+    role: "I used an iceberg and a goal flip so the leverage points read without a policy lecture.",
+    hard: null,
+    change: null,
   },
   introParagraphs: [
-    "The Price for Concrete asks what we actually pay when streets are engineered for cars first and people second. Not the asphalt invoice. The human one.",
-    "Boards first—the argument is in the sequence.",
+    "The Price for Concrete asks what we pay when streets are built for cars first. Not the asphalt invoice. The human one.",
   ],
-  highlights: [
+  highlights: [],
+  sections: [
     {
-      label: "Spark",
-      value: "Raquel Nelson's case: a family crossing after dark, and a system that criminalized the pedestrian.",
+      title: "Final product",
+      blocks: [
+        {
+          title: "Change the goal, not the paint",
+          paragraphs: [
+            "I ended on Changing the Goal: rewrite the rules, fund safe human access instead of maximum throughput, and treat pedestrians as the primary stakeholder, not the criminal.",
+          ],
+          images: projectImages(CN, ["slides/concrete-slide-11.png"]),
+        },
+      ],
+    },
+    {
+      title: "The starting point",
+      blocks: [
+        {
+          title: "A family, a street, a conviction",
+          paragraphs: [
+            "I started with Raquel Nelson. After dark, home across the street, a mile-long detour. A van killed her four-year-old. The driver served six months. She was convicted of vehicular homicide for jaywalking.",
+          ],
+          images: projectImages(CN, ["slides/concrete-slide-01.png"]),
+        },
+      ],
+    },
+    {
+      title: "How it is now",
+      blocks: [
+        {
+          title: "Liberation became necessity",
+          paragraphs: [
+            "290 million cars on US roads. 87% daily car use. A ten-year growth trend. Happiness drops once driving is more than half the day, and most people have no other choice.",
+          ],
+          images: projectImages(CN, ["slides/concrete-slide-04.png"]),
+        },
+        {
+          title: "The event is just the tip",
+          paragraphs: [
+            "I used an iceberg. Above water: I see a lot of cars today. Below it: a decade of more vehicles, zoning that forces long trips, and a mental model that the car is the only normal way to move.",
+          ],
+          images: projectImages(CN, ["slides/concrete-slide-05.png"]),
+        },
+        {
+          title: "Policy funds highways that fund isolation",
+          paragraphs: [
+            "I mapped the loop: policy funds highways, highways become barriers, barriers force longer trips, longer trips demand more car-centric funding. Seniors, low-income people, and young adults miss healthcare, jobs, and school.",
+          ],
+          images: projectImages(CN, ["slides/concrete-slide-06.png"]),
+        },
+        {
+          title: "Wider roads are a fix that fails",
+          paragraphs: [
+            "Congestion gets a wider road. Crossings become impossible. Liability and emergency costs rise. The symptom eases for a minute. The structure gets worse.",
+          ],
+          images: projectImages(CN, ["slides/concrete-slide-07.png"]),
+        },
+        {
+          title: "Inclusion is the actual problem",
+          paragraphs: [
+            "The systemic prioritization of automobiles inhibits social inclusion, cuts mobility, and makes financial independence impossible for anyone who depends on transit.",
+          ],
+          images: projectImages(CN, ["slides/concrete-slide-08.png"]),
+        },
+      ],
+    },
+    {
+      title: "A rule you can build",
+      blocks: [
+        {
+          title: "The 100-foot rule",
+          paragraphs: [
+            "I proposed a pairing rule: no transit stop stays without a pedestrian crosswalk within 100 feet, plus lighting, signaled crossings, and protective medians.",
+          ],
+          images: projectImages(CN, ["slides/concrete-slide-10.png"]),
+        },
+      ],
     },
   ],
-  base: CN,
-  imageFiles: concreteSlides.slice(1),
-  blockParagraphs: [],
   conclusion:
-    "Slide 11, “Changing the Goal,” is where the deck stops diagnosing and starts prescribing.",
+    "Changing the Goal is where the deck stops diagnosing and starts prescribing.",
   nextSteps:
-    "Test whether the sequence persuades readers without a presenter supplying the argument.",
+    "I want to test whether the sequence persuades someone without me in the room.",
 });
 
 /** Flippy */
@@ -1729,23 +1918,47 @@ const flippyCaseStudyRich = simpleGalleryCaseStudy({
     role: "Product design · front-end · ML integration",
   },
   scan: {
-    project: "Your photo, sliced into a pop-up book you can tilt around.",
+    project:
+      "I built a browser toy that slices your photo into a pop-up book you can tilt.",
     problem: "A still image keeps the look and throws away the feeling of standing there.",
-    role: null,
-    hard: "Depth on the phone. Nothing leaves the device.",
-    change: "Capture to paper cutouts in the browser, WebGPU with a WASM fallback.",
+    role: "I designed the loop and ran depth on the phone so nothing leaves the device.",
+    hard: null,
+    change: null,
   },
-  introParagraphs: [],
+  introParagraphs: [
+    "Capture, depth, slice, stand up. The live app is the proof.",
+  ],
   highlights: [],
-  base: FL,
-  imageFiles: ["flippy-flow.png", "flippy-tech.png"],
-  blockParagraphs: [
-    "Process boards for the Flippy loop. Drop real device captures into this folder anytime. The live app is the proof.",
+  sections: [
+    {
+      title: "Final product",
+      blocks: [
+        {
+          title: "The loop",
+          paragraphs: [
+            "I designed three beats: point at a moment, cut it into hard-edged foreground, mid, and background bands, then stand them up so tilt reads like a paper book.",
+          ],
+          images: projectImages(FL, ["flippy-flow.png"]),
+        },
+      ],
+    },
+    {
+      title: "On device",
+      blocks: [
+        {
+          title: "Nothing leaves the phone",
+          paragraphs: [
+            "I ran Depth Anything V2 Small through transformers.js, rendered with CSS 3D and a spring-smoothed look, and drove the feel with gyroscope plus drag.",
+          ],
+          images: projectImages(FL, ["flippy-tech.png"]),
+        },
+      ],
+    },
   ],
   conclusion:
-    "The browser prototype proved that estimated depth can become an interaction rather than a post-processing effect.",
+    "Estimated depth became an interaction, not a filter you apply after the fact.",
   nextSteps:
-    "Refine the cutouts, add richer paper textures, and design a shareable moment format.",
+    "I want richer paper textures, cleaner cutouts, and a moment you can share.",
 });
 
 /** Who Fiddled? */
@@ -1761,24 +1974,20 @@ const whoFiddledCaseStudyRich = {
     role: "Concept, visual system, interaction, identity",
   },
   scan: {
-    project: "Daily bluffing trivia inside a Reddit post. One truth, three lies.",
-    problem: "A game that has to read in a feed and still feel like a party when you expand it.",
-    role: null,
-    hard: "Fair daily play for a public sub under 200 people, and lies that don't give themselves away.",
-    change: "A sequential ten, a sticker system, and a writer that stopped wrapping tells in parentheses.",
+    project:
+      "I designed a daily bluffing trivia game that lives inside a Reddit post: one truth, three lies.",
+    problem: "It has to read in a feed and still feel like a party when you expand it.",
+    role: "I designed the loop, the sticker system, and the identity so ranked play stayed fair in a small public sub.",
+    hard: null,
+    change: null,
   },
   introParagraphs: [
-    "Designed for Reddit's Games with a Hook hackathon: loop, sticker system, and identity.",
+    "One truth, three lies, ten questions a day, inside a Reddit post. I designed the loop, the stickers, and the identity for Games with a Hook.",
   ],
-  highlights: [
-    {
-      label: "Look",
-      value: "Cyan field, pink as the one primary action, navy outlines, Noot on the wordmark only.",
-    },
-  ],
+  highlights: [],
   heroFirst: true,
-  imagesBeforeText: false,
-  showJumpNav: true,
+  imagesBeforeText: true,
+  showJumpNav: false,
   showDeckEmbed: false,
   videos: [
     {
@@ -1787,16 +1996,16 @@ const whoFiddledCaseStudyRich = {
       label: "Full loop inside a Reddit post",
     },
   ],
-  videosPlacement: "afterIntro",
-  videosTitle: "Full loop",
-  videosIntro:
-    "Hub to question to reveal to the next one. This is the game as it actually plays.",
+  videosPlacement: "afterSection",
+  videosAfterSection: "Final product",
+  videosTitle: null,
+  videosIntro: null,
   livePrototype: {
     href: "https://www.reddit.com/r/who_fiddled_dev",
     label: "Open r/who_fiddled_dev",
     intro: "Play today's ranked 10 in r/who_fiddled_dev.",
   },
-  extraVideosAfterSection: "Playing it",
+  extraVideosAfterSection: "Final product",
   extraVideosTitle: "The tap, the miss, the hit",
   extraVideosIntro: null,
   extraVideos: [
@@ -1822,12 +2031,16 @@ const whoFiddledCaseStudyRich = {
   processWork: {
     sections: [
       {
+        title: "Final product",
+        blocks: [],
+      },
+      {
         title: "In the feed",
         blocks: [
           {
             title: "It has to look like a Reddit post first",
             paragraphs: [
-              "If the first card does not feel tappable, nobody reaches Today's 10.",
+              "I designed the first card to feel tappable in the feed. If it does not, nobody reaches Today's 10.",
             ],
             images: [
               {
@@ -1844,8 +2057,8 @@ const whoFiddledCaseStudyRich = {
           {
             title: "Fair ranking needed one shared deck",
             paragraphs: [
-              "The actual sport is Today's 10. Same ten questions for everyone that Pacific day, so the leaderboard is fair. One hero card, a row of pips, Start daily trivia. You don't pick from truncated teasers. You play the deck in order.",
-              "Community sits under it, for fun, no ranked points. One question a day if you want to post. Ranked points never leak into that lane, or a popular lie-farm would beat people who just played the official ten.",
+              "The actual sport is Today's 10. I gave everyone the same ten questions that Pacific day so the leaderboard is fair. One hero card, a row of pips, Start daily trivia. You play the deck in order. You do not pick from truncated teasers.",
+              "Community sits under it, for fun, no ranked points. Ranked points never leak into that lane, or a popular lie-farm would beat people who just played the official ten.",
             ],
             images: [
               {
@@ -1862,8 +2075,8 @@ const whoFiddledCaseStudyRich = {
           {
             title: "A tap had to feel like a tap",
             paragraphs: [
-              "Answer cards are radio stickers, not static text. Lock it in stays dead until you pick something. The copy says Pick an answer first so the grey button isn't a mystery. Sixty seconds on the clock, fill reading as time left, not a loading bar.",
-              "Once you select, the white face presses down and the navy shadow stays put. Switch answers and the old one pops back up. No checkmark. A checkmark shoved the copy and wrapped a word.",
+              "I made answer cards radio stickers, not static text. Lock it in stays dead until you pick something. The copy says Pick an answer first so the grey button is not a mystery. Sixty seconds on the clock, fill reading as time left, not a loading bar.",
+              "Once you select, the white face presses down and the navy shadow stays put. Switch answers and the old one pops back up. I skipped the checkmark. A checkmark shoved the copy and wrapped a word.",
             ],
             images: [
               {
@@ -1880,7 +2093,7 @@ const whoFiddledCaseStudyRich = {
           {
             title: "Type on the card players will see",
             paragraphs: [
-              "The magenta card is the prompt. You type on it, not in a leftover field underneath. Extra context is optional and only shows after voting, so the backstory can't leak the truth. Draft saves as a quiet chip. Next takes you to the three lies.",
+              "I put the prompt on the magenta card so you type on it, not in a leftover field underneath. Extra context is optional and only shows after voting, so the backstory cannot leak the truth.",
               "Two steps, not seven fields in one scroll. Personal questions and Write the lies are different jobs, so they got different tabs.",
             ],
             images: [
@@ -1898,7 +2111,7 @@ const whoFiddledCaseStudyRich = {
           {
             title: "The deck ends. The day doesn't.",
             paragraphs: [
-              "Finish the ten and the card goes yellow, brand yellow, not a random green. Score up top. Correct, missed, and the deck bonus in one box so 2 correct and 8 missed actually add up. If you're #1, that line gets a trophy, not a footnote.",
+              "Finish the ten and the card goes brand yellow, not a random green. I put score, correct, missed, and the deck bonus in one box so 2 correct and 8 missed actually add up. If you are #1, that line gets a trophy, not a footnote.",
               "Share my score is the pink action. View leaderboard is yellow. Next deck drops on a live Pacific countdown, so Check back tomorrow has a clock on it.",
             ],
             images: [
@@ -1918,9 +2131,9 @@ const whoFiddledCaseStudyRich = {
   },
   conclusionTitle: "Reflection",
   conclusion:
-    "The quality of the lies, not additional mechanics, is the game's central content challenge.",
+    "The quality of the lies, not extra mechanics, is the real content problem.",
   nextSteps:
-    "Grow the prompt packs and study which lies actually fool people.",
+    "I want to grow the prompt packs and study which lies actually fool people.",
 };
 
 /** Tama desk companion */
@@ -2415,15 +2628,10 @@ const FEATURED_SLUGS = [
   "kits",
 ];
 
-/** Desktop 2×3: original 2×2 on the left, newer cards in the right column. */
-const DESKTOP_FEATURED_SLUGS = [
-  "eleara",
-  "pulse",
-  "tama",
-  "adherence",
-  "kits",
-  "cca-pathfinding",
-];
+/** Desktop heroes — two large case-study windows. */
+const DESKTOP_FEATURED_SLUGS = ["tama", "pulse"];
+
+const HERO_SLUGS = DESKTOP_FEATURED_SLUGS;
 
 export const featuredProjects = FEATURED_SLUGS.map((slug) =>
   projects.find((p) => p.slug === slug)
@@ -2432,6 +2640,12 @@ export const featuredProjects = FEATURED_SLUGS.map((slug) =>
 export const desktopFeaturedProjects = DESKTOP_FEATURED_SLUGS.map((slug) =>
   projects.find((p) => p.slug === slug)
 ).filter(Boolean);
+
+export const heroProjects = desktopFeaturedProjects;
+
+export const carouselProjects = projects.filter(
+  (p) => !HERO_SLUGS.includes(p.slug)
+);
 
 export const archiveProjects = projects.filter(
   (p) => !FEATURED_SLUGS.includes(p.slug)

@@ -451,6 +451,168 @@ body {
   }
 }
 
+.os-window-body--fill {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+}
+
+.me-txt-body {
+  box-sizing: border-box;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: visible;
+}
+
+.me-txt-portrait-wrap {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.me-txt-drawer {
+  position: absolute;
+  left: -1px;
+  right: -1px;
+  top: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 6;
+}
+
+.me-txt-drawer__panel {
+  transform: translateY(-100%);
+  opacity: 0;
+  background: rgba(18, 12, 8, 0.96);
+  border: 1px solid rgba(255, 122, 41, 0.55);
+  border-top: 0;
+  border-radius: 0 0 3px 3px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5);
+  transition:
+    transform 0.38s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.28s ease;
+}
+
+.os-window-shell:hover .me-txt-drawer,
+.os-window-shell:focus-within .me-txt-drawer {
+  pointer-events: auto;
+}
+
+.os-window-shell:hover .me-txt-drawer__panel,
+.os-window-shell:focus-within .me-txt-drawer__panel {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .me-txt-drawer__panel {
+    transform: none;
+    transition: opacity 0.16s ease;
+  }
+}
+
+.project-dock {
+  overflow: hidden;
+}
+
+.project-dock__mask {
+  height: 100%;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0,
+    #000 28px,
+    #000 calc(100% - 36px),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0,
+    #000 28px,
+    #000 calc(100% - 36px),
+    transparent 100%
+  );
+}
+
+.project-dock__mask--static {
+  overflow-x: auto;
+  overflow-y: hidden;
+  mask-image: none;
+  scrollbar-width: thin;
+}
+
+.project-dock__track {
+  display: flex;
+  align-items: flex-end;
+  width: max-content;
+  height: 100%;
+  gap: 0;
+  padding: 8px 0 10px;
+  animation: project-dock-scroll var(--dock-duration, 40s) linear infinite;
+}
+
+.project-dock__set {
+  display: flex;
+  align-items: flex-end;
+  flex: 0 0 auto;
+  gap: var(--dock-gap, 22px);
+  padding-right: var(--dock-gap, 22px);
+}
+
+.project-dock__track--static {
+  animation: none;
+}
+
+.project-dock:hover .project-dock__track,
+.project-dock:focus-within .project-dock__track {
+  animation-play-state: paused;
+}
+
+.project-dock__item {
+  position: relative;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.project-dock__name {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: "VT323", monospace;
+  font-size: 16px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #ff7a29;
+  text-shadow: 0 0 8px rgba(255, 122, 41, 0.45);
+  pointer-events: none;
+}
+
+.project-dock__card {
+  flex: 0 0 auto;
+}
+
+@keyframes project-dock-scroll {
+  from {
+    transform: translate3d(-50%, 0, 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .project-dock__track {
+    animation: none;
+  }
+}
+
 @keyframes os-window-bob {
   0%,
   100% {
