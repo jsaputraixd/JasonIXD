@@ -451,6 +451,126 @@ body {
   }
 }
 
+.project-hero-teaser {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  box-sizing: border-box;
+  background: rgba(8, 5, 4, 0.78);
+  backdrop-filter: blur(10px) saturate(0.8);
+  -webkit-backdrop-filter: blur(10px) saturate(0.8);
+  opacity: 0;
+  transition: opacity 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.project-hero-teaser.is-on {
+  opacity: 1;
+}
+
+.project-hero-teaser__video {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  background: #0a0806;
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.5);
+  transform: scale(0.96);
+  transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.project-hero-teaser.is-on .project-hero-teaser__video {
+  transform: scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .project-hero-teaser {
+    display: none;
+  }
+}
+
+.kits-card-phones {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  overflow: hidden;
+  background: #07060c;
+  opacity: 0;
+  transition: opacity 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.kits-card-phones.is-on {
+  opacity: 1;
+}
+
+.kits-card-phones__screen {
+  position: absolute;
+  left: 50%;
+  top: 52%;
+  display: block;
+  height: 78%;
+  width: auto;
+  object-fit: cover;
+  object-position: top center;
+  border-radius: 6px;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.5);
+  transform-origin: 50% 92%;
+  transform: translate(-50%, -50%) rotate(calc((var(--i) - 1) * 7deg))
+    scale(0.9);
+  z-index: calc(2 + var(--i));
+  transition:
+    transform 0.58s cubic-bezier(0.18, 0.84, 0.28, 1),
+    box-shadow 0.4s ease;
+  transition-delay: calc(var(--i) * 55ms);
+}
+
+.kits-card-phones.is-fanned .kits-card-phones__screen:nth-child(1) {
+  transform: translate(-50%, -50%) translateX(-102%) rotate(-12deg);
+  z-index: 2;
+}
+
+.kits-card-phones.is-fanned .kits-card-phones__screen:nth-child(2) {
+  transform: translate(-50%, -54%) rotate(0deg);
+  z-index: 4;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.55);
+}
+
+.kits-card-phones.is-fanned .kits-card-phones__screen:nth-child(3) {
+  transform: translate(-50%, -50%) translateX(102%) rotate(12deg);
+  z-index: 3;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kits-card-phones__screen {
+    transition: none;
+  }
+}
+
+.desktop-project-focus-scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: rgba(6, 4, 3, 0.55);
+  backdrop-filter: blur(16px) saturate(0.72);
+  -webkit-backdrop-filter: blur(16px) saturate(0.72);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .desktop-project-focus-scrim {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(6, 4, 3, 0.62);
+  }
+}
+
 .os-window-body--fill {
   flex: 1 1 auto;
   min-height: 0;
@@ -566,8 +686,8 @@ body {
   animation: none;
 }
 
-.project-dock:hover .project-dock__track,
-.project-dock:focus-within .project-dock__track {
+.project-dock:has(.project-dock__item:hover) .project-dock__track,
+.project-dock:has(.project-dock__item:focus-within) .project-dock__track {
   animation-play-state: paused;
 }
 
@@ -591,7 +711,6 @@ body {
   text-transform: uppercase;
   color: #ff7a29;
   text-shadow: 0 0 8px rgba(255, 122, 41, 0.45);
-  pointer-events: none;
 }
 
 .project-dock__card {

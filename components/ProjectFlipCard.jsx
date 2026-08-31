@@ -4,7 +4,10 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { projectCardThumbSrc, projectCarouselThumbSrc } from "@/lib/projectMedia";
 import { DESKTOP_PROJECT_CARD_ASPECT } from "@/lib/projectDesktopCards";
+import { PROJECT_CARD_TEASERS } from "@/lib/projectCardVideos";
 import { playClick, notePointerHover } from "@/lib/typingSound";
+import ProjectHeroTeaser from "@/components/ProjectHeroTeaser";
+import KitsCardPhones from "@/components/KitsCardPhones";
 
 /** Per-project crop so wordmarks land in the card instead of getting clipped. */
 const PROJECT_CARD_CROP = {};
@@ -66,6 +69,7 @@ export default function ProjectFlipCard({
   hoverFocusDelayMs = 0,
   hoverScale = true,
   loading = "lazy",
+  motionPreview = false,
 }) {
   const aspect = aspectRatio ?? DESKTOP_PROJECT_CARD_ASPECT;
   const fluid = frameWidth == null && frameHeight == null;
@@ -74,6 +78,9 @@ export default function ProjectFlipCard({
 
   const heroSrc = project.thumb ?? project.caseStudyHero ?? null;
   const crop = PROJECT_CARD_CROP[project.slug] ?? null;
+  const teaser = motionPreview ? PROJECT_CARD_TEASERS[project.slug] : null;
+  const kitsPhones = motionPreview && project.slug === "kits";
+  const [previewHot, setPreviewHot] = useState(false);
   const hoverTimerRef = useRef(null);
 
   const clearHoverTimer = () => {
@@ -88,6 +95,7 @@ export default function ProjectFlipCard({
   }, [hoverFocusDelayMs]);
 
   const handleMouseEnter = (e) => {
+    if (teaser || kitsPhones) setPreviewHot(true);
     notePointerHover(e.currentTarget);
     if (!onRequestFocus) return;
     if (hoverFocusDelayMs <= 0) {
@@ -107,7 +115,10 @@ export default function ProjectFlipCard({
       data-cursor="view"
       aria-label={`Open ${project.title} case study`}
       onMouseEnter={handleMouseEnter}
-      onMouseLeave={clearHoverTimer}
+      onMouseLeave={() => {
+        setPreviewHot(false);
+        clearHoverTimer();
+      }}
       onFocus={() => onRequestFocus?.()}
       onPointerDown={() => {
         clearHoverTimer();
@@ -164,11 +175,20 @@ export default function ProjectFlipCard({
                   transformOrigin: crop?.objectPosition ?? "center",
                 }}
               />
+              {teaser ? (
+                <ProjectHeroTeaser
+                  src={teaser.src}
+                  active={previewHot}
+                  objectPosition={teaser.objectPosition}
+                />
+              ) : null}
+              {kitsPhones ? <KitsCardPhones active={previewHot} /> : null}
               <div
                 aria-hidden="true"
                 style={{
                   position: "absolute",
                   inset: 0,
+                  zIndex: 2,
                   background:
                     "linear-gradient(180deg, rgba(12, 8, 6, 0.08) 0%, rgba(8, 5, 4, 0.35) 100%)",
                   pointerEvents: "none",
@@ -184,7 +204,7 @@ export default function ProjectFlipCard({
               backgroundImage:
                 "repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.04) 0px, rgba(255, 255, 255, 0.04) 1px, transparent 2px, transparent 4px)",
               pointerEvents: "none",
-              zIndex: 1,
+              zIndex: 3,
             }}
           />
         </div>

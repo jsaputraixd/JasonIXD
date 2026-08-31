@@ -85,6 +85,9 @@ const EASE = [0.16, 1, 0.3, 1];
 const SKILLS_FOCUS_BACKDROP_Z = 480;
 const SKILLS_FOCUS_GLOBE_Z = 481;
 const SKILLS_FOCUS_HINT_Z = 482;
+/** Dim the desktop under a featured project + its description peek. */
+const PROJECT_FOCUS_SCRIM_Z = 160;
+const PROJECT_FOCUS_WINDOW_Z = 180;
 
 function getWindowTitle(id) {
   switch (id) {
@@ -168,7 +171,9 @@ function getDesktopLayout(vw, vh) {
 
   const gridMinLeft = edge + leftColumnInset + W.me + projectLeftGap;
   const gridMaxRight = vw - edge - RIGHT_RESERVE;
-  const maxGridW = Math.max(0, gridMaxRight - gridMinLeft);
+  // Heroes sit in the mid band under the identity windows, so they can use
+  // the full stage width instead of squeezing past me.txt.
+  const maxGridW = Math.max(0, vw - 2 * edge - RIGHT_RESERVE);
   const identityH = identityWindowHeight(layoutScale);
   const maxGridH = Math.max(
     0,
@@ -245,6 +250,8 @@ export default function Desktop() {
   const [skillsFocused, setSkillsFocused] = useState(false);
   const skillsFocusedRef = useRef(false);
   skillsFocusedRef.current = skillsFocused;
+  const [focusProjectSlug, setFocusProjectSlug] = useState(null);
+  const [peekDismissEpoch, setPeekDismissEpoch] = useState(0);
   const [minimizedIds, setMinimizedIds] = useState([]);
   const welcomeDoneTimerRef = useRef(null);
   const [iconOffsets, setIconOffsets] = useState(() => ({}));
@@ -270,6 +277,22 @@ export default function Desktop() {
     window.addEventListener("keydown", onKey, true);
     return () => window.removeEventListener("keydown", onKey, true);
   }, [skillsFocused, closeSkillsFocus]);
+
+  useEffect(() => {
+    const clearFeaturedHover = () => {
+      setFocusProjectSlug(null);
+      setPeekDismissEpoch((n) => n + 1);
+    };
+    window.addEventListener("blur", clearFeaturedHover);
+    document.documentElement.addEventListener("mouseleave", clearFeaturedHover);
+    return () => {
+      window.removeEventListener("blur", clearFeaturedHover);
+      document.documentElement.removeEventListener(
+        "mouseleave",
+        clearFeaturedHover
+      );
+    };
+  }, []);
 
   const handleIconOffset = useCallback((id, offset) => {
     setIconOffsets((prev) => ({ ...prev, [id]: offset }));
@@ -450,6 +473,25 @@ export default function Desktop() {
 
   const zOf = (id, base) => zMap[id] ?? base;
 
+  const featuredFocusSlugs = useMemo(
+    () => new Set(desktopFeaturedProjects.map((p) => p.slug)),
+    []
+  );
+
+  const handleProjectPeekActive = useCallback(({ slug, focus, from }) => {
+    if (focus && slug) {
+      setFocusProjectSlug(slug);
+      return;
+    }
+    // Only drop the card we actually left so a hop Tama → Pulse
+    // cannot clear Pulse after Pulse already became active.
+    setFocusProjectSlug((cur) => {
+      if (from && cur === from) return null;
+      if (!from && cur && !featuredFocusSlugs.has(cur)) return null;
+      return cur;
+    });
+  }, [featuredFocusSlugs]);
+
   useEffect(() => {
     if (!viewport || viewport.w < 900 || phase !== "dashboard") return;
     const el = stageRef.current;
@@ -627,6 +669,21 @@ export default function Desktop() {
       className="relative w-full"
       style={{ height: "100%", overflow: "hidden" }}
     >
+      <AnimatePresence>
+        {showOtherWindows && focusProjectSlug ? (
+          <motion.div
+            key="project-focus-scrim"
+            className="desktop-project-focus-scrim"
+            aria-hidden
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.22, ease: EASE }}
+            style={{ zIndex: PROJECT_FOCUS_SCRIM_Z }}
+          />
+        ) : null}
+      </AnimatePresence>
+
       {phase === "waiting-boot" && (
         <div
           aria-hidden="true"
@@ -779,7 +836,11 @@ export default function Desktop() {
               width={card.width}
               height={card.windowHeight}
               delay={cascadeDelay(0.62 + projectIndex * 0.28)}
-              zIndex={zOf(id, zBase)}
+              zIndex={
+                focusProjectSlug === p.slug
+                  ? PROJECT_FOCUS_WINDOW_Z
+                  : zOf(id, zBase)
+              }
               onFocus={bringToFront}
               interactive
               minimized={isMinimized(id)}
@@ -789,7 +850,15 @@ export default function Desktop() {
               uiScale={layoutScale}
               clipContent={false}
               growOnHover
+              enlarged={focusProjectSlug === p.slug}
               dataProjectSlug={p.slug}
+              onHoverChange={(inside) => {
+                if (inside) setFocusProjectSlug(p.slug);
+                else {
+                  setFocusProjectSlug((cur) => (cur === p.slug ? null : cur));
+                  setPeekDismissEpoch((n) => n + 1);
+                }
+              }}
             >
               <ProjectFlipCard
                 project={p}
@@ -801,6 +870,7 @@ export default function Desktop() {
                 frameHeight={card.bodyHeight}
                 aspectRatio={card.aspect}
                 hoverScale={false}
+                motionPreview
                 hoverFocusDelayMs={
                   (otherStuffOpen && !isMinimized("otherStuff")) ||
                   (otherProjectsOpen && !isMinimized("otherProjects")) ||
@@ -959,6 +1029,9 @@ export default function Desktop() {
           projects={[...desktopFeaturedProjects, ...carouselProjects]}
           enabled={phase === "dashboard"}
           layoutScale={layoutScale}
+          focusSlugs={featuredFocusSlugs}
+          onActiveChange={handleProjectPeekActive}
+          dismissEpoch={peekDismissEpoch}
         />
       ) : null}
       <StatusBar />

@@ -39,8 +39,14 @@ export default function Window({
   clipContent = true,
   /** Scale the full chrome (title bar + body) on hover. */
   growOnHover = false,
+  /** Lift and enlarge this window (featured project focus). */
+  enlarged = false,
+  /** Featured hover enter/leave — drops zoom if the pointer leaves fast. */
+  onHoverChange,
   /** Marks this window as a featured project for the hover peek. */
   dataProjectSlug,
+  /** Skip the floating description peek when the card plays video instead. */
+  hideProjectPeek = false,
   /** Play a short whoosh when the window first appears (cascade delay respected). */
   playOpenSound = true,
   /** When false, ignore focus/drag so overlays (skills zoom) stay on top. */
@@ -107,7 +113,15 @@ export default function Window({
           onPointerEnter={() => {
             if (!interactive) return;
             onFocus?.(id);
+            onHoverChange?.(true);
           }}
+          onPointerLeave={(e) => {
+            if (e.relatedTarget instanceof Node && e.currentTarget.contains(e.relatedTarget)) {
+              return;
+            }
+            onHoverChange?.(false);
+          }}
+          onPointerCancel={() => onHoverChange?.(false)}
           onPointerDown={() => {
             if (!interactive) return;
             playClick();
@@ -127,11 +141,13 @@ export default function Window({
                   rotate: -1.4,
                   skewX: 0.8,
                 }
-              : { opacity: 1, scale: 1, rotate: 0, skewX: 0 }
+              : enlarged
+                ? { opacity: 1, scale: 1.5, rotate: 0, skewX: 0 }
+                : { opacity: 1, scale: 1, rotate: 0, skewX: 0 }
           }
           transition={{
-            duration: isHeld ? 0.08 : hasBeenHeld ? 0 : 0.28,
-            delay: isHeld || hasBeenHeld ? 0 : delay,
+            duration: isHeld ? 0.08 : enlarged ? 0.32 : hasBeenHeld ? 0 : 0.28,
+            delay: isHeld || hasBeenHeld || enlarged ? 0 : delay,
             ease: EASE,
           }}
           style={{
@@ -143,20 +159,22 @@ export default function Window({
             minWidth,
             zIndex,
             // Only promote a compositor layer while dragging.
-            willChange: isHeld ? "transform" : "auto",
+            willChange: isHeld || enlarged ? "transform" : "auto",
             pointerEvents: interactive ? "auto" : "none",
+            transformOrigin: "center center",
           }}
         >
           <div
             className={[
               "os-window-shell",
-              growOnHover ? "os-window-grow" : "",
+              growOnHover && !enlarged ? "os-window-grow" : "",
               isHeld ? "os-window-shell--held" : "",
               growOnHover && isHeld ? "os-window-grow--held" : "",
             ]
               .filter(Boolean)
               .join(" ")}
             data-project-slug={dataProjectSlug || undefined}
+            data-peek={hideProjectPeek ? "off" : undefined}
             data-sound="object"
             data-cursor="hover"
             onMouseEnter={(e) => notePointerHover(e.currentTarget)}
@@ -174,7 +192,9 @@ export default function Window({
               borderRadius: 3,
               boxShadow: isHeld
                 ? "0 0 28px rgba(255, 122, 41, 0.22), 0 24px 56px rgba(0, 0, 0, 0.65)"
-                : "0 0 24px rgba(255, 122, 41, 0.12), 0 16px 50px rgba(0, 0, 0, 0.5)",
+                : enlarged
+                  ? "0 0 36px rgba(255, 122, 41, 0.28), 0 28px 64px rgba(0, 0, 0, 0.7)"
+                  : "0 0 24px rgba(255, 122, 41, 0.12), 0 16px 50px rgba(0, 0, 0, 0.5)",
               color: "#ffffff",
               userSelect: "none",
               overflow: clipContent ? "hidden" : "visible",

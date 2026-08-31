@@ -10,7 +10,7 @@ const GAP = 14;
 const FOLLOW_X = 0.05;
 const FOLLOW_Y = 0.16;
 const LERP = 0.18;
-const LEAVE_MS = 90;
+const LEAVE_MS = 140;
 const PEEK_W = 400;
 
 function clamp(n, lo, hi) {
@@ -84,6 +84,9 @@ export default function ProjectHoverPeek({
   projects,
   enabled = true,
   layoutScale = 1,
+  focusSlugs,
+  onActiveChange,
+  dismissEpoch = 0,
 }) {
   const reduceMotion = useReducedMotion();
   const size = peekSize(layoutScale);
@@ -106,6 +109,10 @@ export default function ProjectHoverPeek({
   const openRef = useRef(false);
   slugRef.current = slug;
   openRef.current = open;
+  const onActiveChangeRef = useRef(onActiveChange);
+  onActiveChangeRef.current = onActiveChange;
+  const focusSlugsRef = useRef(focusSlugs);
+  focusSlugsRef.current = focusSlugs;
 
   const project = slug ? bySlug.get(slug) : null;
   const line = project?.cardLine || project?.tagline || "";
@@ -121,21 +128,51 @@ export default function ProjectHoverPeek({
     const measureHeight = () =>
       boxRef.current?.offsetHeight || Math.round(148 * layoutScale);
 
-    const updateFromEvent = (e) => {
-      const el = e.target instanceof Element ? e.target : null;
-      const hit = el?.closest("[data-project-slug]");
-      const next = hit?.getAttribute("data-project-slug");
-      if (!next || !bySlug.has(next)) {
-        if (leaveTimer.current) return;
-        leaveTimer.current = window.setTimeout(() => {
-          leaveTimer.current = 0;
-          setOpen(false);
-          setSlug(null);
-          displayed.current.ready = false;
-        }, LEAVE_MS);
+    const emitActive = (nextSlug) => {
+      const focus = Boolean(nextSlug && focusSlugsRef.current?.has(nextSlug));
+      onActiveChangeRef.current?.({
+        slug: nextSlug,
+        focus,
+        from: slugRef.current,
+      });
+    };
+
+    const closeNow = () => {
+      if (leaveTimer.current) {
+        window.clearTimeout(leaveTimer.current);
+        leaveTimer.current = 0;
+      }
+      setOpen(false);
+      setSlug(null);
+      displayed.current.ready = false;
+      emitActive(null);
+    };
+
+    const scheduleLeave = (nextSlug) => {
+      if (leaveTimer.current) return;
+      const focus = Boolean(nextSlug && focusSlugsRef.current?.has(nextSlug));
+      if (focus) {
+        closeNow();
         return;
       }
+      leaveTimer.current = window.setTimeout(() => {
+        leaveTimer.current = 0;
+        closeNow();
+      }, LEAVE_MS);
+    };
 
+    const hitFromPoint = (x, y) => {
+      const el = document.elementFromPoint(x, y);
+      if (!(el instanceof Element)) return null;
+      const hit = el.closest("[data-project-slug]");
+      if (!hit || hit.getAttribute("data-peek") === "off") return null;
+      const next = hit.getAttribute("data-project-slug");
+      if (!next || !bySlug.has(next)) return null;
+      return hit;
+    };
+
+    const openFromHit = (hit, clientX, clientY) => {
+      const next = hit.getAttribute("data-project-slug");
       if (leaveTimer.current) {
         window.clearTimeout(leaveTimer.current);
         leaveTimer.current = 0;
@@ -146,7 +183,7 @@ export default function ProjectHoverPeek({
       const nextTarget = preferAbove
         ? targetAboveCard(
             rect,
-            { x: e.clientX, y: e.clientY },
+            { x: clientX, y: clientY },
             size.width,
             measureHeight(),
             window.innerWidth,
@@ -154,7 +191,7 @@ export default function ProjectHoverPeek({
           )
         : targetBesideCard(
             rect,
-            { x: e.clientX, y: e.clientY },
+            { x: clientX, y: clientY },
             size.width,
             measureHeight(),
             window.innerWidth,
@@ -170,19 +207,65 @@ export default function ProjectHoverPeek({
       if (slugRef.current !== next) {
         setSlug(next);
         setOpen(true);
+        emitActive(next);
       } else if (!openRef.current) {
         setOpen(true);
+        emitActive(next);
       }
     };
 
-    const onMove = (e) => updateFromEvent(e);
+    const onPointerMove = (e) => {
+      const hit = hitFromPoint(e.clientX, e.clientY);
+      if (!hit) {
+        scheduleLeave(slugRef.current);
+        return;
+      }
+      openFromHit(hit, e.clientX, e.clientY);
+    };
 
-    window.addEventListener("mousemove", onMove, { passive: true });
+    const onPointerOut = (e) => {
+      const from =
+        e.target instanceof Element
+          ? e.target.closest("[data-project-slug]")
+          : null;
+      if (!from) return;
+      const to =
+        e.relatedTarget instanceof Element
+          ? e.relatedTarget.closest("[data-project-slug]")
+          : null;
+      if (from === to) return;
+      // Hit-test the event point. A stale in-bounds sample would keep zoom stuck.
+      const still = hitFromPoint(e.clientX, e.clientY);
+      if (still) {
+        openFromHit(still, e.clientX, e.clientY);
+        return;
+      }
+      scheduleLeave(from.getAttribute("data-project-slug"));
+    };
+
+    window.addEventListener("pointermove", onPointerMove, { passive: true });
+    window.addEventListener("pointerout", onPointerOut);
+    window.addEventListener("blur", closeNow);
+    document.documentElement.addEventListener("mouseleave", closeNow);
     return () => {
-      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerout", onPointerOut);
+      window.removeEventListener("blur", closeNow);
+      document.documentElement.removeEventListener("mouseleave", closeNow);
       if (leaveTimer.current) window.clearTimeout(leaveTimer.current);
     };
   }, [enabled, bySlug, layoutScale, size.width]);
+
+  useEffect(() => {
+    if (!dismissEpoch) return;
+    if (leaveTimer.current) {
+      window.clearTimeout(leaveTimer.current);
+      leaveTimer.current = 0;
+    }
+    setOpen(false);
+    setSlug(null);
+    displayed.current.ready = false;
+  }, [dismissEpoch]);
 
   useEffect(() => {
     if (!open || reduceMotion) {

@@ -2628,8 +2628,8 @@ const FEATURED_SLUGS = [
   "kits",
 ];
 
-/** Desktop heroes — two large case-study windows. */
-const DESKTOP_FEATURED_SLUGS = ["tama", "pulse"];
+/** Desktop heroes — one row of three case-study windows. */
+const DESKTOP_FEATURED_SLUGS = ["tama", "pulse", "kits"];
 
 const HERO_SLUGS = DESKTOP_FEATURED_SLUGS;
 
