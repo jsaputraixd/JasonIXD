@@ -17,8 +17,8 @@ export default function DesktopFolderIcon({
   iconSrc,
   left: baseLeft,
   top: baseTop,
-  width = 76,
-  height = 96,
+  width = 62,
+  height = 78,
   iconId = "otherStuffIcon",
   stageRef,
   onOpen,
@@ -97,7 +97,7 @@ export default function DesktopFolderIcon({
         height,
         zIndex: drag.isDragging ? zIndex + 20 : zIndex,
         margin: 0,
-        padding: "4px 2px 6px",
+        padding: "3px 2px 4px",
         border: "none",
         background: selected
           ? "rgba(255, 122, 41, 0.14)"
@@ -144,8 +144,8 @@ export default function DesktopFolderIcon({
       <span
         style={{
           fontFamily: "'VT323', monospace",
-          fontSize: 11,
-          lineHeight: 1.25,
+          fontSize: 10,
+          lineHeight: 1.2,
           letterSpacing: "0.06em",
           textAlign: "center",
           color: selected ? "#ffe2c4" : ACCENT,
@@ -153,7 +153,7 @@ export default function DesktopFolderIcon({
             ? "0 0 8px rgba(255, 122, 41, 0.55)"
             : "0 0 6px rgba(255, 122, 41, 0.35)",
           width: "100%",
-          minHeight: 28,
+          minHeight: 22,
           display: "block",
         }}
       >

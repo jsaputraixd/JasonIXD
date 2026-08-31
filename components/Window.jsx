@@ -146,7 +146,7 @@ export default function Window({
                 : { opacity: 1, scale: 1, rotate: 0, skewX: 0 }
           }
           transition={{
-            duration: isHeld ? 0.08 : enlarged ? 0.32 : hasBeenHeld ? 0 : 0.28,
+            duration: isHeld ? 0.08 : enlarged ? 0.26 : 0.16,
             delay: isHeld || hasBeenHeld || enlarged ? 0 : delay,
             ease: EASE,
           }}

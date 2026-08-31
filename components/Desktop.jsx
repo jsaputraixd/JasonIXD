@@ -89,6 +89,15 @@ const SKILLS_FOCUS_HINT_Z = 482;
 const PROJECT_FOCUS_SCRIM_Z = 160;
 const PROJECT_FOCUS_WINDOW_Z = 180;
 
+function featuredProjectSlugFromPoint(x, y, featuredSlugs) {
+  const el = document.elementFromPoint(x, y);
+  if (!(el instanceof Element)) return null;
+  const hit = el.closest("[data-project-slug]");
+  if (!hit || hit.getAttribute("data-peek") === "off") return null;
+  const slug = hit.getAttribute("data-project-slug");
+  return slug && featuredSlugs.has(slug) ? slug : null;
+}
+
 function getWindowTitle(id) {
   switch (id) {
     case "welcome":
@@ -477,20 +486,69 @@ export default function Desktop() {
     () => new Set(desktopFeaturedProjects.map((p) => p.slug)),
     []
   );
+  const focusProjectSlugRef = useRef(focusProjectSlug);
+  focusProjectSlugRef.current = focusProjectSlug;
 
-  const handleProjectPeekActive = useCallback(({ slug, focus, from }) => {
-    if (focus && slug) {
+  // Single source of truth: derive featured zoom from live pointer hit-tests.
+  useEffect(() => {
+    if (phase !== "dashboard") return undefined;
+    if (typeof window === "undefined") return undefined;
+    if (window.matchMedia("(pointer: coarse)").matches) return undefined;
+
+    let raf = 0;
+    let lastX = -1;
+    let lastY = -1;
+
+    const syncFeaturedFocus = () => {
+      raf = 0;
+      if (lastX < 0 || skillsFocusedRef.current) return;
+
+      const slug = featuredProjectSlugFromPoint(
+        lastX,
+        lastY,
+        featuredFocusSlugs
+      );
+      const prev = focusProjectSlugRef.current;
+
+      if (slug === prev) return;
+
       setFocusProjectSlug(slug);
-      return;
-    }
-    // Only drop the card we actually left so a hop Tama → Pulse
-    // cannot clear Pulse after Pulse already became active.
-    setFocusProjectSlug((cur) => {
-      if (from && cur === from) return null;
-      if (!from && cur && !featuredFocusSlugs.has(cur)) return null;
-      return cur;
-    });
-  }, [featuredFocusSlugs]);
+      if (!slug && prev) {
+        setPeekDismissEpoch((n) => n + 1);
+      }
+    };
+
+    const queueSync = () => {
+      if (!raf) raf = requestAnimationFrame(syncFeaturedFocus);
+    };
+
+    const onPointerSample = (e) => {
+      lastX = e.clientX;
+      lastY = e.clientY;
+      queueSync();
+    };
+
+    const clearFeaturedFocus = () => {
+      if (!focusProjectSlugRef.current) return;
+      setFocusProjectSlug(null);
+      setPeekDismissEpoch((n) => n + 1);
+    };
+
+    window.addEventListener("pointermove", onPointerSample, { passive: true });
+    window.addEventListener("pointerover", onPointerSample, { passive: true });
+    window.addEventListener("blur", clearFeaturedFocus);
+    document.documentElement.addEventListener("mouseleave", clearFeaturedFocus);
+    return () => {
+      window.removeEventListener("pointermove", onPointerSample);
+      window.removeEventListener("pointerover", onPointerSample);
+      window.removeEventListener("blur", clearFeaturedFocus);
+      document.documentElement.removeEventListener(
+        "mouseleave",
+        clearFeaturedFocus
+      );
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [phase, featuredFocusSlugs]);
 
   useEffect(() => {
     if (!viewport || viewport.w < 900 || phase !== "dashboard") return;
@@ -852,13 +910,6 @@ export default function Desktop() {
               growOnHover
               enlarged={focusProjectSlug === p.slug}
               dataProjectSlug={p.slug}
-              onHoverChange={(inside) => {
-                if (inside) setFocusProjectSlug(p.slug);
-                else {
-                  setFocusProjectSlug((cur) => (cur === p.slug ? null : cur));
-                  setPeekDismissEpoch((n) => n + 1);
-                }
-              }}
             >
               <ProjectFlipCard
                 project={p}
@@ -1019,7 +1070,7 @@ export default function Desktop() {
       {showOtherWindows ? (
         <ProjectDockCarousel
           leftInset={
-            pos.otherProjectsIcon.left + pos.otherProjectsIcon.width + 16
+            pos.otherProjectsIcon.left + pos.otherProjectsIcon.width + 12
           }
           layoutScale={layoutScale}
         />
@@ -1030,7 +1081,6 @@ export default function Desktop() {
           enabled={phase === "dashboard"}
           layoutScale={layoutScale}
           focusSlugs={featuredFocusSlugs}
-          onActiveChange={handleProjectPeekActive}
           dismissEpoch={peekDismissEpoch}
         />
       ) : null}

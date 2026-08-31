@@ -6,7 +6,7 @@
 export const otherStuff = {
   label: "Other stuff",
   windowTitle: "Other stuff",
-  icon: "/images/junk-folder-icon.png",
+  icon: "/images/Desktop Gallery Icon.png",
   blurb:
     "Photos, drawings, sculptures. The stuff that doesn't fit a case study but still lives rent-free in my hard drive. Pop a folder.",
   categories: [

@@ -10,9 +10,9 @@ import ProjectFlipCard, {
   PROJECT_CARD_GRADIENTS,
 } from "@/components/ProjectFlipCard";
 
-const CARD_W = 200;
-const CARD_H = 120;
-const GAP = 24;
+const CARD_W = 168;
+const CARD_H = 96;
+const GAP = 18;
 
 function DockSet({ items, cardW, cardH, gap, scale, copy }) {
   return (

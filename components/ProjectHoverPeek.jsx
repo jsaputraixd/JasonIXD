@@ -85,7 +85,6 @@ export default function ProjectHoverPeek({
   enabled = true,
   layoutScale = 1,
   focusSlugs,
-  onActiveChange,
   dismissEpoch = 0,
 }) {
   const reduceMotion = useReducedMotion();
@@ -109,8 +108,6 @@ export default function ProjectHoverPeek({
   const openRef = useRef(false);
   slugRef.current = slug;
   openRef.current = open;
-  const onActiveChangeRef = useRef(onActiveChange);
-  onActiveChangeRef.current = onActiveChange;
   const focusSlugsRef = useRef(focusSlugs);
   focusSlugsRef.current = focusSlugs;
 
@@ -128,15 +125,6 @@ export default function ProjectHoverPeek({
     const measureHeight = () =>
       boxRef.current?.offsetHeight || Math.round(148 * layoutScale);
 
-    const emitActive = (nextSlug) => {
-      const focus = Boolean(nextSlug && focusSlugsRef.current?.has(nextSlug));
-      onActiveChangeRef.current?.({
-        slug: nextSlug,
-        focus,
-        from: slugRef.current,
-      });
-    };
-
     const closeNow = () => {
       if (leaveTimer.current) {
         window.clearTimeout(leaveTimer.current);
@@ -145,16 +133,15 @@ export default function ProjectHoverPeek({
       setOpen(false);
       setSlug(null);
       displayed.current.ready = false;
-      emitActive(null);
     };
 
     const scheduleLeave = (nextSlug) => {
-      if (leaveTimer.current) return;
       const focus = Boolean(nextSlug && focusSlugsRef.current?.has(nextSlug));
       if (focus) {
         closeNow();
         return;
       }
+      if (leaveTimer.current) return;
       leaveTimer.current = window.setTimeout(() => {
         leaveTimer.current = 0;
         closeNow();
@@ -207,10 +194,8 @@ export default function ProjectHoverPeek({
       if (slugRef.current !== next) {
         setSlug(next);
         setOpen(true);
-        emitActive(next);
       } else if (!openRef.current) {
         setOpen(true);
-        emitActive(next);
       }
     };
 
