@@ -9,13 +9,14 @@ import {
   useState,
 } from "react";
 import { useReducedMotion } from "framer-motion";
+import { useRouter } from "next/navigation";
 import { featuredProjects } from "@/data/projects";
 import {
   PROJECT_CARD_GRADIENTS,
   ProjectCardHeroImage,
 } from "@/components/ProjectFlipCard";
 import { projectCarouselThumbSrc, resolveProjectCarouselSrc } from "@/lib/projectMedia";
-import { projectHeroTransitionName } from "@/lib/viewTransition";
+import { projectHeroTransitionName, withViewTransition } from "@/lib/viewTransition";
 import { playClick } from "@/lib/typingSound";
 
 export const MOBILE_CAROUSEL_TRANSITION_MS = 640;
@@ -24,6 +25,8 @@ export const MOBILE_CAROUSEL_EASE = `cubic-bezier(${MOBILE_CAROUSEL_EASE_BEZIER.
 
 const ACCENT = "#FF7A29";
 const SWIPE_THRESHOLD = 48;
+/** Max movement (px) that still counts as a tap on the center card. */
+const TAP_THRESHOLD = 12;
 /** Radians between neighboring cards on the ring (~50°). */
 const SLOT_ANGLE = 0.88;
 const DEG = 180 / Math.PI;
@@ -110,6 +113,7 @@ const CarouselCard = memo(function CarouselCard({
   layout,
   isCenter,
   onActivate,
+  onOpen,
 }) {
   const heroSrc = resolveProjectCarouselSrc(project);
 
@@ -120,9 +124,13 @@ const CarouselCard = memo(function CarouselCard({
           ? "mobile-cover-card mobile-cover-card--center"
           : "mobile-cover-card mobile-cover-card--side"
       }
-      role={isCenter ? undefined : "button"}
-      tabIndex={isCenter ? undefined : 0}
-      aria-label={isCenter ? undefined : `Focus ${project.title}`}
+      role={isCenter ? "link" : "button"}
+      tabIndex={0}
+      aria-label={
+        isCenter
+          ? `Open ${project.title} case study`
+          : `Focus ${project.title}`
+      }
       onClick={
         isCenter
           ? undefined
@@ -133,7 +141,13 @@ const CarouselCard = memo(function CarouselCard({
       }
       onKeyDown={
         isCenter
-          ? undefined
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                e.stopPropagation();
+                onOpen?.();
+              }
+            }
           : (e) => {
               if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();
@@ -156,7 +170,7 @@ const CarouselCard = memo(function CarouselCard({
         opacity: layout.opacity,
         zIndex: layout.zIndex,
         pointerEvents: "auto",
-        cursor: isCenter ? "grab" : "pointer",
+        cursor: "pointer",
         // RAF drives motion, avoid CSS fighting the glide
         transition: "none",
         willChange: "transform, opacity",
@@ -257,6 +271,7 @@ export default function MobileOrbitCarousel({
 }) {
   const count = featuredProjects.length;
   const reduceMotion = useReducedMotion();
+  const router = useRouter();
 
   const stageRef = useRef(null);
   const dragRef = useRef(null);
@@ -405,6 +420,15 @@ export default function MobileOrbitCarousel({
     [animateCenterTo, count, isAnimating]
   );
 
+  const openActiveProject = useCallback(() => {
+    const project = featuredProjects[activeIdxRef.current];
+    if (!project) return;
+    playClick();
+    withViewTransition(() => {
+      router.push(`/work/${project.slug}`);
+    });
+  }, [router]);
+
   const onPointerDown = useCallback(
     (e) => {
       if (isAnimating) return;
@@ -416,6 +440,10 @@ export default function MobileOrbitCarousel({
         startY: e.clientY,
         originCenter: visualCenterRef.current,
         axis: null,
+        tapOnCenter: Boolean(
+          e.target instanceof Element &&
+            e.target.closest(".mobile-cover-card--center")
+        ),
       };
       setDragging(true);
       try {
@@ -457,6 +485,20 @@ export default function MobileOrbitCarousel({
       } catch {
         /* ignore */
       }
+
+      const dx = e.clientX - d.startX;
+      const dy = e.clientY - d.startY;
+      const isTap =
+        d.tapOnCenter &&
+        d.axis !== "y" &&
+        Math.abs(dx) < TAP_THRESHOLD &&
+        Math.abs(dy) < TAP_THRESHOLD;
+
+      if (isTap) {
+        openActiveProject();
+        return;
+      }
+
       if (d.axis !== "x") {
         animateCenterTo(Math.round(d.originCenter), {
           from: visualCenterRef.current,
@@ -464,7 +506,6 @@ export default function MobileOrbitCarousel({
         return;
       }
 
-      const dx = e.clientX - d.startX;
       const from = visualCenterRef.current;
       if (Math.abs(dx) >= SWIPE_THRESHOLD) {
         playClick();
@@ -474,7 +515,7 @@ export default function MobileOrbitCarousel({
         animateCenterTo(Math.round(d.originCenter), { from });
       }
     },
-    [animateCenterTo]
+    [animateCenterTo, openActiveProject]
   );
 
   return (
@@ -488,7 +529,7 @@ export default function MobileOrbitCarousel({
         }
         role="region"
         aria-roledescription="carousel"
-        aria-label="Selected projects. Swipe, tap a side card, or use arrows."
+        aria-label="Selected projects. Swipe, tap the cover to open, tap a side card to focus, or use arrows."
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={endDrag}
@@ -511,6 +552,7 @@ export default function MobileOrbitCarousel({
               layout={layout}
               isCenter={layout.isCenter}
               onActivate={goToIndex}
+              onOpen={openActiveProject}
             />
           );
         })}
