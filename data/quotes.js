@@ -1,4 +1,4 @@
-/** Quote pool for the status bar, one per calendar day (local time). */
+/** Quote pool for decorative typewriter + daily rotation. */
 export const quotes = [
   {
     text: "Design is thinking made visual.",
@@ -21,7 +21,7 @@ export const quotes = [
     author: "Brian Reed",
   },
   {
-    text: "People ignore design that ignores people.",
+    text: "People ignore designs that ignore people.",
     author: "Frank Chimero",
   },
   {
@@ -119,5 +119,41 @@ export const quotes = [
   {
     text: "A person who works with their hands is a laborer. A person who works with their hands and their head is a craftsman. A person who works with their head, their hands, and their heart is an artist.",
     author: "Marco Pierre White",
+  },
+  {
+    text: "Design is not for philosophy, it's for life.",
+    author: "Issey Miyake",
+  },
+  {
+    text: "Design creates culture. Culture shapes values. Values determine the future.",
+    author: "Robert L. Peters",
+  },
+  {
+    text: "The role of the designer is that of a very good, thoughtful host, anticipating the needs of his guests.",
+    author: "Charles Eames",
+  },
+  {
+    text: "A designer knows he has achieved perfection not when there is nothing left to add, but when there is nothing left to take away.",
+    author: "Antoine de Saint-Exupéry",
+  },
+  {
+    text: "Simplicity is not the goal. It is the by-product of a good idea and modest expectations.",
+    author: "Paul Rand",
+  },
+  {
+    text: "To avoid criticism: do nothing, say nothing and be nothing.",
+    author: "Elbert Hubbard",
+  },
+  {
+    text: "Creativity takes courage.",
+    author: "Henri Matisse",
+  },
+  {
+    text: "Every child is an artist. The problem is how to remain an artist once he grows up.",
+    author: "Pablo Picasso",
+  },
+  {
+    text: "You don't think your way to creative work. You work your way to creative thinking.",
+    author: "George Nelson",
   },
 ];

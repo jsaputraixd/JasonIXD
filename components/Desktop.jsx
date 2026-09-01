@@ -85,17 +85,11 @@ const EASE = [0.16, 1, 0.3, 1];
 const SKILLS_FOCUS_BACKDROP_Z = 480;
 const SKILLS_FOCUS_GLOBE_Z = 481;
 const SKILLS_FOCUS_HINT_Z = 482;
-/** Dim the desktop under a featured project + its description peek. */
-const PROJECT_FOCUS_SCRIM_Z = 160;
-const PROJECT_FOCUS_WINDOW_Z = 180;
 
-function featuredProjectSlugFromPoint(x, y, featuredSlugs) {
+function isPointerOverFeaturedWindow(x, y) {
   const el = document.elementFromPoint(x, y);
-  if (!(el instanceof Element)) return null;
-  const hit = el.closest("[data-project-slug]");
-  if (!hit || hit.getAttribute("data-peek") === "off") return null;
-  const slug = hit.getAttribute("data-project-slug");
-  return slug && featuredSlugs.has(slug) ? slug : null;
+  if (!(el instanceof Element)) return false;
+  return Boolean(el.closest(".os-window--featured"));
 }
 
 function getWindowTitle(id) {
@@ -191,7 +185,7 @@ function getDesktopLayout(vw, vh) {
       PROJECT_DOCK_H -
       identityH -
       topBand -
-      32
+      12
   );
   projectCards = fitProjectCardsToBounds(projectCards, layoutScale, {
     maxGridW,
@@ -259,8 +253,10 @@ export default function Desktop() {
   const [skillsFocused, setSkillsFocused] = useState(false);
   const skillsFocusedRef = useRef(false);
   skillsFocusedRef.current = skillsFocused;
-  const [focusProjectSlug, setFocusProjectSlug] = useState(null);
   const [peekDismissEpoch, setPeekDismissEpoch] = useState(0);
+  const [featuredHoverGated, setFeaturedHoverGated] = useState(false);
+  const featuredHoverGatedRef = useRef(false);
+  const featuredPointerInitRef = useRef(false);
   const [minimizedIds, setMinimizedIds] = useState([]);
   const welcomeDoneTimerRef = useRef(null);
   const [iconOffsets, setIconOffsets] = useState(() => ({}));
@@ -288,20 +284,52 @@ export default function Desktop() {
   }, [skillsFocused, closeSkillsFocus]);
 
   useEffect(() => {
-    const clearFeaturedHover = () => {
-      setFocusProjectSlug(null);
-      setPeekDismissEpoch((n) => n + 1);
-    };
-    window.addEventListener("blur", clearFeaturedHover);
-    document.documentElement.addEventListener("mouseleave", clearFeaturedHover);
+    const dismissPeek = () => setPeekDismissEpoch((n) => n + 1);
+    window.addEventListener("blur", dismissPeek);
+    document.documentElement.addEventListener("mouseleave", dismissPeek);
     return () => {
-      window.removeEventListener("blur", clearFeaturedHover);
-      document.documentElement.removeEventListener(
-        "mouseleave",
-        clearFeaturedHover
-      );
+      window.removeEventListener("blur", dismissPeek);
+      document.documentElement.removeEventListener("mouseleave", dismissPeek);
     };
   }, []);
+
+  // If the cursor is already over a hero window on first paint, hold zoom until
+  // they leave and hover again. Otherwise :hover zoom is immediate.
+  useEffect(() => {
+    if (phase !== "dashboard") {
+      featuredPointerInitRef.current = false;
+      featuredHoverGatedRef.current = false;
+      setFeaturedHoverGated(false);
+      return undefined;
+    }
+    if (typeof window === "undefined") return undefined;
+    if (window.matchMedia("(pointer: coarse)").matches) return undefined;
+
+    const sample = (x, y) => {
+      const overFeatured = isPointerOverFeaturedWindow(x, y);
+      if (!featuredPointerInitRef.current) {
+        featuredPointerInitRef.current = true;
+        if (overFeatured) {
+          featuredHoverGatedRef.current = true;
+          setFeaturedHoverGated(true);
+        }
+        return;
+      }
+      if (featuredHoverGatedRef.current && !overFeatured) {
+        featuredHoverGatedRef.current = false;
+        setFeaturedHoverGated(false);
+      }
+    };
+
+    const onPointerSample = (e) => sample(e.clientX, e.clientY);
+
+    window.addEventListener("pointermove", onPointerSample, { passive: true });
+    window.addEventListener("pointerover", onPointerSample, { passive: true });
+    return () => {
+      window.removeEventListener("pointermove", onPointerSample);
+      window.removeEventListener("pointerover", onPointerSample);
+    };
+  }, [phase]);
 
   const handleIconOffset = useCallback((id, offset) => {
     setIconOffsets((prev) => ({ ...prev, [id]: offset }));
@@ -486,69 +514,6 @@ export default function Desktop() {
     () => new Set(desktopFeaturedProjects.map((p) => p.slug)),
     []
   );
-  const focusProjectSlugRef = useRef(focusProjectSlug);
-  focusProjectSlugRef.current = focusProjectSlug;
-
-  // Single source of truth: derive featured zoom from live pointer hit-tests.
-  useEffect(() => {
-    if (phase !== "dashboard") return undefined;
-    if (typeof window === "undefined") return undefined;
-    if (window.matchMedia("(pointer: coarse)").matches) return undefined;
-
-    let raf = 0;
-    let lastX = -1;
-    let lastY = -1;
-
-    const syncFeaturedFocus = () => {
-      raf = 0;
-      if (lastX < 0 || skillsFocusedRef.current) return;
-
-      const slug = featuredProjectSlugFromPoint(
-        lastX,
-        lastY,
-        featuredFocusSlugs
-      );
-      const prev = focusProjectSlugRef.current;
-
-      if (slug === prev) return;
-
-      setFocusProjectSlug(slug);
-      if (!slug && prev) {
-        setPeekDismissEpoch((n) => n + 1);
-      }
-    };
-
-    const queueSync = () => {
-      if (!raf) raf = requestAnimationFrame(syncFeaturedFocus);
-    };
-
-    const onPointerSample = (e) => {
-      lastX = e.clientX;
-      lastY = e.clientY;
-      queueSync();
-    };
-
-    const clearFeaturedFocus = () => {
-      if (!focusProjectSlugRef.current) return;
-      setFocusProjectSlug(null);
-      setPeekDismissEpoch((n) => n + 1);
-    };
-
-    window.addEventListener("pointermove", onPointerSample, { passive: true });
-    window.addEventListener("pointerover", onPointerSample, { passive: true });
-    window.addEventListener("blur", clearFeaturedFocus);
-    document.documentElement.addEventListener("mouseleave", clearFeaturedFocus);
-    return () => {
-      window.removeEventListener("pointermove", onPointerSample);
-      window.removeEventListener("pointerover", onPointerSample);
-      window.removeEventListener("blur", clearFeaturedFocus);
-      document.documentElement.removeEventListener(
-        "mouseleave",
-        clearFeaturedFocus
-      );
-      if (raf) cancelAnimationFrame(raf);
-    };
-  }, [phase, featuredFocusSlugs]);
 
   useEffect(() => {
     if (!viewport || viewport.w < 900 || phase !== "dashboard") return;
@@ -721,26 +686,25 @@ export default function Desktop() {
     welcomeRight + (contactGap - contactBannerW) / 2
   );
 
+  const folderGalleryOpen =
+    (otherStuffOpen && !isMinimized("otherStuff")) ||
+    (otherProjectsOpen && !isMinimized("otherProjects"));
+  const blockFeaturedZoom = featuredHoverGated || folderGalleryOpen;
+
   return (
     <div
       ref={stageRef}
-      className="relative w-full"
+      className={[
+        "relative w-full desktop-stage",
+        blockFeaturedZoom ? "desktop-stage--featured-hover-gated" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
       style={{ height: "100%", overflow: "hidden" }}
     >
-      <AnimatePresence>
-        {showOtherWindows && focusProjectSlug ? (
-          <motion.div
-            key="project-focus-scrim"
-            className="desktop-project-focus-scrim"
-            aria-hidden
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.22, ease: EASE }}
-            style={{ zIndex: PROJECT_FOCUS_SCRIM_Z }}
-          />
-        ) : null}
-      </AnimatePresence>
+      {showOtherWindows ? (
+        <div className="desktop-project-focus-scrim" aria-hidden />
+      ) : null}
 
       {phase === "waiting-boot" && (
         <div
@@ -894,11 +858,7 @@ export default function Desktop() {
               width={card.width}
               height={card.windowHeight}
               delay={cascadeDelay(0.62 + projectIndex * 0.28)}
-              zIndex={
-                focusProjectSlug === p.slug
-                  ? PROJECT_FOCUS_WINDOW_Z
-                  : zOf(id, zBase)
-              }
+              zIndex={zOf(id, zBase)}
               onFocus={bringToFront}
               interactive
               minimized={isMinimized(id)}
@@ -908,7 +868,7 @@ export default function Desktop() {
               uiScale={layoutScale}
               clipContent={false}
               growOnHover
-              enlarged={focusProjectSlug === p.slug}
+              featuredProject
               dataProjectSlug={p.slug}
             >
               <ProjectFlipCard
@@ -922,14 +882,6 @@ export default function Desktop() {
                 aspectRatio={card.aspect}
                 hoverScale={false}
                 motionPreview
-                hoverFocusDelayMs={
-                  (otherStuffOpen && !isMinimized("otherStuff")) ||
-                  (otherProjectsOpen && !isMinimized("otherProjects")) ||
-                  coffeeSnakeOpen
-                    ? 700
-                    : 0
-                }
-                onRequestFocus={() => bringToFront(id)}
               />
             </Window>
           );

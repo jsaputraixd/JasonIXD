@@ -1,9 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { getQuoteOfDay } from "@/lib/quoteOfDay";
-import { about } from "@/data/about";
 import {
   CRT_BEZEL_RADIUS,
   CRT_FOOTER_BOTTOM_PAD,
@@ -18,7 +16,6 @@ const BUILD_LABEL = "JS-OS · v1.6";
 export default function StatusBar() {
   const [time, setTime] = useState("--:--:--");
   const [isMobile, setIsMobile] = useState(false);
-  const quote = useMemo(() => getQuoteOfDay(), []);
 
   useEffect(() => {
     const tick = () => {
@@ -75,115 +72,6 @@ export default function StatusBar() {
         pointerEvents: "none",
       }}
     >
-      <motion.div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          flexWrap: "wrap",
-          gap: isMobile ? "6px 10px" : "8px 16px",
-          padding: isMobile ? "5px 10px" : "6px 16px",
-          borderBottom: isMobile
-            ? "1px solid rgba(255, 122, 41, 0.12)"
-            : "1px solid rgba(255, 122, 41, 0.15)",
-          background: "rgba(0, 0, 0, 0.25)",
-          pointerEvents: "auto",
-          fontFamily: "'VT323', monospace",
-          fontSize: isMobile ? 12 : 14,
-          letterSpacing: isMobile ? "0.14em" : "0.18em",
-          textTransform: "uppercase",
-          color: ACCENT,
-          textShadow: "0 0 6px rgba(255, 122, 41, 0.45)",
-        }}
-      >
-        <span>Jason Saputra</span>
-        <span aria-hidden style={{ opacity: 0.45 }}>
-          /
-        </span>
-        <span>Product + Interaction</span>
-        <span aria-hidden style={{ opacity: 0.45 }}>
-          /
-        </span>
-        <span>SF</span>
-        {isMobile ? (
-          <>
-            <span aria-hidden style={{ opacity: 0.45 }}>
-              ·
-            </span>
-            <a
-              href={`mailto:${about.email}`}
-              data-cursor="hover"
-              style={{ color: ACCENT, textDecoration: "none" }}
-            >
-              Email
-            </a>
-            <span aria-hidden style={{ opacity: 0.45 }}>
-              ·
-            </span>
-            <a
-              href={about.socials.linkedin}
-              target="_blank"
-              rel="noopener noreferrer"
-              data-cursor="hover"
-              style={{ color: ACCENT, textDecoration: "none" }}
-            >
-              LinkedIn
-            </a>
-            <span aria-hidden style={{ opacity: 0.45 }}>
-              ·
-            </span>
-            <a
-              href={about.socials.instagram}
-              target="_blank"
-              rel="noopener noreferrer"
-              data-cursor="hover"
-              style={{ color: ACCENT, textDecoration: "none" }}
-            >
-              Instagram
-            </a>
-          </>
-        ) : null}
-      </motion.div>
-
-      {!isMobile ? (
-        <motion.div
-          className="status-bar-quote-row"
-          style={{
-            padding: `5px ${CRT_FOOTER_CORNER_INSET} 4px`,
-            borderBottom: "1px solid rgba(255, 122, 41, 0.12)",
-            pointerEvents: "none",
-          }}
-        >
-          <p
-            style={{
-              margin: 0,
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: 13,
-              lineHeight: 1.5,
-              color: FOOTER_MUTED,
-              fontStyle: "italic",
-              textAlign: "center",
-            }}
-          >
-            <span
-              style={{
-                fontFamily: "'VT323', monospace",
-                fontStyle: "normal",
-                fontSize: 13,
-                letterSpacing: "0.14em",
-                textTransform: "uppercase",
-                color: ACCENT,
-                marginRight: "0.5em",
-              }}
-            >
-              Quote ·
-            </span>
-            &ldquo;{quote.text}&rdquo;
-            <span style={{ opacity: 0.72 }}> · {quote.author}</span>
-          </p>
-        </motion.div>
-      ) : null}
-
       {isMobile ? (
         <motion.div
           className="status-bar-mobile-footer"

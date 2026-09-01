@@ -6,6 +6,33 @@ import { playClick, playDragTick, playWindowWhoosh, playWindowPickup, playWindow
 
 const ACCENT = "#FF7A29";
 const EASE = [0.16, 1, 0.3, 1];
+/** Wait before raising a hero window that is covered by another window. */
+const FEATURED_STACK_RAISE_DELAY_MS = 700;
+
+function rectsOverlap(a, b) {
+  return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+}
+
+function readElementZ(el) {
+  const parsed = Number.parseInt(getComputedStyle(el).zIndex, 10);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function isObscuredByHigherWindow(el) {
+  const stage = el.closest(".desktop-stage");
+  if (!stage) return false;
+
+  const myRect = el.getBoundingClientRect();
+  const myZ = readElementZ(el);
+
+  for (const other of stage.querySelectorAll("[data-window-id]")) {
+    if (other === el) continue;
+    const otherZ = readElementZ(other);
+    if (otherZ <= myZ) continue;
+    if (rectsOverlap(myRect, other.getBoundingClientRect())) return true;
+  }
+  return false;
+}
 
 export default function Window({
   id,
@@ -39,10 +66,8 @@ export default function Window({
   clipContent = true,
   /** Scale the full chrome (title bar + body) on hover. */
   growOnHover = false,
-  /** Lift and enlarge this window (featured project focus). */
-  enlarged = false,
-  /** Featured hover enter/leave — drops zoom if the pointer leaves fast. */
-  onHoverChange,
+  /** CSS-driven hover zoom for featured hero windows (no React state). */
+  featuredProject = false,
   /** Marks this window as a featured project for the hover peek. */
   dataProjectSlug,
   /** Skip the floating description peek when the card plays video instead. */
@@ -56,8 +81,49 @@ export default function Window({
   const handleMinimizeCb = onMinimize ?? onClose;
   const [isHeld, setIsHeld] = useState(false);
   const [hasBeenHeld, setHasBeenHeld] = useState(false);
+  const [featuredRaised, setFeaturedRaised] = useState(false);
+  const rootRef = useRef(null);
+  const raiseTimerRef = useRef(null);
   const dragControls = useDragControls();
   const openSoundPlayed = useRef(false);
+
+  const clearFeaturedRaiseTimer = () => {
+    if (raiseTimerRef.current == null) return;
+    clearTimeout(raiseTimerRef.current);
+    raiseTimerRef.current = null;
+  };
+
+  const applyFeaturedRaise = () => {
+    setFeaturedRaised(true);
+    onFocus?.(id);
+  };
+
+  const scheduleFeaturedRaise = () => {
+    clearFeaturedRaiseTimer();
+    const el = rootRef.current;
+    if (!el) {
+      applyFeaturedRaise();
+      return;
+    }
+    const delay = isObscuredByHigherWindow(el)
+      ? FEATURED_STACK_RAISE_DELAY_MS
+      : 0;
+    if (delay <= 0) {
+      applyFeaturedRaise();
+      return;
+    }
+    raiseTimerRef.current = setTimeout(() => {
+      raiseTimerRef.current = null;
+      applyFeaturedRaise();
+    }, delay);
+  };
+
+  const resetFeaturedRaise = () => {
+    clearFeaturedRaiseTimer();
+    setFeaturedRaised(false);
+  };
+
+  useEffect(() => () => clearFeaturedRaiseTimer(), []);
 
   useEffect(() => {
     if (!playOpenSound || openSoundPlayed.current) return;
@@ -94,6 +160,7 @@ export default function Window({
     event.stopPropagation();
     playWindowPickup();
     onFocus?.(id);
+    setFeaturedRaised(true);
     setIsHeld(true);
     setHasBeenHeld(true);
     dragControls.start(event);
@@ -104,6 +171,17 @@ export default function Window({
       {!minimized && (
         <motion.div
           key={id}
+          ref={rootRef}
+          data-window-id={id}
+          className={[
+            featuredProject ? "os-window--featured" : "",
+            featuredProject && (featuredRaised || isHeld)
+              ? "os-window--featured-raised"
+              : "",
+            isHeld ? "os-window--held" : "",
+          ]
+            .filter(Boolean)
+            .join(" ")}
           drag
           dragListener={false}
           dragControls={dragControls}
@@ -112,19 +190,33 @@ export default function Window({
           dragConstraints={dragConstraints}
           onPointerEnter={() => {
             if (!interactive) return;
-            onFocus?.(id);
-            onHoverChange?.(true);
-          }}
-          onPointerLeave={(e) => {
-            if (e.relatedTarget instanceof Node && e.currentTarget.contains(e.relatedTarget)) {
+            if (featuredProject) {
+              scheduleFeaturedRaise();
               return;
             }
-            onHoverChange?.(false);
+            onFocus?.(id);
           }}
-          onPointerCancel={() => onHoverChange?.(false)}
+          onPointerLeave={(e) => {
+            if (!featuredProject) return;
+            if (
+              e.relatedTarget instanceof Node &&
+              e.currentTarget.contains(e.relatedTarget)
+            ) {
+              return;
+            }
+            resetFeaturedRaise();
+          }}
+          onPointerCancel={() => {
+            if (featuredProject) resetFeaturedRaise();
+          }}
           onPointerDown={() => {
             if (!interactive) return;
             playClick();
+            if (featuredProject) {
+              clearFeaturedRaiseTimer();
+              applyFeaturedRaise();
+              return;
+            }
             onFocus?.(id);
           }}
           onDrag={(_e, info) => {
@@ -141,13 +233,13 @@ export default function Window({
                   rotate: -1.4,
                   skewX: 0.8,
                 }
-              : enlarged
-                ? { opacity: 1, scale: 1.5, rotate: 0, skewX: 0 }
+              : featuredProject
+                ? { opacity: 1, scale: 1, rotate: 0, skewX: 0 }
                 : { opacity: 1, scale: 1, rotate: 0, skewX: 0 }
           }
           transition={{
-            duration: isHeld ? 0.08 : enlarged ? 0.26 : 0.16,
-            delay: isHeld || hasBeenHeld || enlarged ? 0 : delay,
+            duration: isHeld ? 0.08 : 0.16,
+            delay: isHeld || hasBeenHeld ? 0 : delay,
             ease: EASE,
           }}
           style={{
@@ -158,16 +250,16 @@ export default function Window({
             height,
             minWidth,
             zIndex,
-            // Only promote a compositor layer while dragging.
-            willChange: isHeld || enlarged ? "transform" : "auto",
+            willChange: isHeld || featuredProject ? "transform" : "auto",
             pointerEvents: interactive ? "auto" : "none",
             transformOrigin: "center center",
           }}
         >
+          <div className={featuredProject ? "os-window-featured-zoom" : undefined}>
           <div
             className={[
               "os-window-shell",
-              growOnHover && !enlarged ? "os-window-grow" : "",
+              growOnHover && !featuredProject ? "os-window-grow" : "",
               isHeld ? "os-window-shell--held" : "",
               growOnHover && isHeld ? "os-window-grow--held" : "",
             ]
@@ -192,8 +284,8 @@ export default function Window({
               borderRadius: 3,
               boxShadow: isHeld
                 ? "0 0 28px rgba(255, 122, 41, 0.22), 0 24px 56px rgba(0, 0, 0, 0.65)"
-                : enlarged
-                  ? "0 0 36px rgba(255, 122, 41, 0.28), 0 28px 64px rgba(0, 0, 0, 0.7)"
+                : featuredProject
+                  ? undefined
                   : "0 0 24px rgba(255, 122, 41, 0.12), 0 16px 50px rgba(0, 0, 0, 0.5)",
               color: "#ffffff",
               userSelect: "none",
@@ -293,6 +385,7 @@ export default function Window({
             >
               {children}
             </div>
+          </div>
           </div>
           </div>
         </motion.div>
