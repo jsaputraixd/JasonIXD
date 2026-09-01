@@ -23,7 +23,7 @@ import CoffeeSnakeGame from "./CoffeeSnakeGame";
 import ProjectViewLink from "@/components/ProjectViewLink";
 import { projectHeroTransitionName } from "@/lib/viewTransition";
 import DesktopIdleLayer from "./DesktopIdleLayer";
-import SkillsPlanet, { desktopGlobeBox, portraitOrbitBox } from "./SkillsPlanet";
+import SkillsPlanet, { desktopGlobeBox } from "./SkillsPlanet";
 import ProjectHoverPeek from "./ProjectHoverPeek";
 import { carouselProjects, desktopFeaturedProjects } from "@/data/projects";
 import ProjectDockCarousel from "@/components/ProjectDockCarousel";
@@ -250,9 +250,6 @@ export default function Desktop() {
   const [otherProjectsOpen, setOtherProjectsOpen] = useState(false);
   const [coffeeSnakeOpen, setCoffeeSnakeOpen] = useState(false);
   const [vaultBreachOpen, setVaultBreachOpen] = useState(false);
-  const [skillsFocused, setSkillsFocused] = useState(false);
-  const skillsFocusedRef = useRef(false);
-  skillsFocusedRef.current = skillsFocused;
   const [peekDismissEpoch, setPeekDismissEpoch] = useState(0);
   const [featuredHoverGated, setFeaturedHoverGated] = useState(false);
   const featuredHoverGatedRef = useRef(false);
@@ -261,27 +258,6 @@ export default function Desktop() {
   const welcomeDoneTimerRef = useRef(null);
   const [iconOffsets, setIconOffsets] = useState(() => ({}));
   const { toastOpen, dismissToast } = useVaultKeyState();
-
-  const openSkillsFocus = useCallback(() => {
-    setSkillsFocused(true);
-  }, []);
-
-  const closeSkillsFocus = useCallback(() => {
-    setSkillsFocused(false);
-  }, []);
-
-  useEffect(() => {
-    if (!skillsFocused) return undefined;
-    const onKey = (e) => {
-      if (e.key !== "Escape" && e.code !== "Escape") return;
-      e.preventDefault();
-      e.stopPropagation();
-      closeSkillsFocus();
-    };
-    // Capture so window/ESC handlers deeper in the tree don't swallow it.
-    window.addEventListener("keydown", onKey, true);
-    return () => window.removeEventListener("keydown", onKey, true);
-  }, [skillsFocused, closeSkillsFocus]);
 
   useEffect(() => {
     const dismissPeek = () => setPeekDismissEpoch((n) => n + 1);
@@ -791,7 +767,7 @@ export default function Desktop() {
           width={W.me}
           height={identityH}
           delay={cascadeDelay(0.45)}
-          zIndex={skillsFocused ? 36 : zOf("me", 13)}
+          zIndex={zOf("me", 13)}
           onFocus={bringToFront}
           interactive
           minimized={isMinimized("me")}
@@ -805,9 +781,6 @@ export default function Desktop() {
             frameWidth={W.me}
             frameHeight={identityH}
             layoutScale={layoutScale}
-            portraitActive={skillsFocused}
-            onPortraitHoverStart={openSkillsFocus}
-            onPortraitHoverEnd={closeSkillsFocus}
           />
         </Window>
       )}
@@ -1105,14 +1078,7 @@ function WelcomeIntroMorph({ phase, typed, targetOffset }) {
   );
 }
 
-function MeTxtBody({
-  frameWidth,
-  frameHeight,
-  layoutScale = 1,
-  onPortraitHoverStart,
-  onPortraitHoverEnd,
-  portraitActive = false,
-}) {
+function MeTxtBody({ frameWidth, frameHeight, layoutScale = 1 }) {
   const s = layoutScale;
   const inset = Math.max(18, Math.round(26 * s));
   const isDesktop = frameWidth != null;
@@ -1136,9 +1102,6 @@ function MeTxtBody({
       : { width: "min(220px, 72vw)", height: "min(220px, 72vw)" };
   const bioSize = isDesktop ? Math.max(13, Math.round(15 * s)) : 14;
   const bioPad = isDesktop ? Math.round(10 * s) : 12;
-  const portraitInteractive = typeof onPortraitHoverStart === "function";
-  const reduceMotion = useReducedMotion();
-  const orbitBox = inner != null ? portraitOrbitBox(inner) : null;
 
   return (
     <div
@@ -1157,83 +1120,15 @@ function MeTxtBody({
             overflow: "visible",
             zIndex: 2,
           }}
-          onMouseEnter={portraitInteractive ? onPortraitHoverStart : undefined}
-          onMouseLeave={portraitInteractive ? onPortraitHoverEnd : undefined}
-          data-cursor={portraitInteractive ? "hover" : undefined}
-          data-sound={portraitInteractive ? "object" : undefined}
         >
-          {orbitBox && portraitInteractive ? (
-            <AnimatePresence>
-              {portraitActive ? (
-                <motion.div
-                  key="me-skills-orbit"
-                  initial={
-                    reduceMotion
-                      ? { opacity: 1, scale: 1, x: "-50%", y: "-50%" }
-                      : { opacity: 0, scale: 0.9, x: "-50%", y: "-50%" }
-                  }
-                  animate={{ opacity: 1, scale: 1, x: "-50%", y: "-50%" }}
-                  exit={
-                    reduceMotion
-                      ? { opacity: 0, scale: 1, x: "-50%", y: "-50%" }
-                      : { opacity: 0, scale: 0.96, x: "-50%", y: "-50%" }
-                  }
-                  transition={{
-                    duration: reduceMotion ? 0 : 0.5,
-                    ease: EASE,
-                  }}
-                  style={{
-                    position: "absolute",
-                    left: "50%",
-                    top: "50%",
-                    width: orbitBox.boxW,
-                    height: orbitBox.boxH,
-                    transformOrigin: "center center",
-                    zIndex: 3,
-                    pointerEvents: "none",
-                  }}
-                >
-                  <SkillsPlanet
-                    variant="desktop"
-                    showGlobe={false}
-                    orbitActive
-                    anchorSize={inner}
-                  />
-                </motion.div>
-              ) : null}
-            </AnimatePresence>
-          ) : null}
-          {portraitInteractive ? (
-            <div
-              data-cursor="hover"
-              aria-label="Hover to show skills"
-              style={{
-                display: "block",
-                position: "relative",
-                zIndex: 1,
-                width: "100%",
-                height: "100%",
-              }}
-            >
-              <WelcomeAsciiPortrait
-                sizes={inner != null ? `${Math.ceil(inner * 1.2)}px` : "min(280px, 85vw)"}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  maxWidth: "none",
-                }}
-              />
-            </div>
-          ) : (
-            <WelcomeAsciiPortrait
-              sizes={inner != null ? `${Math.ceil(inner * 1.2)}px` : "min(280px, 85vw)"}
-              style={{
-                width: "100%",
-                height: "100%",
-                maxWidth: "none",
-              }}
-            />
-          )}
+          <WelcomeAsciiPortrait
+            sizes={inner != null ? `${Math.ceil(inner * 1.2)}px` : "min(280px, 85vw)"}
+            style={{
+              width: "100%",
+              height: "100%",
+              maxWidth: "none",
+            }}
+          />
         </div>
         <p
           style={{

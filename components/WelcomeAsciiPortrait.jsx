@@ -1,16 +1,16 @@
 import Image from "next/image";
 
-const ASCII_PORTRAIT_SRC = "/images/ascii-portrait.png";
-const ASCII_PORTRAIT_W = 6591;
-const ASCII_PORTRAIT_H = 6624;
+const PORTRAIT_SRC = "/images/Website Avatar.png";
+const PORTRAIT_W = 4648;
+const PORTRAIT_H = 5394;
 
 export default function WelcomeAsciiPortrait({ sizes, style, priority = false }) {
   return (
     <Image
-      src={ASCII_PORTRAIT_SRC}
-      alt="ASCII portrait of Jason Saputra"
-      width={ASCII_PORTRAIT_W}
-      height={ASCII_PORTRAIT_H}
+      src={PORTRAIT_SRC}
+      alt="Portrait of Jason Saputra"
+      width={PORTRAIT_W}
+      height={PORTRAIT_H}
       sizes={sizes}
       priority={priority}
       draggable={false}
