@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { useReducedMotion } from "framer-motion";
 import { carouselProjects } from "@/data/projects";
 import {
@@ -9,9 +10,14 @@ import {
 import ProjectFlipCard, {
   PROJECT_CARD_GRADIENTS,
 } from "@/components/ProjectFlipCard";
+import { playDragTick } from "@/lib/typingSound";
 
 const DESKTOP = { cardW: 168, cardH: 96, gap: 18 };
 const MOBILE = { cardW: 132, cardH: 76, gap: 14 };
+/** Idle marquee speed */
+const AUTO_PX_PER_SEC = 52;
+const RESUME_IDLE_MS = 1400;
+const SOUND_EVERY_PX = 30;
 
 function DockSet({ items, cardW, cardH, gap, scale, copy }) {
   return (
@@ -54,8 +60,13 @@ export default function ProjectDockCarousel({
   variant = "desktop",
 }) {
   const reduceMotion = useReducedMotion();
+  const maskRef = useRef(null);
+  const trackRef = useRef(null);
+  const offsetRef = useRef(0);
+  const pauseUntilRef = useRef(0);
+  const draggingRef = useRef(false);
+  const soundMarkRef = useRef(0);
   const items = carouselProjects;
-  if (!items.length) return null;
 
   const isMobile = variant === "mobile";
   const dims = isMobile ? MOBILE : DESKTOP;
@@ -65,26 +76,142 @@ export default function ProjectDockCarousel({
   const cardW = Math.round(dims.cardW * scale);
   const cardH = Math.round(dims.cardH * scale);
   const gap = Math.round(dims.gap * scale);
-  const duration = Math.max(28, items.length * 4.2);
+
+  useEffect(() => {
+    const mask = maskRef.current;
+    const track = trackRef.current;
+    if (!mask || !track || !items.length) return undefined;
+
+    let raf = 0;
+    let last = performance.now();
+
+    const loopWidth = () => {
+      // Two identical sets — one set is half the track
+      return track.scrollWidth / 2;
+    };
+
+    const apply = () => {
+      const half = loopWidth();
+      if (half <= 0) return;
+      let x = offsetRef.current;
+      // Keep offset in [0, half)
+      x = ((x % half) + half) % half;
+      offsetRef.current = x;
+      track.style.transform = `translate3d(${-x}px, 0, 0)`;
+    };
+
+    const pause = (ms = RESUME_IDLE_MS) => {
+      pauseUntilRef.current = performance.now() + ms;
+    };
+
+    const playScrollSound = (dx) => {
+      const acc = (soundMarkRef.current || 0) + Math.abs(dx);
+      if (acc >= SOUND_EVERY_PX) {
+        soundMarkRef.current = acc % SOUND_EVERY_PX;
+        playDragTick(Math.min(1, Math.abs(dx) / 36));
+      } else {
+        soundMarkRef.current = acc;
+      }
+    };
+
+    const onWheel = (e) => {
+      const delta =
+        Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+      if (!delta) return;
+      e.preventDefault();
+      pause();
+      offsetRef.current += delta;
+      apply();
+      playScrollSound(delta);
+    };
+
+    const onPointerDown = (e) => {
+      // Only primary button / touch / pen
+      if (e.pointerType === "mouse" && e.button !== 0) return;
+      draggingRef.current = true;
+      pause(120_000);
+      const startX = e.clientX;
+      const startOffset = offsetRef.current;
+      let moved = false;
+
+      const onMove = (ev) => {
+        const dx = startX - ev.clientX;
+        if (Math.abs(dx) > 3) moved = true;
+        const prev = offsetRef.current;
+        offsetRef.current = startOffset + dx;
+        apply();
+        playScrollSound(offsetRef.current - prev);
+      };
+
+      const onUp = () => {
+        window.removeEventListener("pointermove", onMove);
+        window.removeEventListener("pointerup", onUp);
+        window.removeEventListener("pointercancel", onUp);
+        draggingRef.current = false;
+        pause();
+        if (moved) {
+          const block = (clickEv) => {
+            clickEv.preventDefault();
+            clickEv.stopPropagation();
+            mask.removeEventListener("click", block, true);
+          };
+          mask.addEventListener("click", block, true);
+        }
+      };
+
+      window.addEventListener("pointermove", onMove);
+      window.addEventListener("pointerup", onUp);
+      window.addEventListener("pointercancel", onUp);
+    };
+
+    mask.addEventListener("wheel", onWheel, { passive: false });
+    mask.addEventListener("pointerdown", onPointerDown);
+
+    apply();
+
+    const tick = (now) => {
+      raf = requestAnimationFrame(tick);
+      const dt = Math.min(64, Math.max(0, now - last));
+      last = now;
+      if (reduceMotion) return;
+      if (dt <= 0 || document.hidden || draggingRef.current) return;
+      if (now < pauseUntilRef.current) return;
+      const half = loopWidth();
+      // Content may still be measuring on first frames
+      if (!(half > 8)) return;
+
+      const step = (AUTO_PX_PER_SEC * dt) / 1000;
+      offsetRef.current += step;
+      apply();
+      playScrollSound(step);
+    };
+    raf = requestAnimationFrame(tick);
+
+    const onResize = () => apply();
+    window.addEventListener("resize", onResize);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      mask.removeEventListener("wheel", onWheel);
+      mask.removeEventListener("pointerdown", onPointerDown);
+      window.removeEventListener("resize", onResize);
+    };
+  }, [reduceMotion, items.length, cardW, gap]);
+
+  if (!items.length) return null;
 
   const track = (
     <div
-      className={
-        reduceMotion
-          ? "project-dock__mask project-dock__mask--static"
-          : "project-dock__mask"
-      }
+      ref={maskRef}
+      className="project-dock__mask project-dock__mask--scroll"
+      tabIndex={0}
+      role="region"
+      aria-label="Scroll project carousel"
     >
       <div
-        className={
-          reduceMotion
-            ? "project-dock__track project-dock__track--static"
-            : "project-dock__track"
-        }
-        style={{
-          "--dock-duration": `${duration}s`,
-          "--dock-gap": `${gap}px`,
-        }}
+        ref={trackRef}
+        className="project-dock__track project-dock__track--scroll"
+        style={{ "--dock-gap": `${gap}px` }}
       >
         <DockSet
           items={items}
@@ -94,16 +221,14 @@ export default function ProjectDockCarousel({
           scale={scale}
           copy={false}
         />
-        {reduceMotion ? null : (
-          <DockSet
-            items={items}
-            cardW={cardW}
-            cardH={cardH}
-            gap={gap}
-            scale={scale}
-            copy
-          />
-        )}
+        <DockSet
+          items={items}
+          cardW={cardW}
+          cardH={cardH}
+          gap={gap}
+          scale={scale}
+          copy
+        />
       </div>
     </div>
   );

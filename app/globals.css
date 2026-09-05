@@ -710,7 +710,15 @@ body {
 
 .project-dock__mask {
   height: 100%;
+  width: 100%;
   overflow: hidden;
+}
+
+.project-dock__mask--scroll {
+  overflow: hidden;
+  touch-action: pan-y;
+  cursor: grab;
+  scrollbar-width: none;
   -webkit-mask-image: linear-gradient(
     90deg,
     transparent 0,
@@ -727,11 +735,12 @@ body {
   );
 }
 
-.project-dock__mask--static {
-  overflow-x: auto;
-  overflow-y: hidden;
-  mask-image: none;
-  scrollbar-width: thin;
+.project-dock__mask--scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.project-dock__mask--scroll:active {
+  cursor: grabbing;
 }
 
 .project-dock__track {
@@ -741,7 +750,11 @@ body {
   height: 100%;
   gap: 0;
   padding: 6px 0 14px;
-  animation: project-dock-scroll var(--dock-duration, 40s) linear infinite;
+  will-change: transform;
+}
+
+.project-dock__track--scroll {
+  animation: none;
 }
 
 .project-dock__set {
@@ -750,16 +763,6 @@ body {
   flex: 0 0 auto;
   gap: var(--dock-gap, 22px);
   padding-right: var(--dock-gap, 22px);
-}
-
-.project-dock__track--static {
-  animation: none;
-}
-
-.project-dock:has(.project-dock__item:hover) .project-dock__track,
-.project-dock:has(.project-dock__item:focus-within) .project-dock__track,
-.project-dock:has(.project-dock__item:active) .project-dock__track {
-  animation-play-state: paused;
 }
 
 .project-dock--mobile {
@@ -773,7 +776,7 @@ body {
   overflow: hidden;
 }
 
-.project-dock--mobile .project-dock__mask {
+.project-dock--mobile .project-dock__mask--scroll {
   -webkit-mask-image: linear-gradient(
     90deg,
     transparent 0,
@@ -793,16 +796,6 @@ body {
 .project-dock--mobile .project-dock__name {
   font-size: 12px;
   letter-spacing: 0.1em;
-}
-
-.project-dock--mobile .project-dock__mask--static {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-
-.project-dock--mobile .project-dock__mask--static::-webkit-scrollbar {
-  display: none;
 }
 
 .project-dock__item {
@@ -831,19 +824,19 @@ body {
   flex: 0 0 auto;
 }
 
-@keyframes project-dock-scroll {
-  from {
-    transform: translate3d(-50%, 0, 0);
-  }
-  to {
-    transform: translate3d(0, 0, 0);
-  }
+.project-dock__card img,
+.project-dock__card video,
+.project-dock__card .project-hero-teaser,
+.project-dock__card .kits-card-phones {
+  pointer-events: none;
+  -webkit-user-drag: none;
+  user-select: none;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .project-dock__track {
-    animation: none;
-  }
+.project-dock__card a,
+.project-dock__card .project-card-shell {
+  -webkit-user-drag: none;
+  user-select: none;
 }
 
 @keyframes os-window-bob {

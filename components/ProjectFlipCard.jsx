@@ -47,10 +47,16 @@ export function ProjectCardHeroImage({
       src={displaySrc}
       alt=""
       aria-hidden
+      draggable={false}
       loading={loading}
       decoding="async"
       fetchPriority={fetchPriority}
-      style={style}
+      style={{
+        ...style,
+        userSelect: "none",
+        WebkitUserDrag: "none",
+      }}
+      onDragStart={(e) => e.preventDefault()}
       onError={() => {
         const fallback = encodeURI(src);
         if (displaySrc !== fallback) setDisplaySrc(fallback);
@@ -154,6 +160,8 @@ export default function ProjectFlipCard({
         clearPreviewTimer();
         onRequestFocus?.();
       }}
+      onDragStart={(e) => e.preventDefault()}
+      draggable={false}
       style={{
         display: "block",
         position: "relative",
