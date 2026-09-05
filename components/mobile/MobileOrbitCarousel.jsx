@@ -196,6 +196,7 @@ const CarouselCard = memo(function CarouselCard({
         }}
       >
         <div
+          className="project-card-hero-vt"
           style={{
             position: "absolute",
             inset: 0,

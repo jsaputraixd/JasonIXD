@@ -1,11 +1,12 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { projectCardThumbSrc, projectCarouselThumbSrc } from "@/lib/projectMedia";
 import { DESKTOP_PROJECT_CARD_ASPECT } from "@/lib/projectDesktopCards";
 import { PROJECT_CARD_TEASERS } from "@/lib/projectCardVideos";
-import { playClick, notePointerHover } from "@/lib/typingSound";
+import { notePointerHover } from "@/lib/typingSound";
+import { projectHeroTransitionName } from "@/lib/viewTransition";
+import ProjectViewLink from "@/components/ProjectViewLink";
 import ProjectHeroTeaser from "@/components/ProjectHeroTeaser";
 import KitsCardPhones from "@/components/KitsCardPhones";
 
@@ -70,6 +71,8 @@ export default function ProjectFlipCard({
   hoverScale = true,
   loading = "lazy",
   motionPreview = false,
+  /** When false, skip shared hero name (e.g. marquee duplicate track). */
+  shareHeroTransition = true,
 }) {
   const aspect = aspectRatio ?? DESKTOP_PROJECT_CARD_ASPECT;
   const fluid = frameWidth == null && frameHeight == null;
@@ -85,6 +88,9 @@ export default function ProjectFlipCard({
   const previewTimerRef = useRef(null);
   /** Featured motion: start after expand + blur have begun. */
   const previewDelayMs = motionPreview ? 250 : 0;
+  const heroVtName = shareHeroTransition
+    ? projectHeroTransitionName(project.slug)
+    : undefined;
 
   const clearHoverTimer = () => {
     if (hoverTimerRef.current == null) return;
@@ -132,7 +138,7 @@ export default function ProjectFlipCard({
   };
 
   return (
-    <Link
+    <ProjectViewLink
       href={`/work/${project.slug}`}
       data-cursor="view"
       aria-label={`Open ${project.title} case study`}
@@ -146,7 +152,6 @@ export default function ProjectFlipCard({
       onPointerDown={() => {
         clearHoverTimer();
         clearPreviewTimer();
-        playClick();
         onRequestFocus?.();
       }}
       style={{
@@ -164,7 +169,9 @@ export default function ProjectFlipCard({
     >
       <div
         className={
-          hoverScale ? "project-card-shell" : "project-card-shell project-card-shell--locked"
+          hoverScale
+            ? "project-card-shell"
+            : "project-card-shell project-card-shell--locked"
         }
         style={{
           position: "relative",
@@ -177,10 +184,12 @@ export default function ProjectFlipCard({
         }}
       >
         <div
+          className="project-card-hero-vt"
           style={{
             position: "absolute",
             inset: 0,
             background: gradient,
+            viewTransitionName: heroVtName,
           }}
         >
           {heroSrc ? (
@@ -233,6 +242,6 @@ export default function ProjectFlipCard({
           />
         </div>
       </div>
-    </Link>
+    </ProjectViewLink>
   );
 }

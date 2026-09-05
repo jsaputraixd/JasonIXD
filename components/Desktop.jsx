@@ -20,8 +20,6 @@ import {
 import Window from "./Window";
 import StatusBar from "./StatusBar";
 import CoffeeSnakeGame from "./CoffeeSnakeGame";
-import ProjectViewLink from "@/components/ProjectViewLink";
-import { projectHeroTransitionName } from "@/lib/viewTransition";
 import DesktopIdleLayer from "./DesktopIdleLayer";
 import SkillsPlanet, { desktopGlobeBox } from "./SkillsPlanet";
 import ProjectHoverPeek from "./ProjectHoverPeek";

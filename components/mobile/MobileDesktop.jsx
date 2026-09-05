@@ -54,12 +54,10 @@ const ACCENT_DIM = "#FFB570";
 
 const MOBILE_BLOCK_GAP = 40;
 const MOBILE_CARD_INSET = 16;
-/** Right-edge Niagara-style scrubber width (content clears this). */
-const MOBILE_SCRUB_WIDTH = 40;
 /** Top inset for section titles — no top dock anymore. */
 const MOBILE_NAV_CLEARANCE_FALLBACK = 28;
 const MOBILE_SCROLL_PAD_TOP = `calc(18px + env(safe-area-inset-top, 0px))`;
-const MOBILE_SCROLL_PAD_RIGHT = `calc(${MOBILE_SCRUB_WIDTH + 6}px + env(safe-area-inset-right, 0px))`;
+const MOBILE_SCROLL_PAD_RIGHT = `max(16px, env(safe-area-inset-right, 0px))`;
 const MOBILE_SCROLL_PAD_BOTTOM = `calc(108px + env(safe-area-inset-bottom, 0px))`;
 
 function getMobileNavClearance() {
@@ -75,14 +73,6 @@ function getSectionScrollTarget(root, element) {
   return Math.min(Math.max(0, desired), maxScroll);
 }
 
-function scrollMobileSection(root, sectionId, behavior = "smooth") {
-  const target = document.getElementById(sectionId);
-  if (!root || !target) return false;
-  const top = getSectionScrollTarget(root, target);
-  root.scrollTo({ top, behavior });
-  return true;
-}
-
 function useMobileScrollEndSpacer(scrollRoot, spacerRef, enabled) {
   useLayoutEffect(() => {
     if (!enabled) return;
@@ -94,8 +84,8 @@ function useMobileScrollEndSpacer(scrollRoot, spacerRef, enabled) {
       const spacerEl = spacerRef.current;
       if (!spacerEl) return;
 
-      const lastSection = MOBILE_NAV_SECTIONS[MOBILE_NAV_SECTIONS.length - 1];
-      const last = lastSection ? document.getElementById(lastSection.id) : null;
+      const lastId = MOBILE_SECTION_IDS[MOBILE_SECTION_IDS.length - 1];
+      const last = lastId ? document.getElementById(lastId) : null;
       if (!last) return;
 
       spacerEl.style.height = "0px";
@@ -108,7 +98,7 @@ function useMobileScrollEndSpacer(scrollRoot, spacerRef, enabled) {
     sync();
     const ro = new ResizeObserver(sync);
     ro.observe(root);
-    for (const { id } of MOBILE_NAV_SECTIONS) {
+    for (const id of MOBILE_SECTION_IDS) {
       const el = document.getElementById(id);
       if (el) ro.observe(el);
     }
@@ -120,49 +110,14 @@ function useMobileScrollEndSpacer(scrollRoot, spacerRef, enabled) {
   }, [scrollRoot, spacerRef, enabled]);
 }
 
-const MOBILE_NAV_SECTIONS = [
-  {
-    id: "mobile-work",
-    label: "Work",
-    glyph: "W",
-    path: "~/work/",
-    hint: "3 featured · swipe carousel",
-  },
-  {
-    id: "mobile-skills",
-    label: "Skills",
-    glyph: "S",
-    path: "~/skills.log",
-    hint: "Tap a node on the globe",
-  },
-  {
-    id: "mobile-more-projects",
-    label: "More",
-    glyph: "R",
-    path: "~/more/",
-    hint: "Scroll more case studies",
-  },
-  {
-    id: "mobile-more",
-    label: "Art",
-    glyph: "A",
-    path: "~/other/",
-    hint: "Illustration, photo & drawing",
-  },
-  {
-    id: "mobile-about",
-    label: "About",
-    glyph: "M",
-    path: "~/me.txt",
-    hint: "Bio & internships",
-  },
-  {
-    id: "mobile-contact",
-    label: "Contact",
-    glyph: "@",
-    path: "~/contact.msg",
-    hint: "Email & social links",
-  },
+/** Journey section anchors used for end-of-scroll clearance. */
+const MOBILE_SECTION_IDS = [
+  "mobile-work",
+  "mobile-skills",
+  "mobile-more-projects",
+  "mobile-more",
+  "mobile-about",
+  "mobile-contact",
 ];
 
 function MobileJourneyChapter({
@@ -440,335 +395,6 @@ function MobileOpenForWorkStrip() {
   );
 }
 
-function flashSection(sectionId) {
-  const target = document.getElementById(sectionId);
-  if (!target) return;
-  target.classList.remove("mobile-journey-chapter--nav-flash");
-  void target.offsetWidth;
-  target.classList.add("mobile-journey-chapter--nav-flash");
-  window.setTimeout(() => {
-    target.classList.remove("mobile-journey-chapter--nav-flash");
-  }, 720);
-}
-
-function pulseNav() {
-  if (typeof navigator !== "undefined" && navigator.vibrate) {
-    navigator.vibrate(8);
-  }
-}
-
-/**
- * Niagara-style right-edge scrubber: tap a glyph or drag along the rail
- * to filter/jump through journey sections.
- */
-function MobileSideScrubNav({ scrollRoot, activeId, visible, onNavigate }) {
-  const reduceMotion = useReducedMotion();
-  const railRef = useRef(null);
-  const scrubbingRef = useRef(false);
-  const lastIdxRef = useRef(-1);
-  const [scrubIdx, setScrubIdx] = useState(null);
-  const [hintPulse, setHintPulse] = useState(false);
-
-  const activeIndex = Math.max(
-    0,
-    MOBILE_NAV_SECTIONS.findIndex((s) => s.id === activeId)
-  );
-  const focusIndex = scrubIdx ?? activeIndex;
-  const focusSection = MOBILE_NAV_SECTIONS[focusIndex];
-
-  useEffect(() => {
-    if (!visible || reduceMotion) return;
-    if (typeof sessionStorage === "undefined") return;
-    if (sessionStorage.getItem("js-os-mobile-scrub-hint")) return;
-    sessionStorage.setItem("js-os-mobile-scrub-hint", "1");
-    setHintPulse(true);
-    const t = setTimeout(() => setHintPulse(false), 3200);
-    return () => clearTimeout(t);
-  }, [visible, reduceMotion]);
-
-  const jumpToIndex = useCallback(
-    (idx, { smooth = true, flash = true } = {}) => {
-      const section = MOBILE_NAV_SECTIONS[idx];
-      const root = scrollRoot?.current;
-      if (!section || !root) return;
-      onNavigate?.(section.id);
-      if (flash) flashSection(section.id);
-      scrollMobileSection(root, section.id, smooth && !reduceMotion ? "smooth" : "auto");
-    },
-    [onNavigate, reduceMotion, scrollRoot]
-  );
-
-  const indexFromClientY = useCallback((clientY) => {
-    const rail = railRef.current;
-    if (!rail) return 0;
-    const rect = rail.getBoundingClientRect();
-    if (rect.height <= 0) return 0;
-    const t = (clientY - rect.top) / rect.height;
-    const n = MOBILE_NAV_SECTIONS.length;
-    return Math.max(0, Math.min(n - 1, Math.floor(t * n)));
-  }, []);
-
-  const applyScrubIndex = useCallback(
-    (idx) => {
-      if (idx === lastIdxRef.current) return;
-      lastIdxRef.current = idx;
-      setScrubIdx(idx);
-      pulseNav();
-      playClick();
-      jumpToIndex(idx, { smooth: false, flash: false });
-    },
-    [jumpToIndex]
-  );
-
-  const onPointerDown = (e) => {
-    if (e.button != null && e.button !== 0) return;
-    scrubbingRef.current = true;
-    lastIdxRef.current = -1;
-    try {
-      e.currentTarget.setPointerCapture(e.pointerId);
-    } catch {
-      /* ignore */
-    }
-    applyScrubIndex(indexFromClientY(e.clientY));
-  };
-
-  const onPointerMove = (e) => {
-    if (!scrubbingRef.current) return;
-    applyScrubIndex(indexFromClientY(e.clientY));
-  };
-
-  const endScrub = (e) => {
-    if (!scrubbingRef.current) return;
-    scrubbingRef.current = false;
-    const idx = indexFromClientY(e.clientY);
-    const section = MOBILE_NAV_SECTIONS[idx];
-    if (section) flashSection(section.id);
-    setScrubIdx(null);
-    lastIdxRef.current = -1;
-    try {
-      e.currentTarget.releasePointerCapture(e.pointerId);
-    } catch {
-      /* ignore */
-    }
-  };
-
-  return (
-    <AnimatePresence>
-      {visible ? (
-        <motion.nav
-          key="mobile-scrub"
-          className={
-            hintPulse
-              ? "mobile-side-scrub mobile-side-scrub--hint"
-              : "mobile-side-scrub"
-          }
-          aria-label="Jump to section"
-          initial={reduceMotion ? false : { x: 28, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          exit={{ x: 18, opacity: 0 }}
-          transition={{ duration: 0.45, ease: EASE, delay: 0.08 }}
-          style={{
-            position: "absolute",
-            right: 0,
-            top: 0,
-            bottom: 0,
-            zIndex: 35,
-            width: MOBILE_SCRUB_WIDTH,
-            paddingRight: "max(2px, env(safe-area-inset-right, 0px))",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "flex-end",
-            pointerEvents: "none",
-            touchAction: "none",
-            userSelect: "none",
-          }}
-        >
-          <div
-            style={{
-              position: "relative",
-              width: "100%",
-              pointerEvents: "auto",
-            }}
-          >
-          {/* Floating label while scrubbing (Niagara-style callout) */}
-          <AnimatePresence>
-            {scrubIdx != null && focusSection ? (
-              <motion.div
-                key={focusSection.id}
-                className="mobile-side-scrub__bubble"
-                initial={reduceMotion ? false : { opacity: 0, x: 8 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 6 }}
-                transition={{ duration: 0.16 }}
-                aria-hidden
-                style={{
-                  position: "absolute",
-                  right: "100%",
-                  top: `${((focusIndex + 0.5) / MOBILE_NAV_SECTIONS.length) * 100}%`,
-                  transform: "translateY(-50%)",
-                  marginRight: 10,
-                  padding: "6px 10px",
-                  border: "1px solid rgba(255, 122, 41, 0.55)",
-                  borderRadius: 2,
-                  background: "rgba(12, 8, 5, 0.96)",
-                  boxShadow: "0 0 18px rgba(255, 122, 41, 0.22)",
-                  whiteSpace: "nowrap",
-                  fontFamily: "'VT323', monospace",
-                  fontSize: 15,
-                  letterSpacing: "0.18em",
-                  textTransform: "uppercase",
-                  color: ACCENT,
-                  pointerEvents: "none",
-                }}
-              >
-                {focusSection.label}
-              </motion.div>
-            ) : null}
-          </AnimatePresence>
-
-          <div
-            ref={railRef}
-            className="mobile-side-scrub__rail"
-            role="listbox"
-            aria-orientation="vertical"
-            aria-activedescendant={`mobile-scrub-${focusSection?.id}`}
-            onPointerDown={onPointerDown}
-            onPointerMove={onPointerMove}
-            onPointerUp={endScrub}
-            onPointerCancel={endScrub}
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: 2,
-              minHeight: "min(52vh, 340px)",
-              padding: "10px 0",
-              borderLeft: "1px solid rgba(255, 122, 41, 0.22)",
-              background:
-                "linear-gradient(90deg, transparent 0%, rgba(10, 6, 4, 0.55) 40%, rgba(10, 6, 4, 0.82) 100%)",
-              borderRadius: "3px 0 0 3px",
-            }}
-          >
-            {MOBILE_NAV_SECTIONS.map(({ id, label, glyph }, i) => {
-              const isActive = i === focusIndex;
-              const dist = Math.abs(i - focusIndex);
-              const scale = isActive ? 1.35 : dist === 1 ? 0.92 : 0.78;
-              const opacity = isActive ? 1 : dist === 1 ? 0.55 : 0.32;
-              return (
-                <button
-                  key={id}
-                  id={`mobile-scrub-${id}`}
-                  type="button"
-                  role="option"
-                  aria-selected={isActive}
-                  aria-label={label}
-                  className={
-                    isActive
-                      ? "mobile-side-scrub__glyph mobile-side-scrub__glyph--active"
-                      : "mobile-side-scrub__glyph"
-                  }
-                  onClick={(e) => {
-                    // Keyboard / accessibility path — pointer scrub already jumps on drag/tap.
-                    if (scrubbingRef.current) return;
-                    e.stopPropagation();
-                    playClick();
-                    jumpToIndex(i, { smooth: true, flash: true });
-                  }}
-                  style={{
-                    margin: 0,
-                    padding: "6px 4px",
-                    minWidth: 28,
-                    minHeight: 28,
-                    border: "none",
-                    background: "transparent",
-                    fontFamily: "'VT323', monospace",
-                    fontSize: isActive ? 18 : 13,
-                    letterSpacing: "0.04em",
-                    textTransform: "uppercase",
-                    color: isActive ? ACCENT : "rgba(255, 180, 112, 0.7)",
-                    textShadow: isActive
-                      ? "0 0 10px rgba(255, 122, 41, 0.55)"
-                      : "none",
-                    opacity,
-                    transform: `scale(${scale})`,
-                    transition:
-                      "transform 0.16s ease, opacity 0.16s ease, color 0.16s ease, font-size 0.16s ease",
-                    cursor: "pointer",
-                    lineHeight: 1,
-                    pointerEvents: "none",
-                  }}
-                >
-                  {glyph}
-                </button>
-              );
-            })}
-          </div>
-          </div>
-        </motion.nav>
-      ) : null}
-    </AnimatePresence>
-  );
-}
-
-/** How far above the scroll viewport bottom a section top must be before it registers. */
-const MOBILE_SECTION_PEEK_INSET = 88;
-
-function getActiveSectionFromBottomPeek(root) {
-  const rootRect = root.getBoundingClientRect();
-  const peekLine = rootRect.bottom - MOBILE_SECTION_PEEK_INSET;
-  const maxScroll = Math.max(0, root.scrollHeight - root.clientHeight);
-
-  if (root.scrollTop >= maxScroll - 6) {
-    return (
-      MOBILE_NAV_SECTIONS[MOBILE_NAV_SECTIONS.length - 1]?.id ??
-      MOBILE_NAV_SECTIONS[0].id
-    );
-  }
-
-  let activeId = MOBILE_NAV_SECTIONS[0].id;
-  for (const { id } of MOBILE_NAV_SECTIONS) {
-    const el = document.getElementById(id);
-    if (!el) continue;
-    if (el.getBoundingClientRect().top <= peekLine) {
-      activeId = id;
-    }
-  }
-  return activeId;
-}
-
-function useMobileSectionSpy(scrollRoot, enabled) {
-  const [activeId, setActiveId] = useState(MOBILE_NAV_SECTIONS[0].id);
-
-  useEffect(() => {
-    if (!enabled) return;
-    const root = scrollRoot?.current;
-    if (!root) return;
-
-    let raf = 0;
-
-    const update = () => {
-      raf = 0;
-      const bestId = getActiveSectionFromBottomPeek(root);
-      setActiveId((prev) => (prev === bestId ? prev : bestId));
-    };
-
-    const onScroll = () => {
-      if (raf) return;
-      raf = requestAnimationFrame(update);
-    };
-
-    update();
-    root.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      root.removeEventListener("scroll", onScroll);
-      if (raf) cancelAnimationFrame(raf);
-    };
-  }, [scrollRoot, enabled]);
-
-  return activeId;
-}
-
 function MobileBootReady({ show }) {
   const [dismissed, setDismissed] = useState(false);
   const reduceMotion = useReducedMotion();
@@ -895,19 +521,12 @@ function MobileDesktop() {
   const skipWelcomeTyping = phase === "dashboard";
   const scrollRef = useRef(null);
   const scrollEndSpacerRef = useRef(null);
-  const activeSection = useMobileSectionSpy(scrollRef, showMobileRest);
   useMobileScrollEndSpacer(scrollRef, scrollEndSpacerRef, showMobileRest);
   const { toastOpen, dismissToast } = useVaultKeyState();
   const [vaultGameOpen, setVaultGameOpen] = useState(false);
 
   return (
     <div className="mobile-os">
-      <MobileSideScrubNav
-        scrollRoot={scrollRef}
-        activeId={activeSection}
-        visible={showMobileRest}
-      />
-
       <div
         ref={scrollRef}
         data-mobile-scroll
@@ -917,6 +536,9 @@ function MobileDesktop() {
             ? MOBILE_SCROLL_PAD_TOP
             : "max(24px, env(safe-area-inset-top, 0px))",
           paddingRight: showMobileRest ? MOBILE_SCROLL_PAD_RIGHT : undefined,
+          paddingLeft: showMobileRest
+            ? "max(0px, env(safe-area-inset-left, 0px))"
+            : undefined,
           paddingBottom: MOBILE_SCROLL_PAD_BOTTOM,
         }}
       >

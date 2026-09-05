@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import ProjectViewLink from "@/components/ProjectViewLink";
 import { otherProjects } from "@/data/otherProjects";
 import ProjectFlipCard, {
   PROJECT_CARD_GRADIENTS,
@@ -8,7 +8,7 @@ import ProjectFlipCard, {
 } from "@/components/ProjectFlipCard";
 import { DESKTOP_PROJECT_CARD_ASPECT } from "@/lib/projectDesktopCards";
 import { projectCardMeta } from "@/lib/projectCardMeta";
-import { playClick } from "@/lib/typingSound";
+import { projectHeroTransitionName } from "@/lib/viewTransition";
 
 function MobileOtherProjectRow({ project, gradient, loading }) {
   const heroSrc = project.thumb ?? project.caseStudyHero ?? null;
@@ -16,16 +16,18 @@ function MobileOtherProjectRow({ project, gradient, loading }) {
   const meta = [category, timeline].filter(Boolean).join(" · ");
 
   return (
-    <Link
+    <ProjectViewLink
       href={`/work/${project.slug}`}
       className="other-projects-row"
       data-cursor="view"
       aria-label={`Open ${project.title} case study`}
-      onClick={() => playClick()}
     >
       <span
-        className="other-projects-row__thumb"
-        style={{ background: gradient }}
+        className="other-projects-row__thumb project-card-hero-vt"
+        style={{
+          background: gradient,
+          viewTransitionName: projectHeroTransitionName(project.slug),
+        }}
         aria-hidden
       >
         {heroSrc ? (
@@ -49,7 +51,7 @@ function MobileOtherProjectRow({ project, gradient, loading }) {
       <span className="other-projects-row__arrow" aria-hidden>
         →
       </span>
-    </Link>
+    </ProjectViewLink>
   );
 }
 

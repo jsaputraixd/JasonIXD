@@ -1034,27 +1034,6 @@ body {
   transform: scale(0.96);
 }
 
-.mobile-side-scrub--hint .mobile-side-scrub__rail {
-  animation: mobile-scrub-hint 1.1s ease-in-out 3;
-}
-
-@keyframes mobile-scrub-hint {
-  0%,
-  100% {
-    border-left-color: rgba(255, 122, 41, 0.22);
-    box-shadow: none;
-  }
-  50% {
-    border-left-color: rgba(255, 122, 41, 0.7);
-    box-shadow: -6px 0 18px rgba(255, 122, 41, 0.28);
-  }
-}
-
-.mobile-side-scrub__glyph--active {
-  filter: drop-shadow(0 0 6px rgba(255, 122, 41, 0.45));
-}
-
-
 .mobile-intro-skip {
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
@@ -1062,23 +1041,6 @@ body {
 .mobile-intro-skip:active {
   border-color: rgba(255, 122, 41, 0.8);
   box-shadow: 0 0 18px rgba(255, 122, 41, 0.28);
-}
-
-.mobile-journey-chapter--nav-flash {
-  animation: mobile-nav-flash 0.7s ease-out 1;
-}
-
-@keyframes mobile-nav-flash {
-  0% {
-    box-shadow: inset 0 0 0 0 rgba(255, 122, 41, 0);
-  }
-  35% {
-    box-shadow: inset 0 0 0 1px rgba(255, 122, 41, 0.55),
-      0 0 22px rgba(255, 122, 41, 0.2);
-  }
-  100% {
-    box-shadow: inset 0 0 0 0 rgba(255, 122, 41, 0);
-  }
 }
 
 .mobile-section-label {
@@ -1110,6 +1072,27 @@ body {
   ::view-transition-group(*) {
     animation-duration: 0.48s;
     animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+
+/* Card → case study: shared hero expands into the page */
+@supports (view-transition-name: none) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 0.4s;
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  ::view-transition-group(*) {
+    animation-duration: 0.58s;
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .project-card-hero-vt,
+  .case-study-hero-fade,
+  .case-study-hero-vt {
+    /* Avoid paint containment fighting the shared-element snapshot */
+    contain: none;
   }
 }
 

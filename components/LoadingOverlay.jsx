@@ -9,28 +9,17 @@ import {
 import {
   playStartupChime,
   playStartupWordAccent,
-  playTypingClick,
 } from "@/lib/typingSound";
 import { preloadPortfolioAssets } from "@/lib/preloadPortfolio";
 
-const ACCENT = "#FF7A29";
 const EASE = [0.16, 1, 0.3, 1];
 
-const BOOT_LINES = [
-  "> BOOTING JS-OS v1.0…",
-  "> DISPENSING oatmeal latte…",
-  "> TOASTING croissant.dll…",
-  "> LOC: SF // BALI · synced",
-  "> READY \u25A2",
-];
-
-const CHAR_MS = 26;
-const LINE_GAP_MS = 120;
-const POST_BOOT_PAUSE = 260;
+const START_MS = 320;
 const WORD_DURATION_S = 1.2;
-const WORD_STAGGER_S = 0.58;
-const TAGLINE_HOLD_MS = 4400;
-const EXIT_FADE_MS = 950;
+const WORD_STAGGER_S = 0.65;
+/** Time from tagline show → exit starts (words finish ~2.5s in). */
+const TAGLINE_HOLD_MS = 4300;
+const EXIT_FADE_MS = 800;
 
 const TAGLINE_WORDS = ["Dream.", "Think.", "Build."];
 
@@ -53,9 +42,6 @@ function delay(ms, signal) {
 }
 
 export default function LoadingOverlay() {
-  const [typed, setTyped] = useState(BOOT_LINES.map(() => ""));
-  const [activeLine, setActiveLine] = useState(0);
-  const [bootDone, setBootDone] = useState(false);
   const [showTagline, setShowTagline] = useState(false);
   const [exiting, setExiting] = useState(false);
   /** Hidden until client decides: full boot vs skip (refresh with intro seen). */
@@ -101,11 +87,8 @@ export default function LoadingOverlay() {
     (async () => {
       try {
         if (reduced) {
-          setTyped(BOOT_LINES);
-          setActiveLine(BOOT_LINES.length);
-          setBootDone(true);
           setShowTagline(true);
-          await delay(2000, signal);
+          await delay(1800, signal);
           setExiting(true);
           await delay(EXIT_FADE_MS, signal);
           setVisible(false);
@@ -113,26 +96,7 @@ export default function LoadingOverlay() {
           return;
         }
 
-        await delay(100, signal);
-
-        for (let lineIdx = 0; lineIdx < BOOT_LINES.length; lineIdx++) {
-          const line = BOOT_LINES[lineIdx];
-          setActiveLine(lineIdx);
-          for (let i = 1; i <= line.length; i++) {
-            await delay(CHAR_MS, signal);
-            setTyped((prev) => {
-              const next = [...prev];
-              next[lineIdx] = line.slice(0, i);
-              return next;
-            });
-            if (i % 2 === 0) playTypingClick();
-          }
-          await delay(LINE_GAP_MS, signal);
-        }
-
-        setBootDone(true);
-        setActiveLine(BOOT_LINES.length);
-        await delay(POST_BOOT_PAUSE, signal);
+        await delay(START_MS, signal);
         setShowTagline(true);
         await delay(TAGLINE_HOLD_MS, signal);
         setExiting(true);
@@ -159,7 +123,7 @@ export default function LoadingOverlay() {
     const pings = TAGLINE_WORDS.map((_, i) =>
       window.setTimeout(
         () => playStartupWordAccent(i),
-        (i * WORD_STAGGER_S + 0.2) * 1000
+        (i * WORD_STAGGER_S + 0.12) * 1000
       )
     );
     return () => pings.forEach((id) => clearTimeout(id));
@@ -185,7 +149,6 @@ export default function LoadingOverlay() {
           }}
           aria-hidden="true"
         >
-          {/* Scanline veil + warm tint */}
           <div
             aria-hidden="true"
             style={{
@@ -209,48 +172,12 @@ export default function LoadingOverlay() {
             }}
           />
 
-          {/* Boot terminal block, fades out as tagline rises */}
-          <motion.div
-            animate={{
-              opacity: showTagline ? 0 : 1,
-              y: showTagline ? -20 : 0,
-            }}
-            transition={{ duration: 0.6, ease: EASE }}
-            style={{
-              position: "absolute",
-              fontFamily: "'VT323', monospace",
-              fontSize: 18,
-              letterSpacing: "0.06em",
-              color: ACCENT,
-              textShadow: "0 0 10px rgba(255, 122, 41, 0.5)",
-              lineHeight: 1.55,
-              minWidth: 280,
-              textAlign: "left",
-              whiteSpace: "pre",
-              pointerEvents: "none",
-            }}
-          >
-            {BOOT_LINES.map((line, i) => {
-              const isCurrent = i === activeLine && !bootDone;
-              const isLastDone =
-                i === BOOT_LINES.length - 1 && bootDone && !showTagline;
-              const isFuture = i > activeLine && !bootDone;
-              return (
-                <div key={i} style={{ opacity: isFuture ? 0 : 1 }}>
-                  {typed[i]}
-                  {(isCurrent || isLastDone) && <BlinkCursor />}
-                </div>
-              );
-            })}
-          </motion.div>
-
-          {/* Tagline reveal */}
-          {showTagline && (
+          {showTagline ? (
             <motion.div
               key="tagline"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.4, ease: EASE }}
+              transition={{ duration: 0.35, ease: EASE }}
               style={{
                 position: "absolute",
                 display: "flex",
@@ -270,7 +197,7 @@ export default function LoadingOverlay() {
               {TAGLINE_WORDS.map((word, i) => (
                 <motion.span
                   key={word}
-                  initial={{ opacity: 0, y: 32, filter: "blur(8px)" }}
+                  initial={{ opacity: 0, y: 28, filter: "blur(8px)" }}
                   animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                   transition={{
                     duration: WORD_DURATION_S,
@@ -282,32 +209,9 @@ export default function LoadingOverlay() {
                 </motion.span>
               ))}
             </motion.div>
-          )}
+          ) : null}
         </motion.div>
       )}
     </AnimatePresence>
-  );
-}
-
-function BlinkCursor() {
-  return (
-    <motion.span
-      animate={{ opacity: [1, 1, 0, 0] }}
-      transition={{
-        duration: 1,
-        times: [0, 0.5, 0.5, 1],
-        repeat: Infinity,
-        ease: "linear",
-      }}
-      style={{
-        display: "inline-block",
-        width: "0.55em",
-        marginLeft: 2,
-        background: ACCENT,
-        height: "1em",
-        verticalAlign: "-0.12em",
-        boxShadow: "0 0 8px rgba(255, 122, 41, 0.6)",
-      }}
-    />
   );
 }
