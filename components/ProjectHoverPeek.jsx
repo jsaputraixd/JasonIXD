@@ -11,6 +11,9 @@ const FOLLOW_X = 0.05;
 const FOLLOW_Y = 0.16;
 const LERP = 0.18;
 const LEAVE_MS = 140;
+/** Featured heroes: info panel after expand + blur have started. */
+const FEATURED_PEEK_DELAY_MS = 200;
+const FEATURED_LEAVE_MS = 80;
 const PEEK_W = 400;
 
 function clamp(n, lo, hi) {
@@ -104,6 +107,7 @@ export default function ProjectHoverPeek({
   const originRef = useRef("left center");
   const rafRef = useRef(0);
   const leaveTimer = useRef(0);
+  const openTimer = useRef(0);
   const slugRef = useRef(null);
   const openRef = useRef(false);
   slugRef.current = slug;
@@ -125,27 +129,32 @@ export default function ProjectHoverPeek({
     const measureHeight = () =>
       boxRef.current?.offsetHeight || Math.round(148 * layoutScale);
 
+    const clearOpenTimer = () => {
+      if (!openTimer.current) return;
+      window.clearTimeout(openTimer.current);
+      openTimer.current = 0;
+    };
+
     const closeNow = () => {
       if (leaveTimer.current) {
         window.clearTimeout(leaveTimer.current);
         leaveTimer.current = 0;
       }
+      clearOpenTimer();
       setOpen(false);
       setSlug(null);
       displayed.current.ready = false;
     };
 
     const scheduleLeave = (nextSlug) => {
+      clearOpenTimer();
       const focus = Boolean(nextSlug && focusSlugsRef.current?.has(nextSlug));
-      if (focus) {
-        closeNow();
-        return;
-      }
+      const delay = focus ? FEATURED_LEAVE_MS : LEAVE_MS;
       if (leaveTimer.current) return;
       leaveTimer.current = window.setTimeout(() => {
         leaveTimer.current = 0;
         closeNow();
-      }, LEAVE_MS);
+      }, delay);
     };
 
     const hitFromPoint = (x, y) => {
@@ -158,13 +167,7 @@ export default function ProjectHoverPeek({
       return hit;
     };
 
-    const openFromHit = (hit, clientX, clientY) => {
-      const next = hit.getAttribute("data-project-slug");
-      if (leaveTimer.current) {
-        window.clearTimeout(leaveTimer.current);
-        leaveTimer.current = 0;
-      }
-
+    const placePeek = (hit, clientX, clientY) => {
       const rect = hit.getBoundingClientRect();
       const preferAbove = hit.getAttribute("data-peek-placement") === "above";
       const nextTarget = preferAbove
@@ -190,13 +193,54 @@ export default function ProjectHoverPeek({
         : nextTarget.placeRight
           ? "left center"
           : "right center";
+    };
 
+    const showPeek = (next) => {
       if (slugRef.current !== next) {
         setSlug(next);
         setOpen(true);
       } else if (!openRef.current) {
         setOpen(true);
       }
+    };
+
+    const openFromHit = (hit, clientX, clientY) => {
+      const next = hit.getAttribute("data-project-slug");
+      if (leaveTimer.current) {
+        window.clearTimeout(leaveTimer.current);
+        leaveTimer.current = 0;
+      }
+
+      placePeek(hit, clientX, clientY);
+
+      const isFeatured = Boolean(
+        next && focusSlugsRef.current?.has(next)
+      );
+
+      // Already open on this slug — keep tracking, no re-delay.
+      if (slugRef.current === next && openRef.current) {
+        clearOpenTimer();
+        return;
+      }
+
+      if (!isFeatured || reduceMotion) {
+        clearOpenTimer();
+        showPeek(next);
+        return;
+      }
+
+      // Featured: wait for expand + blur before the info panel.
+      if (slugRef.current !== next) {
+        setSlug(next);
+        setOpen(false);
+        displayed.current.ready = false;
+        clearOpenTimer();
+      }
+      if (openTimer.current) return;
+      openTimer.current = window.setTimeout(() => {
+        openTimer.current = 0;
+        if (slugRef.current === next) showPeek(next);
+      }, FEATURED_PEEK_DELAY_MS);
     };
 
     const onPointerMove = (e) => {
@@ -238,14 +282,19 @@ export default function ProjectHoverPeek({
       window.removeEventListener("blur", closeNow);
       document.documentElement.removeEventListener("mouseleave", closeNow);
       if (leaveTimer.current) window.clearTimeout(leaveTimer.current);
+      clearOpenTimer();
     };
-  }, [enabled, bySlug, layoutScale, size.width]);
+  }, [enabled, bySlug, layoutScale, size.width, reduceMotion]);
 
   useEffect(() => {
     if (!dismissEpoch) return;
     if (leaveTimer.current) {
       window.clearTimeout(leaveTimer.current);
       leaveTimer.current = 0;
+    }
+    if (openTimer.current) {
+      window.clearTimeout(openTimer.current);
+      openTimer.current = 0;
     }
     setOpen(false);
     setSlug(null);
@@ -318,7 +367,7 @@ export default function ProjectHoverPeek({
                 ? { opacity: 0, scale: 1 }
                 : { opacity: 0, scale: 0.94 }
             }
-            transition={{ duration: reduceMotion ? 0.12 : 0.22, ease: EASE }}
+            transition={{ duration: reduceMotion ? 0.12 : 0.24, ease: EASE }}
             style={{
               transformOrigin: originRef.current,
               background: "rgba(18, 12, 8, 0.96)",

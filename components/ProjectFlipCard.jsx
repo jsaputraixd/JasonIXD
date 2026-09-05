@@ -82,6 +82,9 @@ export default function ProjectFlipCard({
   const kitsPhones = motionPreview && project.slug === "kits";
   const [previewHot, setPreviewHot] = useState(false);
   const hoverTimerRef = useRef(null);
+  const previewTimerRef = useRef(null);
+  /** Featured motion: start after expand + blur have begun. */
+  const previewDelayMs = motionPreview ? 250 : 0;
 
   const clearHoverTimer = () => {
     if (hoverTimerRef.current == null) return;
@@ -89,13 +92,32 @@ export default function ProjectFlipCard({
     hoverTimerRef.current = null;
   };
 
+  const clearPreviewTimer = () => {
+    if (previewTimerRef.current == null) return;
+    clearTimeout(previewTimerRef.current);
+    previewTimerRef.current = null;
+  };
+
   useEffect(() => {
     if (hoverFocusDelayMs <= 0) clearHoverTimer();
-    return clearHoverTimer;
+    return () => {
+      clearHoverTimer();
+      clearPreviewTimer();
+    };
   }, [hoverFocusDelayMs]);
 
   const handleMouseEnter = (e) => {
-    if (teaser || kitsPhones) setPreviewHot(true);
+    if (teaser || kitsPhones) {
+      clearPreviewTimer();
+      if (previewDelayMs <= 0) {
+        setPreviewHot(true);
+      } else {
+        previewTimerRef.current = setTimeout(() => {
+          previewTimerRef.current = null;
+          setPreviewHot(true);
+        }, previewDelayMs);
+      }
+    }
     notePointerHover(e.currentTarget);
     if (!onRequestFocus) return;
     if (hoverFocusDelayMs <= 0) {
@@ -118,10 +140,12 @@ export default function ProjectFlipCard({
       onMouseLeave={() => {
         setPreviewHot(false);
         clearHoverTimer();
+        clearPreviewTimer();
       }}
       onFocus={() => onRequestFocus?.()}
       onPointerDown={() => {
         clearHoverTimer();
+        clearPreviewTimer();
         playClick();
         onRequestFocus?.();
       }}

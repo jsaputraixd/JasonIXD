@@ -10,9 +10,8 @@ import ProjectFlipCard, {
   PROJECT_CARD_GRADIENTS,
 } from "@/components/ProjectFlipCard";
 
-const CARD_W = 168;
-const CARD_H = 96;
-const GAP = 18;
+const DESKTOP = { cardW: 168, cardH: 96, gap: 18 };
+const MOBILE = { cardW: 132, cardH: 76, gap: 14 };
 
 function DockSet({ items, cardW, cardH, gap, scale, copy }) {
   return (
@@ -51,16 +50,73 @@ function DockSet({ items, cardW, cardH, gap, scale, copy }) {
 export default function ProjectDockCarousel({
   leftInset = 0,
   layoutScale = 1,
+  variant = "desktop",
 }) {
   const reduceMotion = useReducedMotion();
   const items = carouselProjects;
   if (!items.length) return null;
 
-  const scale = Math.min(1, Math.max(0.82, layoutScale));
-  const cardW = Math.round(CARD_W * scale);
-  const cardH = Math.round(CARD_H * scale);
-  const gap = Math.round(GAP * scale);
+  const isMobile = variant === "mobile";
+  const dims = isMobile ? MOBILE : DESKTOP;
+  const scale = isMobile
+    ? 1
+    : Math.min(1, Math.max(0.82, layoutScale));
+  const cardW = Math.round(dims.cardW * scale);
+  const cardH = Math.round(dims.cardH * scale);
+  const gap = Math.round(dims.gap * scale);
   const duration = Math.max(28, items.length * 4.2);
+
+  const track = (
+    <div
+      className={
+        reduceMotion
+          ? "project-dock__mask project-dock__mask--static"
+          : "project-dock__mask"
+      }
+    >
+      <div
+        className={
+          reduceMotion
+            ? "project-dock__track project-dock__track--static"
+            : "project-dock__track"
+        }
+        style={{
+          "--dock-duration": `${duration}s`,
+          "--dock-gap": `${gap}px`,
+        }}
+      >
+        <DockSet
+          items={items}
+          cardW={cardW}
+          cardH={cardH}
+          gap={gap}
+          scale={scale}
+          copy={false}
+        />
+        {reduceMotion ? null : (
+          <DockSet
+            items={items}
+            cardW={cardW}
+            cardH={cardH}
+            gap={gap}
+            scale={scale}
+            copy
+          />
+        )}
+      </div>
+    </div>
+  );
+
+  if (isMobile) {
+    return (
+      <nav
+        className="project-dock project-dock--mobile"
+        aria-label="More case studies"
+      >
+        {track}
+      </nav>
+    );
+  }
 
   return (
     <nav
@@ -75,44 +131,7 @@ export default function ProjectDockCarousel({
         zIndex: 28,
       }}
     >
-      <div
-        className={
-          reduceMotion
-            ? "project-dock__mask project-dock__mask--static"
-            : "project-dock__mask"
-        }
-      >
-        <div
-          className={
-            reduceMotion
-              ? "project-dock__track project-dock__track--static"
-              : "project-dock__track"
-          }
-          style={{
-            "--dock-duration": `${duration}s`,
-            "--dock-gap": `${gap}px`,
-          }}
-        >
-          <DockSet
-            items={items}
-            cardW={cardW}
-            cardH={cardH}
-            gap={gap}
-            scale={scale}
-            copy={false}
-          />
-          {reduceMotion ? null : (
-            <DockSet
-              items={items}
-              cardW={cardW}
-              cardH={cardH}
-              gap={gap}
-              scale={scale}
-              copy
-            />
-          )}
-        </div>
-      </div>
+      {track}
     </nav>
   );
 }

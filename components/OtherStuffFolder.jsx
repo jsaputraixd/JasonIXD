@@ -236,7 +236,7 @@ function CategoryFolderButton({ category, index, layoutScale, onOpen }) {
         }}
       >
         <Image
-          src={otherStuff.icon}
+          src={category.icon ?? otherStuff.icon}
           alt=""
           fill
           sizes="48px"

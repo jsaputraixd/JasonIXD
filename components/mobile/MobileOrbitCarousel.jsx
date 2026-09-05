@@ -10,7 +10,7 @@ import {
 } from "react";
 import { useReducedMotion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { featuredProjects } from "@/data/projects";
+import { desktopFeaturedProjects } from "@/data/projects";
 import {
   PROJECT_CARD_GRADIENTS,
   ProjectCardHeroImage,
@@ -90,13 +90,14 @@ function layoutFromRel(rel, metrics) {
   };
 }
 
-function preloadCarouselNeighbors(centerIdx) {
-  const count = featuredProjects.length;
+function preloadCarouselNeighbors(projects, centerIdx) {
+  const count = projects.length;
+  if (!count) return;
   const slots = new Set(
     [centerIdx, centerIdx - 1, centerIdx + 1].map((i) => wrapIndex(i, count))
   );
   slots.forEach((i) => {
-    const p = featuredProjects[i];
+    const p = projects[i];
     const src = resolveProjectCarouselSrc(p);
     if (!src) return;
     const url = projectCarouselThumbSrc(src);
@@ -266,10 +267,11 @@ function CarouselNavButton({ label, onClick, disabled, children }) {
 }
 
 export default function MobileOrbitCarousel({
+  projects = desktopFeaturedProjects,
   activeIdx: controlledIdx,
   onActiveChange,
 }) {
-  const count = featuredProjects.length;
+  const count = projects.length;
   const reduceMotion = useReducedMotion();
   const router = useRouter();
 
@@ -344,8 +346,8 @@ export default function MobileOrbitCarousel({
   );
 
   useLayoutEffect(() => {
-    preloadCarouselNeighbors(activeIdx);
-  }, [activeIdx]);
+    preloadCarouselNeighbors(projects, activeIdx);
+  }, [activeIdx, projects]);
 
   useEffect(() => {
     return () => stopRaf();
@@ -421,13 +423,13 @@ export default function MobileOrbitCarousel({
   );
 
   const openActiveProject = useCallback(() => {
-    const project = featuredProjects[activeIdxRef.current];
+    const project = projects[activeIdxRef.current];
     if (!project) return;
     playClick();
     withViewTransition(() => {
       router.push(`/work/${project.slug}`);
     });
-  }, [router]);
+  }, [projects, router]);
 
   const onPointerDown = useCallback(
     (e) => {
@@ -539,7 +541,7 @@ export default function MobileOrbitCarousel({
           WORK
         </div>
 
-        {featuredProjects.map((p, i) => {
+        {projects.map((p, i) => {
           const rel = relativeOffset(i, visualCenter, count);
           const layout = layoutFromRel(rel, metrics);
           if (!layout) return null;
@@ -600,7 +602,7 @@ export default function MobileOrbitCarousel({
             {String(count).padStart(2, "0")}
           </span>
           <div style={{ display: "flex", gap: 6, alignItems: "center" }} aria-hidden>
-            {featuredProjects.map((p, i) => (
+            {projects.map((p, i) => (
               <button
                 key={p.id}
                 type="button"

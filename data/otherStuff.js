@@ -13,6 +13,7 @@ export const otherStuff = {
     {
       id: "photography",
       label: "Photography",
+      icon: "/images/Icons/Photography.png",
       items: [
         { id: "photography-8-jasonsaputra", src: "/images/other-stuff/photography/8_JasonSaputra.jpg" },
         { id: "photography-9-jasonsaputra", src: "/images/other-stuff/photography/9_JasonSaputra.jpg" },
@@ -34,6 +35,7 @@ export const otherStuff = {
     {
       id: "illustration",
       label: "Illustration",
+      icon: "/images/Icons/Illustration.png",
       items: [
         { id: "illustration-2-jasonsaputra", src: "/images/other-stuff/illustration/2_JasonSaputra.jpg" },
         { id: "illustration-3-jasonsaputra", src: "/images/other-stuff/illustration/3_JasonSaputra.jpg" },
@@ -50,6 +52,7 @@ export const otherStuff = {
     {
       id: "drawing",
       label: "Drawing",
+      icon: "/images/Icons/Drawing.png",
       items: [
         { id: "drawing-300-chains", src: "/images/other-stuff/drawing/300_Chains.jpg" },
         { id: "drawing-20251002-153759-1", src: "/images/other-stuff/drawing/20251002_153759 1.jpg" },
@@ -59,6 +62,7 @@ export const otherStuff = {
     {
       id: "sculptures",
       label: "Sculptures",
+      icon: "/images/Icons/Sculptures.png",
       items: [
         { id: "sculptures-13-jasonsaputra", src: "/images/other-stuff/sculptures/13_JasonSaputra.jpg" },
         { id: "sculptures-craked", src: "/images/other-stuff/sculptures/Craked.jpg" },

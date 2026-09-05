@@ -18,7 +18,7 @@ import StatusBar from "@/components/StatusBar";
 import SkillsPlanet from "@/components/SkillsPlanet";
 import WelcomeReadAloud from "@/components/WelcomeReadAloud";
 import OtherStuffFolder from "@/components/OtherStuffFolder";
-import OtherProjectsFolder from "@/components/OtherProjectsFolder";
+import ProjectDockCarousel from "@/components/ProjectDockCarousel";
 import { MobileProjectPreviewPanel } from "@/components/ProjectPreviewPane";
 import MobileOrbitCarousel, {
   MOBILE_CAROUSEL_EASE,
@@ -41,7 +41,7 @@ import {
   ACCENT,
   EASE,
 } from "@/components/TypedLine";
-import { featuredProjects } from "@/data/projects";
+import { desktopFeaturedProjects } from "@/data/projects";
 import { about } from "@/data/about";
 import {
   markIntroSeen,
@@ -126,7 +126,7 @@ const MOBILE_NAV_SECTIONS = [
     label: "Work",
     glyph: "W",
     path: "~/work/",
-    hint: "Featured projects · swipe carousel",
+    hint: "3 featured · swipe carousel",
   },
   {
     id: "mobile-skills",
@@ -137,10 +137,10 @@ const MOBILE_NAV_SECTIONS = [
   },
   {
     id: "mobile-more-projects",
-    label: "Archive",
+    label: "More",
     glyph: "R",
-    path: "~/archive/",
-    hint: "More case studies",
+    path: "~/more/",
+    hint: "Scroll more case studies",
   },
   {
     id: "mobile-more",
@@ -184,17 +184,15 @@ const MOBILE_WORK_TINTS = [
   "rgba(255, 122, 41, 0.14)",
   "rgba(255, 105, 48, 0.11)",
   "rgba(255, 145, 55, 0.12)",
-  "rgba(120, 90, 200, 0.1)",
-  "rgba(40, 160, 190, 0.12)",
-  "rgba(220, 90, 140, 0.11)",
 ];
 
 function MobileWorkSection({ scrollRoot }) {
-  const count = featuredProjects.length;
+  const count = desktopFeaturedProjects.length;
   const prevIdxRef = useRef(0);
   const [activeIdx, setActiveIdx] = useState(0);
   const [flipDir, setFlipDir] = useState(1);
-  const project = featuredProjects[activeIdx] ?? featuredProjects[0];
+  const project =
+    desktopFeaturedProjects[activeIdx] ?? desktopFeaturedProjects[0];
   const workTint = MOBILE_WORK_TINTS[activeIdx % MOBILE_WORK_TINTS.length];
 
   const handleActiveChange = useCallback(
@@ -221,6 +219,7 @@ function MobileWorkSection({ scrollRoot }) {
     >
       <MobileScrollReveal scrollRoot={scrollRoot} variant="up" delay={0.04}>
         <MobileOrbitCarousel
+          projects={desktopFeaturedProjects}
           activeIdx={activeIdx}
           onActiveChange={handleActiveChange}
         />
@@ -965,11 +964,9 @@ function MobileDesktop() {
 
             <MobileJourneyChapter scrollRoot={scrollRef} sectionId="mobile-more-projects">
               <MobileJourneySectionLabel scrollRoot={scrollRef} skipTyping={skipWelcomeTyping}>
-                ▢ Archive
+                ▢ More work
               </MobileJourneySectionLabel>
-              <MobileCard title="Archive" titleUppercase={false} compactBody>
-                <OtherProjectsFolder variant="mobile" />
-              </MobileCard>
+              <ProjectDockCarousel variant="mobile" />
             </MobileJourneyChapter>
 
             <MobileSectionRule />
