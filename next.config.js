@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  /** Hide the bottom-left Next.js issue/dev badge (shows up in showcase recordings). */
+  devIndicators: false,
   /**
    * Dev-only tuning: rapid saves generate new `/_next/static/*` URLs. Browsers still
    * holding the previous HTML + chunk list then 404 until a full reload. Debouncing

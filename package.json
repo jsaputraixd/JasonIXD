@@ -11,6 +11,8 @@
     "dev:clean": "rm -rf .next && next dev -H 127.0.0.1 -p 3000",
     "dev:turbo": "next dev --turbo -H 127.0.0.1 -p 3000",
     "merge-pdfs": "node scripts/merge-case-study-decks.mjs",
+    "record:showcase": "node scripts/record-showcase.mjs",
+    "record:showcase:capture": "CAPTURE=1 node scripts/record-showcase.mjs",
     "generate:listen-audio": "node --env-file=./.env.local scripts/generate-listen-audio.mjs",
     "generate:listen-audio:wait": "node --env-file=./.env.local scripts/generate-listen-audio.mjs --wait",
     "generate:listen-audio:force": "node --env-file=./.env.local scripts/generate-listen-audio.mjs --force",
@@ -30,6 +32,7 @@
     "eslint": "^9.39.4",
     "eslint-config-next": "^16.2.6",
     "pdf-lib": "^1.17.1",
+    "playwright": "^1.63.0",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.14"
   }

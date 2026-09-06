@@ -65,6 +65,7 @@ export default function ProjectDockCarousel({
   const offsetRef = useRef(0);
   const pauseUntilRef = useRef(0);
   const draggingRef = useRef(false);
+  const wheelingRef = useRef(false);
   const soundMarkRef = useRef(0);
   const items = carouselProjects;
 
@@ -104,7 +105,9 @@ export default function ProjectDockCarousel({
       pauseUntilRef.current = performance.now() + ms;
     };
 
+    /** Scroll ticks only while the user is actively dragging or wheeling. */
     const playScrollSound = (dx) => {
+      if (!draggingRef.current && !wheelingRef.current) return;
       const acc = (soundMarkRef.current || 0) + Math.abs(dx);
       if (acc >= SOUND_EVERY_PX) {
         soundMarkRef.current = acc % SOUND_EVERY_PX;
@@ -114,12 +117,19 @@ export default function ProjectDockCarousel({
       }
     };
 
+    let wheelSoundClear = 0;
     const onWheel = (e) => {
       const delta =
         Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
       if (!delta) return;
       e.preventDefault();
       pause();
+      wheelingRef.current = true;
+      window.clearTimeout(wheelSoundClear);
+      // Momentum wheel ends shortly after the last event — then silence.
+      wheelSoundClear = window.setTimeout(() => {
+        wheelingRef.current = false;
+      }, 120);
       offsetRef.current += delta;
       apply();
       playScrollSound(delta);
@@ -129,12 +139,14 @@ export default function ProjectDockCarousel({
       // Only primary button / touch / pen
       if (e.pointerType === "mouse" && e.button !== 0) return;
       draggingRef.current = true;
+      wheelingRef.current = false;
       pause(120_000);
       const startX = e.clientX;
       const startOffset = offsetRef.current;
       let moved = false;
 
       const onMove = (ev) => {
+        if (!draggingRef.current) return;
         const dx = startX - ev.clientX;
         if (Math.abs(dx) > 3) moved = true;
         const prev = offsetRef.current;
@@ -183,7 +195,7 @@ export default function ProjectDockCarousel({
       const step = (AUTO_PX_PER_SEC * dt) / 1000;
       offsetRef.current += step;
       apply();
-      playScrollSound(step);
+      // Sound only for wheel/drag — not idle marquee auto-scroll.
     };
     raf = requestAnimationFrame(tick);
 
@@ -192,6 +204,8 @@ export default function ProjectDockCarousel({
 
     return () => {
       cancelAnimationFrame(raf);
+      window.clearTimeout(wheelSoundClear);
+      wheelingRef.current = false;
       mask.removeEventListener("wheel", onWheel);
       mask.removeEventListener("pointerdown", onPointerDown);
       window.removeEventListener("resize", onResize);
@@ -207,6 +221,7 @@ export default function ProjectDockCarousel({
       tabIndex={0}
       role="region"
       aria-label="Scroll project carousel"
+      data-sound="off"
     >
       <div
         ref={trackRef}
