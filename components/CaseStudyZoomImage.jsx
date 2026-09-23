@@ -43,6 +43,7 @@ export function CaseStudyZoomOverlay({
       {visible ? (
         <motion.div
           className="case-study-zoom"
+          data-lenis-prevent
           role="dialog"
           aria-modal="true"
           aria-label={caption || alt || "Zoomed image"}

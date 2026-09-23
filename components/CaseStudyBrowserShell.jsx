@@ -1,4 +1,5 @@
 import Link from "next/link";
+import CaseStudySmoothScroll from "./CaseStudySmoothScroll";
 
 /** Subtle JS-OS browser chrome — wraps case study content without crowding the work. */
 export default function CaseStudyBrowserShell({ project, children, endcap }) {
@@ -7,6 +8,7 @@ export default function CaseStudyBrowserShell({ project, children, endcap }) {
 
   return (
     <main className="case-study-browser">
+      <CaseStudySmoothScroll />
       <div className="case-study-browser__frame">
         <header className="case-study-browser__chrome">
           <div className="case-study-browser__titlebar">

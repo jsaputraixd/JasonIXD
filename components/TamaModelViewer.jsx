@@ -81,6 +81,7 @@ export default function TamaModelViewer({ variants }) {
         src={active.src}
         alt={active.alt}
         camera-controls
+        data-lenis-prevent
         touch-action="pan-y"
         interaction-prompt="auto"
         environment-image="neutral"
