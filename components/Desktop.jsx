@@ -213,6 +213,8 @@ function getDesktopLayout(vw, vh) {
   return { W, pos, projectCards, layoutScale };
 }
 
+const PEEK_PROJECTS = [...desktopFeaturedProjects, ...carouselProjects];
+
 const DESKTOP_PROJECT_SLOTS = desktopFeaturedProjects.map((_, projectIndex) => ({
   slot: `projSlot${projectIndex}`,
   projectIndex,
@@ -1000,7 +1002,7 @@ export default function Desktop() {
       ) : null}
       {showOtherWindows ? (
         <ProjectHoverPeek
-          projects={[...desktopFeaturedProjects, ...carouselProjects]}
+          projects={PEEK_PROJECTS}
           enabled={phase === "dashboard"}
           layoutScale={layoutScale}
           focusSlugs={featuredFocusSlugs}

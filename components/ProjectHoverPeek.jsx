@@ -11,6 +11,7 @@ const FOLLOW_X = 0.05;
 const FOLLOW_Y = 0.16;
 const LERP = 0.18;
 const LEAVE_MS = 140;
+const WATCHDOG_MS = 120;
 const FEATURED_LEAVE_MS = 80;
 const PEEK_W = 400;
 
@@ -105,6 +106,7 @@ export default function ProjectHoverPeek({
   const originRef = useRef("left center");
   const rafRef = useRef(0);
   const leaveTimer = useRef(0);
+  const lastPoint = useRef(null);
   const slugRef = useRef(null);
   const openRef = useRef(false);
   slugRef.current = slug;
@@ -205,6 +207,7 @@ export default function ProjectHoverPeek({
     };
 
     const onPointerMove = (e) => {
+      lastPoint.current = { clientX: e.clientX, clientY: e.clientY };
       const hit = hitFromPoint(e.clientX, e.clientY);
       if (!hit) {
         scheduleLeave(slugRef.current);
@@ -233,16 +236,25 @@ export default function ProjectHoverPeek({
       scheduleLeave(from.getAttribute("data-project-slug"));
     };
 
+    // Lag coalesces/drops pointer events and the dock scrolls under a still
+    // cursor, so the leave event may never come. Re-hit-test while open.
+    const watchdog = window.setInterval(() => {
+      if (openRef.current && lastPoint.current) onPointerMove(lastPoint.current);
+    }, WATCHDOG_MS);
+
     window.addEventListener("pointermove", onPointerMove, { passive: true });
     window.addEventListener("pointerout", onPointerOut);
     window.addEventListener("blur", closeNow);
     document.documentElement.addEventListener("mouseleave", closeNow);
     return () => {
+      window.clearInterval(watchdog);
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerout", onPointerOut);
       window.removeEventListener("blur", closeNow);
       document.documentElement.removeEventListener("mouseleave", closeNow);
+      // Must zero the id: a stale one makes scheduleLeave bail forever (stuck open).
       if (leaveTimer.current) window.clearTimeout(leaveTimer.current);
+      leaveTimer.current = 0;
     };
   }, [enabled, bySlug, layoutScale, size.width]);
 
