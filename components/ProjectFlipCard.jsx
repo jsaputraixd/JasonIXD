@@ -76,6 +76,8 @@ export default function ProjectFlipCard({
   hoverFocusDelayMs = 0,
   hoverScale = true,
   loading = "lazy",
+  /** "carousel" = small low-quality thumb for dense strips like the dock. */
+  imageVariant = "card",
   motionPreview = false,
   /** When false, skip shared hero name (e.g. marquee duplicate track). */
   shareHeroTransition = true,
@@ -205,6 +207,7 @@ export default function ProjectFlipCard({
               <ProjectCardHeroImage
                 src={heroSrc}
                 loading={loading}
+                variant={imageVariant}
                 style={{
                   position: "absolute",
                   inset: 0,

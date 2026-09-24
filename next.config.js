@@ -3,6 +3,10 @@ const nextConfig = {
   reactStrictMode: true,
   /** Hide the bottom-left Next.js issue/dev badge (shows up in showcase recordings). */
   devIndicators: false,
+  /** Next 16 rejects unlisted qualities (400); keep in sync with lib/projectMedia.js. */
+  images: {
+    qualities: [52, 70, 75],
+  },
   /**
    * Dev-only tuning: rapid saves generate new `/_next/static/*` URLs. Browsers still
    * holding the previous HTML + chunk list then 404 until a full reload. Debouncing

@@ -45,6 +45,7 @@ function DockSet({ items, cardW, cardH, gap, scale, copy }) {
               frameHeight={cardH}
               hoverScale={false}
               loading="lazy"
+              imageVariant="carousel"
               shareHeroTransition={!copy}
             />
           </div>
