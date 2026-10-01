@@ -880,15 +880,15 @@ body {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  gap: 6px;
-  padding: 13px 10px 10px;
+  gap: 8px;
+  padding: 16px 12px 12px;
 }
 
 .contact-banner__icon {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   flex: 1;
   padding: 2px 0 0;
   text-decoration: none;
@@ -908,8 +908,8 @@ body {
 }
 
 .contact-banner__led {
-  width: 7px;
-  height: 7px;
+  width: 9px;
+  height: 9px;
   flex-shrink: 0;
   border-radius: 50%;
   background: rgba(255, 122, 41, 0.55);
@@ -929,8 +929,8 @@ body {
 }
 
 .contact-banner__glyph {
-  width: 36px;
-  height: 36px;
+  width: 46px;
+  height: 46px;
   object-fit: contain;
   mix-blend-mode: screen;
   pointer-events: none;
@@ -965,11 +965,11 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 10px;
+  padding: 0 12px;
 }
 
 .contact-banner.is-hot .contact-banner__readout-inner {
-  padding-bottom: 9px;
+  padding-bottom: 11px;
 }
 
 .contact-banner__text {
@@ -977,7 +977,7 @@ body {
   width: 100%;
   text-align: center;
   font-family: "VT323", monospace;
-  font-size: 13px;
+  font-size: 18px;
   letter-spacing: 0.05em;
   line-height: 1.2;
   color: #ffe8d4;

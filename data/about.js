@@ -8,7 +8,7 @@ export const about = {
   availability: "Available for Summer 2027 internships",
   email: "Jsaputra.IXD@gmail.com",
   socials: {
-    linkedin: "https://linkedin.com/in/jasonixd",
+    linkedin: "https://www.linkedin.com/in/jasonsaputra",
     instagram: "https://instagram.com/jason.iv_s",
   },
   photos: [

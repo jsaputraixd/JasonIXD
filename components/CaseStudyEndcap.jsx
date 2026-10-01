@@ -22,7 +22,7 @@ const CONTACT_ROWS = [
   {
     label: "LinkedIn",
     href: about.socials.linkedin,
-    value: "linkedin.com/in/jasonixd",
+    value: "linkedin.com/in/jasonsaputra",
     external: true,
   },
   {

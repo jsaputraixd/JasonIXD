@@ -20,7 +20,6 @@ import {
 import Window from "./Window";
 import StatusBar from "./StatusBar";
 import CoffeeSnakeGame from "./CoffeeSnakeGame";
-import DesktopIdleLayer from "./DesktopIdleLayer";
 import SkillsPlanet, { desktopGlobeBox } from "./SkillsPlanet";
 import ProjectHoverPeek from "./ProjectHoverPeek";
 import { carouselProjects, desktopFeaturedProjects } from "@/data/projects";
@@ -654,10 +653,12 @@ export default function Desktop() {
   const skillsFloatTop = Math.round((vhSafe - skillsFloatH) / 2);
 
   const crtFrameInset = 10;
-  const contactBannerW = Math.round(clamp(184 * layoutScale, 168, 200));
   const welcomeRight = pos.welcome.left + W.welcome;
   const canvasRight = vw - crtFrameInset;
   const contactGap = canvasRight - welcomeRight;
+  const contactBannerW = Math.round(
+    Math.min(clamp(236 * layoutScale, 212, 256), contactGap - 16)
+  );
   const contactBannerLeft = Math.round(
     welcomeRight + (contactGap - contactBannerW) / 2
   );
@@ -1010,7 +1011,6 @@ export default function Desktop() {
         />
       ) : null}
       <StatusBar />
-      {phase === "dashboard" && <DesktopIdleLayer />}
     </div>
   );
 }
@@ -1279,7 +1279,7 @@ function ContactPorts({ left, width }) {
     },
     {
       id: "li",
-      plate: "/in/jasonixd",
+      plate: "/in/jasonsaputra",
       icon: "/images/Icons/linkedin.png",
       href: about.socials.linkedin,
       external: true,
@@ -1328,8 +1328,8 @@ function ContactPorts({ left, width }) {
             <Image
               src={port.icon}
               alt=""
-              width={40}
-              height={40}
+              width={56}
+              height={56}
               className="contact-banner__glyph"
             />
           </a>
