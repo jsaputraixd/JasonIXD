@@ -28,7 +28,7 @@ const CONTACT_ROWS = [
   {
     label: "Instagram",
     href: about.socials.instagram,
-    value: "@jason.iv_s",
+    value: "@jasonixd",
     external: true,
   },
 ];

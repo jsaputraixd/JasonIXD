@@ -1287,7 +1287,7 @@ function ContactPorts({ left, width }) {
     },
     {
       id: "ig",
-      plate: "@jason.iv_s",
+      plate: "@jasonixd",
       icon: "/images/Icons/instagram.png",
       href: about.socials.instagram,
       external: true,

@@ -9,7 +9,7 @@ export const about = {
   email: "Jsaputra.IXD@gmail.com",
   socials: {
     linkedin: "https://www.linkedin.com/in/jasonsaputra",
-    instagram: "https://instagram.com/jason.iv_s",
+    instagram: "https://instagram.com/jasonixd",
   },
   photos: [
     { src: "/images/photos/me-1.jpg", caption: "studio hours" },

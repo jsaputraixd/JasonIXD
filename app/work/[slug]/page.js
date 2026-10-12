@@ -5,7 +5,10 @@ import {
   projectTitleTransitionName,
 } from "@/lib/viewTransition";
 import ProjectPageListen from "@/components/ProjectPageListen";
-import CaseStudyVideos from "@/components/CaseStudyVideos";
+import CaseStudyVideos, {
+  CaseStudyClipTile,
+  CaseStudyHeroVideo,
+} from "@/components/CaseStudyVideos";
 import CaseStudyEndcap from "@/components/CaseStudyEndcap";
 import CaseStudyBrowserShell from "@/components/CaseStudyBrowserShell";
 import CaseStudyScrollSection, {
@@ -178,6 +181,36 @@ function CaseStudyProcessBlock({
     block.gallery ? (
       <div className={imagesFirst ? "mb-8" : "-mt-2 mb-4"}>
         <CaseStudyImageGallery images={block.images} />
+      </div>
+    ) : block.row ? (
+      /* Phone captures: same-size tiles on one grid, stills and clips alike. */
+      <div
+        className={`grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-6 ${
+          imagesFirst ? "mb-8" : "-mt-2 mb-4"
+        }`}
+      >
+        {block.images.map((entry) => (
+          <figure key={entry.src} className="m-0">
+            {entry.video ? (
+              <CaseStudyClipTile
+                src={entry.src}
+                label={entry.caption}
+                frameStyle={frameStyle}
+              />
+            ) : (
+              <FramedCaseStudyImage
+                src={entry.src}
+                alt={entry.alt ?? ""}
+                frameStyle={frameStyle}
+              />
+            )}
+            {entry.caption ? (
+              <figcaption className="case-study-gallery__caption mt-2">
+                {entry.caption}
+              </figcaption>
+            ) : null}
+          </figure>
+        ))}
       </div>
     ) : (
     <div className={`flex flex-col gap-10 ${imagesFirst ? "mb-8" : "-mt-2 mb-4"}`}>
@@ -373,7 +406,7 @@ function CaseStudyRichLayout({ project, frameStyle }) {
         {modelViewer.intro ? (
           <p className="m-0 mb-8 case-study-prose">{modelViewer.intro}</p>
         ) : null}
-        <TamaModelViewer variants={modelViewer.variants} />
+        <TamaModelViewer variants={modelViewer.variants} view={modelViewer.view} />
       </div>
     ) : null;
 
@@ -465,6 +498,12 @@ function CaseStudyRichLayout({ project, frameStyle }) {
               eyebrow={project.title}
               summary={section.blocks?.[0]?.paragraphs?.[0]}
               className="case-study-section-anchor"
+              lead={
+                videosPlacement === "sectionLead" &&
+                videosAfterSection === section.title
+                  ? videoSection
+                  : null
+              }
             >
               {(section.blocks ?? []).map((block, blockIndex) => (
                 <CaseStudyProcessBlock
@@ -678,7 +717,13 @@ export default async function ProjectPage({ params }) {
   return (
     <CaseStudyBrowserShell project={project} endcap={endcap}>
       <div className="case-study-browser__content">
-        {rich?.heroFirst && hero ? (
+        {rich?.heroFirst && project.caseStudyHeroVideo ? (
+          <CaseStudyHeroVideo
+            src={project.caseStudyHeroVideo.src}
+            poster={project.caseStudyHeroVideo.poster}
+            style={{ viewTransitionName: projectHeroTransitionName(project.slug) }}
+          />
+        ) : rich?.heroFirst && hero ? (
           <CaseStudyHeroFade hero={hero} slug={project.slug} />
         ) : null}
 

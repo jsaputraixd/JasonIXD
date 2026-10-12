@@ -178,6 +178,91 @@ function VideoDeck({ items, frameStyle }) {
   );
 }
 
+/** Silent looping hero; stays on its poster for reduced motion, with a pause toggle. */
+export function CaseStudyHeroVideo({ src, poster, style }) {
+  const ref = useRef(null);
+  const [playing, setPlaying] = useState(false);
+
+  useEffect(() => {
+    const video = ref.current;
+    if (!video || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return;
+    }
+    video.play().catch(() => {});
+  }, []);
+
+  const toggle = () => {
+    const video = ref.current;
+    if (video.paused) video.play().catch(() => {});
+    else video.pause();
+  };
+
+  return (
+    <div className="case-study-hero-fade" style={style}>
+      <video
+        ref={ref}
+        src={encodeURI(src)}
+        poster={poster ? encodeURI(poster) : undefined}
+        muted
+        loop
+        playsInline
+        preload="auto"
+        aria-hidden
+        onPlay={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
+        className="case-study-hero-fade__img"
+      />
+      <div className="case-study-hero-fade__overlay" aria-hidden />
+      <button
+        type="button"
+        className="case-study-hero-video__toggle"
+        onClick={toggle}
+        aria-label={playing ? "Pause background video" : "Play background video"}
+      >
+        {playing ? "Pause" : "Play"}
+      </button>
+    </div>
+  );
+}
+
+/** A muted looping clip sized like an image tile; plays only while on screen. */
+export function CaseStudyClipTile({ src, label, frameStyle }) {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const video = ref.current;
+    if (!video || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return undefined;
+    }
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) video.play().catch(() => {});
+        else video.pause();
+      },
+      { threshold: 0.25 }
+    );
+    io.observe(video);
+    return () => io.disconnect();
+  }, []);
+
+  return (
+    <div style={frameStyle}>
+      <video
+        ref={ref}
+        src={encodeURI(src)}
+        muted
+        loop
+        playsInline
+        controls
+        preload="metadata"
+        aria-label={label}
+        className="case-study-video"
+        style={{ width: "100%", height: "auto", display: "block" }}
+      />
+    </div>
+  );
+}
+
 /**
  * File videos: viewport-capped so a clip fits one screen; side-by-side from sm+.
  * YouTube embeds capped and centered below file section.
@@ -323,7 +408,7 @@ export default function CaseStudyVideos({
   /** Portrait app demos stay narrow; landscape clips (layout: "wide") fill the column. */
   const fileMaxWidth = (item) => {
     if (item.layout === "tile") return "100%";
-    if (item.layout === "wide") return "min(100%, 1100px)";
+    if (item.layout === "wide") return "min(100%, 1280px)";
     if (isMulti) return "min(100%, 380px)";
     return "min(100%, 400px)";
   };

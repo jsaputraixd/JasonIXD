@@ -6,7 +6,16 @@ import { useEffect, useRef, useState } from "react";
 const MODEL_VIEWER_SCRIPT =
   "https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js";
 
-export default function TamaModelViewer({ variants }) {
+/** Tama's framing; other models pass their own `view` (same attribute names, camelCase). */
+const TAMA_VIEW = {
+  cameraOrbit: "25deg 72deg 0.42m",
+  minCameraOrbit: "auto 30deg 0.22m",
+  maxCameraOrbit: "auto 110deg 1.2m",
+  exposure: "1.05",
+  shadowIntensity: "0.55",
+};
+
+export default function TamaModelViewer({ variants, view = TAMA_VIEW }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const viewerRef = useRef(null);
   const savedCameraRef = useRef(null);
@@ -59,7 +68,8 @@ export default function TamaModelViewer({ variants }) {
         strategy="afterInteractive"
       />
 
-      <div className="tama-model__controls" aria-label="Tama model variant">
+      {variants.length > 1 ? (
+      <div className="tama-model__controls" aria-label="Model variant">
         {variants.map((variant, index) => (
           <button
             key={variant.src}
@@ -74,6 +84,7 @@ export default function TamaModelViewer({ variants }) {
           </button>
         ))}
       </div>
+      ) : null}
 
       <model-viewer
         ref={viewerRef}
@@ -85,12 +96,14 @@ export default function TamaModelViewer({ variants }) {
         touch-action="pan-y"
         interaction-prompt="auto"
         environment-image="neutral"
-        shadow-intensity="0.55"
         shadow-softness="0.8"
-        exposure="1.05"
-        camera-orbit="25deg 72deg 0.42m"
-        min-camera-orbit="auto 30deg 0.22m"
-        max-camera-orbit="auto 110deg 1.2m"
+        shadow-intensity={view.shadowIntensity}
+        exposure={view.exposure}
+        camera-orbit={view.cameraOrbit}
+        camera-target={view.cameraTarget}
+        field-of-view={view.fieldOfView}
+        min-camera-orbit={view.minCameraOrbit}
+        max-camera-orbit={view.maxCameraOrbit}
       />
 
       <p className="tama-model__hint">

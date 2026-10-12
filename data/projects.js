@@ -2394,6 +2394,258 @@ const tamaCaseStudyRich = {
     "I want to compare Tama with a screen-based version to test whether physical form changes how people engage with the same intelligence.",
 };
 
+const MB = `${P}/Morning Debrief`;
+const morningBriefHero = `${MB}/morning-brief-hero-room.jpg`;
+const mbShot = (name, caption, alt) => ({ src: `${MB}/images/${name}`, caption, alt });
+const mbClip = (name, caption) => ({ src: `${MB}/flows/${name}`, caption, video: true });
+
+const morningBriefCaseStudyRich = {
+  overview: {
+    client: "Personal project · Live",
+    industry: "Mobile web app · Next.js, three.js",
+    timeline: "September 11 to October 11, 2026 · 22 commits",
+    role: "Solo: direction, interaction design, testing. Built with Claude Code.",
+  },
+  scan: {
+    project:
+      "A design-news brief I built for myself: a few files each morning, filed in a 3D detective's office, and then it ends.",
+    problem:
+      "Keeping up with UX and tech news is hard, and a feed never tells you you're done. I wanted catching up to feel comfortable, even fun.",
+    role: "I set the direction, designed the interactions and tested every version on my phone. Claude Code wrote most of the code from my notes.",
+    hard: "Balancing the look and feel of the room against keeping everything accessible and easy to use.",
+    change:
+      "Three rebuilds in a month: a scroll-driven stack, a spring-driven drawer, then one room. It's live, and still needs testing on more phones and a VoiceOver pass.",
+  },
+  introParagraphs: [
+    "Every morning Morning Brief pulls stories from TLDR Design, Dense Discovery and UX Collective, picks the few worth reading and hands them over as files. When I design, I work in an order: usable, then accessible, then enjoyable, then memorable. In one month the brief went from a bare-bones folder stack to a 3D office you walk around in, and this page follows what drove each rebuild.",
+  ],
+  highlights: [],
+  heroFirst: true,
+  imagesBeforeText: true,
+  showJumpNav: false,
+  showDeckEmbed: false,
+  livePrototype: {
+    href: "https://morning-brief-eight-psi.vercel.app",
+    label: "Open Morning Brief",
+    intro: null,
+  },
+  videos: [
+    {
+      kind: "file",
+      src: `${MB}/morning-brief-promo.mp4`,
+      poster: `${MB}/morning-brief-promo.jpg`,
+      label: "The Morning Job, a promo for the room",
+      layout: "wide",
+    },
+  ],
+  videosPlacement: "sectionLead",
+  videosAfterSection: "Final product",
+  videosTitle: null,
+  videosIntro: null,
+  modelViewerAfterSection: "Final product",
+  modelViewer: {
+    title: "Explore the office",
+    intro: "The same room the app renders, exported as a model.",
+    variants: [
+      {
+        label: "Office",
+        src: `${MB}/morning-brief-room.glb`,
+        alt: "Morning Brief's 3D detective room: a bookcase, a filing cabinet under a rainy window, and a desk with a corkboard and typewriter.",
+      },
+    ],
+    view: {
+      cameraTarget: "1.45m 1.3m -0.4m",
+      cameraOrbit: "0deg 82deg 6.4m",
+      minCameraOrbit: "-60deg 40deg 1.2m",
+      maxCameraOrbit: "60deg 95deg 7m",
+      fieldOfView: "42deg",
+      exposure: "0.55",
+      shadowIntensity: "0",
+    },
+  },
+  processWork: {
+    sections: [
+      {
+        title: "Final product",
+        blocks: [
+          {
+            title: "The office",
+            row: true,
+            paragraphs: [
+              "Today, Saved and Ingest are three stations in one room: a bookcase, a filing cabinet under a rainy window, and a desk with a corkboard and a typewriter. These stills are rendered from the app's own scene.",
+            ],
+            images: [
+              { src: `${MB}/renders/web/bookcase-tall.jpg`, caption: "Today: the bookcase", alt: "The bookcase at night: rows of hand-modelled books, a globe, and file boxes under a desk lamp." },
+              { src: `${MB}/renders/web/window-tall.jpg`, caption: "Saved: the cabinet and window", alt: "The green filing cabinet under the rainy window, the moonlit city and searchlights outside." },
+              { src: `${MB}/renders/web/desk-tall.jpg`, caption: "Ingest: the desk and corkboard", alt: "The desk with a typewriter, banker's lamp, hat and mug, under a corkboard of typed index cards strung with red thread." },
+            ],
+          },
+        ],
+      },
+      {
+        title: "A brief that ends",
+        blocks: [
+          {
+            title: "Seven files, then done",
+            row: true,
+            paragraphs: [
+              "I wanted a morning read I could finish. The app ranks each morning's stories and files the top seven (now three to twelve) as folders. No feed, no infinite scroll. Onboarding asks what you're into, and the answers feed the ranking.",
+              "I went with a detective's case files because it felt comforting and fit a morning briefing. Other looks could have worked, but this one felt right.",
+              "The first version was bare bones on purpose, usable before it was pretty. It ran on a custom scroll-driven stack, where the first folder rises to fill the screen while the others line up as tabs, and most of the first week went into getting that motion right. Folders stopped half open, and on phones the browser's touch momentum flung the stack past where it should stop, so it got snap thresholds and a rubber band.",
+              "The summaries told me nothing at first, partly because of a hardcoded 45-word cap in the summarizer. Each story became a bold teaser followed by a fuller summary, with the article's images kept and a small ranking boost for stories that have one.",
+              "The screenshots on this page were retaken by running each old version with a made-up brief, so the headlines are jokes, not real articles.",
+            ],
+            images: [
+              mbShot("02-folder-stack.jpg", "Seven folders: the brief has an end", "Today's Files: seven stories fanned out as a stack of coloured folders."),
+              mbShot("03-folder-open.jpg", "The next title peeks above the tabs", "An open folder filling the screen, with tabs 02 to 07 along the bottom and the next title peeking above them."),
+              mbShot("04-folder-with-photo.jpg", "Teaser, then summary, then photo", "A folder with a heatmap illustration, a bold teaser and the summary below it, read tabs along the top."),
+            ],
+          },
+          {
+            title: "One spring instead of a scroll track",
+            row: true,
+            paragraphs: [
+              "Instead of tuning the scroll track again, I rebuilt the brief as a filing drawer that runs on one spring-animated value: folders lift out, the next one follows your finger, and read ones stay filed with their tabs showing. Reading inside a folder went back to native scrolling, so a fling keeps its momentum, and the bugs tied to the old track went with it.",
+              "The surfaces got materials: pressboard, typed paper, a paper-clipped photo, a red category stamp. Every texture is painted in code, which keeps the app small.",
+            ],
+            images: [
+              mbShot("05-file-drawer.jpg", "Read folders stay filed in the drawer", "Today's files as pressboard folders standing in an open drawer, each with a numbered tab, above a brass label plate."),
+              mbShot("06-drawer-folder.jpg", "A folder lifted out to read", "An open folder: a typed paper sheet with a paper-clipped photo and a red UX stamp."),
+            ],
+          },
+          {
+            title: "Other directions first",
+            paragraphs: [
+              "Before committing to the folders, I had nine other visual directions mocked up on the same made-up brief to see the app in different styles. Four of them are above: a morning paper, a magazine cover, a terminal and swipeable story cards. I kept the folders, because the case file still felt the most comforting, and made them physical instead.",
+            ],
+            images: [
+              { src: `${MB}/images/style-explorations.jpg`, alt: "Four style explorations of the same brief: a broadsheet morning paper, a red magazine cover, a green terminal and lavender swipeable story cards." },
+            ],
+          },
+        ],
+      },
+      {
+        title: "From object to room",
+        blocks: [
+          {
+            title: "Three tabs, three stations",
+            row: true,
+            paragraphs: [
+              "The drawer was a 3D object inside a 2D interface, and the 2D parts kept breaking the illusion. My reference was the Agent Stories in Zenless Zone Zero: a detective's room that feels alive because of its detail.",
+              "So the three tabs became three stations in one WebGL room (three.js and React Three Fiber), and changing tabs walks the camera across it. Scroll and each book slides out and turns its cover to you. Tap it and it opens to a spread whose pages turn as you scroll. I kept the reading text typeset on the 3D pages instead of switching to an HTML overlay, which keeps the illusion and puts contrast on my list to check.",
+            ],
+            images: [
+              mbClip("01-navigation.mp4", "Changing tabs walks the camera"),
+              mbShot("07-room-bookcase.jpg", "Today: the files are books", "TODAY'S FILES lettered in the air above a bookcase of hand-modelled books and a globe, lit by a desk lamp."),
+              mbShot("08-room-book-out.jpg", "A book turns to face you", "One book slid out of the shelf with its cover turned to the camera, the file title floating below it."),
+            ],
+          },
+          {
+            title: "Saved, in the cabinet",
+            row: true,
+            paragraphs: [
+              "Saved works like the shelf: the drawer rolls out as you scroll in and folders rise one at a time. Save a story from the last page of its book and it's filed here.",
+            ],
+            images: [
+              mbClip("05-save.mp4", "Saving from the last page"),
+              mbClip("06-cabinet.mp4", "Saved folders rise one at a time"),
+            ],
+          },
+          {
+            title: "Built in code, not bought",
+            row: true,
+            paragraphs: [
+              "On the Ingest desk, new stories are pinned to the corkboard as typed index cards, strung together by source with red thread. The typewriter is the ingest button: it clatters while the feeds are pulled, then rings its bell.",
+              "I had store-bought models of a bookcase, a cabinet and an investigation board, but had everything modelled in code instead so the room stays small and matches. Rain on the glass, a ticking clock, swaying bulbs and synthesized sound fill it out.",
+            ],
+            images: [
+              mbShot("11-ingest-desk.jpg", "The typewriter is the ingest button", "INGEST lettered over a corkboard of typed index cards strung with red thread, above a desk with a typewriter, a green banker's lamp and a mug."),
+              mbClip("09-ambience.mp4", "The room at rest (sound on)"),
+            ],
+          },
+          {
+            title: "The cost of a room",
+            row: true,
+            paragraphs: [
+              "A 3D room makes reading harder to guarantee, so it has a plain-text reading view, a list view, volume and brightness sliders, keyboard scrolling with a screen-reader version of each station, and reduced motion. Nothing flashes, a rule I set after one of my promo videos came out too close to a strobe. The screen-reader version hasn't had a proper VoiceOver pass yet.",
+            ],
+            images: [
+              mbClip("10-sliders.mp4", "Dimming the room"),
+              mbClip("11-plain.mp4", "Plain text, outside the room"),
+            ],
+          },
+          {
+            title: "What didn't survive",
+            paragraphs: [
+              "Gilt bands on the book spines hid the titles. A sloped key deck on the typewriter hid the keys. Lifting the focused corkboard card forward made the red thread clip through it, so cards stay pinned and glow faintly instead. An art deco nav with a sunburst was too much and got pared back to a walnut bar with a brass hairline.",
+            ],
+            images: [],
+          },
+        ],
+      },
+      {
+        title: "Fixing it on my phone",
+        blocks: [
+          {
+            title: "What bugged me",
+            row: true,
+            paragraphs: [
+              "Then I used it on my phone for a while and wrote down what bugged me. Four notes changed the room.",
+              "The slow, cinematic camera made it hard to pick a book. It now follows the scroll about twice as fast, a flick always comes to rest on a book instead of between two, and tapping any visible spine brings that book out.",
+              "The typewriter sat at the end of the Ingest scroll, so after tapping it you scrolled the whole corkboard to read what it typed and couldn't tell which cards were new. Now it comes first, the camera moves close enough to read the page, and the newest cards are pinned first.",
+              "The page flip felt like a wooden plank flipping, because the pages were rigid planes on a hinge. The turning page is now a bendable sheet that curls as it goes over and bows back against the direction you're turning.",
+              "The \"Aa · Read as text\" button wrapped onto two lines and covered the page right above the nav. It's now a round Aa button next to close.",
+            ],
+            images: [
+              mbClip("02-shelf.mp4", "A flick always lands on a book"),
+              mbClip("12-ingest.mp4", "Typewriter first, newest cards first"),
+              mbClip("04-page-turn.mp4", "The page bends as it turns"),
+              mbShot("09-book-before.jpg", "Before · Oct 5: the pill covers the page", "Before: the AA READ AS TEXT pill wrapping onto two lines over the bottom of the page."),
+              mbShot("12-book-after.jpg", "After · Oct 11: a round button by close", "After: a round Aa button in the top right corner beside the close button, the page clear."),
+            ],
+          },
+        ],
+      },
+      {
+        title: "The window",
+        blocks: [
+          {
+            title: "Rain at three depths",
+            row: true,
+            paragraphs: [
+              "The window doesn't help anyone read the news. It's the memorable layer: once the room was usable, accessible and enjoyable, it's the detail that makes someone remember the site.",
+              "The window over the cabinet had a flat painted city and one layer of rain sliding down like wallpaper. It's a shader now: rain falls at three depths, beads on the glass dry slowly, and each drop shows the city upside down like a lens.",
+              "The city became three bands of buildings that slide past each other as the camera moves, with a neon HOTEL sign, searchlights, an airship and an elevated train every minute or so.",
+            ],
+            images: [
+              mbShot("10-window-before.jpg", "Before · Oct 5: painted city, one rain layer", "Before: the window with a flat painted city and uniform rain streaks."),
+              mbShot("16-window-after-train.jpg", "After · Oct 11: layered city, passing train", "After: the window with layered towers, the HOTEL sign, an airship and an elevated train crossing with its windows lit."),
+            ],
+          },
+          {
+            title: "Looking out",
+            row: true,
+            paragraphs: [
+              "Tap the window and you walk over. Move the pointer and you lean as if peeking out. The sky follows the real hour, and your breath mists the glass so you can draw in it.",
+              "I cut a lit apartment across the street, a Rear Window nod that came out far too big for its building, and left out lightning, the obvious noir touch, because even soft sheet lightning flashes the whole screen.",
+            ],
+            images: [
+              mbClip("07-window.mp4", "Tap the window to walk over"),
+              mbClip("08-window-hours.mp4", "The sky follows the real hour (sped up)"),
+              mbShot("21-drawing-in-the-mist.jpg", "Drawing in the mist", "A loop drawn in the breath mist on the glass, a clear ring with a drip running down from it, the city behind."),
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  conclusionTitle: "Reflection",
+  conclusion:
+    "Most of the month went into feel: snap points, springs, camera speed, how paper bends. The rebuilds came from noticing what kept breaking the illusion, and the small fixes came from using it on my phone. What I don't know yet is whether the room reads as fast for anyone else as it does for me.",
+  nextSteps:
+    "Make it faster and easier to use, and push accessibility further: a VoiceOver pass, a contrast check on the 3D pages, testing on more phones, a read-aloud mode, and reading text set in an easier-to-read format.",
+};
+
 export const projects = [
   {
     id: 1,
@@ -2616,6 +2868,25 @@ export const projects = [
     caseStudyHero: tamaHero,
     caseStudyGallery: [],
     caseStudyRich: tamaCaseStudyRich,
+  },
+  {
+    id: 16,
+    title: "Morning Brief",
+    category: "3D Web App",
+    tagline: "Today's files. Then you're done.",
+    cardLine: "Daily design news filed in a 3D detective's office.",
+    description:
+      "A design-news brief that ends. A few stories every morning, filed as case files in a 3D detective's office, rebuilt three times in a month to feel right on a phone.",
+    tags: ["Product Design", "Interaction Design", "3D", "Creative Coding"],
+    slug: "morning-brief",
+    thumb: morningBriefHero,
+    caseStudyHero: morningBriefHero,
+    caseStudyHeroVideo: {
+      src: `${MB}/morning-brief-hero.mp4`,
+      poster: `${MB}/morning-brief-hero-poster.jpg`,
+    },
+    caseStudyGallery: [],
+    caseStudyRich: morningBriefCaseStudyRich,
   },
 ];
 

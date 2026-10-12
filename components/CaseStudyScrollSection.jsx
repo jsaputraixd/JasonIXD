@@ -25,6 +25,7 @@ export default function CaseStudyScrollSection({
   eyebrow = "Case study",
   summary,
   sticky = true,
+  lead,
   children,
   className = "",
 }) {
@@ -35,6 +36,7 @@ export default function CaseStudyScrollSection({
       id={id}
       className={`case-study-scroll-section ${className}`}
     >
+      {lead ? <div className="case-study-scroll-section__lead">{lead}</div> : null}
       <aside
         className={`case-study-scroll-section__rail${
           sticky ? "" : " case-study-scroll-section__rail--static"

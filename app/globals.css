@@ -2605,6 +2605,30 @@ video {
   object-position: center 20%;
 }
 
+.case-study-hero-video__toggle {
+  position: absolute;
+  top: clamp(1.25rem, 3vw, 2.25rem);
+  right: clamp(1rem, 3vw, 2rem);
+  z-index: 1;
+  border: 1px solid rgba(255, 122, 41, 0.45);
+  border-radius: 2px;
+  padding: 0.35rem 0.7rem;
+  background: rgba(12, 8, 5, 0.6);
+  font-family: "VT323", monospace;
+  font-size: 13px;
+  line-height: 1;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 221, 196, 0.8);
+  cursor: pointer;
+}
+
+.case-study-hero-video__toggle:hover,
+.case-study-hero-video__toggle:focus-visible {
+  color: #fff3e9;
+  background: rgba(255, 122, 41, 0.25);
+}
+
 .case-study-hero-fade__overlay {
   position: absolute;
   inset: 0;
@@ -2669,6 +2693,15 @@ video {
   padding: clamp(4.5rem, 9vw, 9rem) 0;
   border-top: 1px solid rgba(255, 122, 41, 0.2);
   scroll-margin-top: 1rem;
+}
+
+/* Full-width media above the rail and body, e.g. a showcase film. */
+.case-study-scroll-section__lead {
+  grid-column: 1 / -1;
+}
+
+.case-study-scroll-section:has(> .case-study-scroll-section__lead) {
+  row-gap: clamp(2.5rem, 5vw, 4.5rem);
 }
 
 .case-study-scroll-section__rail {
