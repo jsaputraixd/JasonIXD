@@ -2896,11 +2896,11 @@ const FEATURED_SLUGS = [
   "eleara",
   "cca-pathfinding",
   "adherence",
-  "kits",
+  "morning-brief",
 ];
 
 /** Desktop heroes — one row of three case-study windows. */
-const DESKTOP_FEATURED_SLUGS = ["tama", "pulse", "kits"];
+const DESKTOP_FEATURED_SLUGS = ["tama", "pulse", "morning-brief"];
 
 const HERO_SLUGS = DESKTOP_FEATURED_SLUGS;
 
