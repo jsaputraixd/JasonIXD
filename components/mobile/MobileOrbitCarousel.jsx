@@ -16,6 +16,7 @@ import {
   ProjectCardHeroImage,
 } from "@/components/ProjectFlipCard";
 import { projectCarouselThumbSrc, resolveProjectCarouselSrc } from "@/lib/projectMedia";
+import { PROJECT_CARD_TEASERS } from "@/lib/projectCardVideos";
 import { projectHeroTransitionName, withViewTransition } from "@/lib/viewTransition";
 import { playClick } from "@/lib/typingSound";
 
@@ -117,6 +118,9 @@ const CarouselCard = memo(function CarouselCard({
   onOpen,
 }) {
   const heroSrc = resolveProjectCarouselSrc(project);
+  const reduceMotion = useReducedMotion();
+  // The centred card plays its teaser, the touch stand-in for desktop hover.
+  const teaser = isCenter && !reduceMotion ? PROJECT_CARD_TEASERS[project.slug] : null;
 
   return (
     <div
@@ -216,6 +220,31 @@ const CarouselCard = memo(function CarouselCard({
                 width: "100%",
                 height: "100%",
                 objectFit: "cover",
+              }}
+            />
+          ) : null}
+          {teaser ? (
+            <video
+              src={teaser.src}
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="auto"
+              aria-hidden
+              tabIndex={-1}
+              onPlaying={(e) => {
+                e.currentTarget.style.opacity = "1";
+              }}
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                objectPosition: teaser.objectPosition ?? "center",
+                opacity: 0,
+                transition: "opacity 0.35s ease",
               }}
             />
           ) : null}
